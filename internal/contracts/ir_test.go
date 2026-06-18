@@ -82,6 +82,27 @@ func nodeRoundTrips() []struct {
 		{"card_section", &CardSection{Header: "S", Body: []SlideNode{
 			&Grid{Columns: 2, Cells: []SlideNode{&Hero{Title: "g"}}},
 		}}},
+		{"divider", &Divider{Spacing: SpaceLG}},
+		{"quote", &Quote{Text: RichText{{Text: "a quote"}, {Text: "emphasis", Style: RunStyle{Italic: true, TypeRole: TypeBody}}}, Attribution: "me"}},
+		{"chip", &Chip{Label: "new", Tone: ChipSolid, Color: ColorAccent}},
+		{"arrow", &Arrow{Direction: ArrowRight, Label: "next"}},
+		{"section_divider", &SectionDivider{Eyebrow: "Part 2", Label: "Details"}},
+		{"table", &Table{
+			Headers: []RichText{{{Text: "A"}}, {{Text: "B", Style: RunStyle{Bold: true, TypeRole: TypeH3}}}},
+			Rows:    [][]RichText{{{{Text: "1"}}}, {{{Text: "2"}}}},
+			Caption: "cap",
+		}},
+		{"flow", &Flow{Orientation: FlowHorizontal, Connector: ConnectorArrow, Steps: []FlowStep{
+			{Label: RichText{{Text: "start"}}, Detail: RichText{{Text: "go"}}, Icon: "play"},
+			{Label: RichText{{Text: "end"}, {Text: "!", Style: RunStyle{Bold: true}}}},
+		}}},
+		{"image", &Image{AssetID: "logo", Alt: "logo", Frame: FrameBrowser, FrameName: "",
+			Crop: Crop{Left: 0.1, Top: 0.1, Right: 0.1, Bottom: 0.1}, Fit: FitFill}},
+		{"code_block", &CodeBlock{AssetID: "snippet", Language: "go", Caption: "main.go"}},
+		{"chart", &Chart{AssetID: "q1-chart", Caption: "Revenue"}},
+		{"decoration", &Decoration{Kind: DecorationPreset, Preset: "blob", Layer: LayerBackground,
+			Anchor: AnchorTopLeft, Offset: Position{X: 10, Y: 20}, Size: Size{W: 100, H: 100},
+			Bleed: true, Opacity: 0.5, Rotation: 15}},
 	}
 }
 
