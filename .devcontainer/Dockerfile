@@ -45,6 +45,10 @@ RUN printf 'export PATH="/usr/local/bun/bin:/root/.opencode/bin:/usr/local/go/bi
         > /etc/profile.d/toolchain.sh
 ENV GOPRIVATE=github.com/hurtener
 
+# Pre-create opencode's global skills dir so run.sh's `docker cp` of the pptx-go engine
+# skills lands (the entrypoint also writes the dockyard skills here from the module cache).
+RUN mkdir -p /root/.config/opencode/skills
+
 WORKDIR /workspace/go-slides-mcp
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
