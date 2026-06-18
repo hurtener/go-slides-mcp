@@ -245,21 +245,45 @@ Below, "gate" = the universal gate above plus the phase-specific checks named.
   compiles; `make preflight` green; `main.go` registers apps BEFORE tools.
 - **Gate:** universal gate + `make preflight` + `diff -q AGENTS.md CLAUDE.md`.
 
-### Phase 1 — IR model & contract conventions **[ORCH]**
-- **Goal:** the full slide IR node grammar as Go types + normalize/validate-shape +
-  structural-path edit primitives + IR content hash; locked `CONVENTIONS.md`.
-- **Files:** `internal/contracts/ir.go` (all 18 KEEP nodes, RichText, token-role
-  enums, chrome, `section_divider` as a slide primitive), `internal/ir/{normalize,
-  path,hash}.go`, `docs/contracts/CONVENTIONS.md`.
-- **Clone:** reference grammar in `docs/research/01` §1.4; map 1:1 onto
-  `scene.SlideNode` (engine-map §1.4/§4). Node-as-Go-struct + `Kind` discriminator.
-- **Acceptance:** every KEEP node round-trips JSON; path-edit ops have table tests;
-  `validate_slide_ir` rejects a malformed node; **no** `toc`/`bibliography`/
-  `page_break`/`SectionIR` types exist.
-- **Gate:** universal + `grep -rL 'toc\|bibliography\|page_break\|SectionIR' internal/contracts/ir.go`
-  (those identifiers must be absent).
-- **High-judgment:** the discriminated-union encoding and the path-edit semantics are
-  the reference both `internal/ir` per-node code and Group-E handlers clone.
+### Phase 1 — IR model & contract conventions **[ORCH]** — ENGINE-FIRST (see ADR-0001)
+- **Design principle (binding, ADR-0001):** the Deckard IR is a contract-first,
+  JSON-native, agent-ergonomic **mirror of pptx-go's full `scene` node catalog** — NOT a
+  port of the TS reference. The TS nodes are a *coverage checklist* only; we were limited
+  there by the TS render library and are not limited now. Expose the engine's full ceiling.
+- **Goal:** the slide IR node grammar as Go types that map ~1:1 onto `scene.SlideNode`,
+  covering the ENTIRE engine catalog, + RichText + normalize/validate-shape + structural-path
+  edits + IR content hash; locked `CONVENTIONS.md`.
+- **The node set (from the `compose-a-scene` skill — authoritative):**
+  - Leaf: `hero, prose, heading(1..6), list(bullet|number|checklist, levels, checked),
+    divider, quote, callout(note|warning|tip|important), chip(tint|solid|outline),
+    arrow, section_divider, table, flow(orientation, connector, steps{label,detail,icon}),
+    image(frame: none|browser|phone|desktop|laptop, crop, fit), code_block, chart,
+    decoration(preset|asset, layer, opacity, rotation, bleed)`.
+  - Container (RECURSIVELY NESTABLE — the TS cap on nesting is GONE): `two_column(ratio,
+    left[], right[])`, `grid(columns 2..4, ratio[], gap, cells[])`,
+    `card(header,eyebrow,icon,headerPill,body[],bodyLayout,fill,outline,borderStyle,size,
+    layout,elevation)`, `card_section(header, body[])`.
+  - RichText = ordered runs `{text, style{typeRole,bold,italic,underline,strike,code,link,
+    href}, color: token-role | literal}`. Colors are SEMANTIC token roles (soul re-skins);
+    literal hex is the explicit escape hatch only.
+- **Composed patterns, NOT new node types:** TS "special" blocks (timeline, kpi_cards,
+  comparison, etc.) are delivered as **recipes** built from `flow`/`grid`/`card` — never as
+  lossy custom IR types the engine can't render. Stay inside the engine's sealed union.
+- **Files:** `internal/contracts/ir.go` (the node union + RichText + token-role enums +
+  slide `Layout` kinds + chrome), split across small files if needed; `internal/ir/{normalize,
+  path,hash}.go`; `docs/contracts/CONVENTIONS.md`; `docs/decisions/0001-engine-first-ir.md`.
+- **Reference (clone source):** the `compose-a-scene` and `define-a-theme` SKILLS + the
+  pptx-go `scene` package — copy real struct/field shapes; do NOT invent fields the engine
+  lacks, and do NOT reach for the TS schema. Node-as-Go-struct + a `kind` JSON discriminator.
+- **Acceptance:** every engine node + RichText round-trips JSON (table tests); containers
+  nest recursively and validate children; path-edit ops (`["body",2,"left",1]`) have table
+  tests; `validate_slide_ir` mirrors `scene.ValidateScene`'s per-node rules and rejects a
+  malformed node; **no** `toc`/`bibliography`/`page_break`/`SectionIR`/A4 types exist; no IR
+  node lacks a `scene` counterpart (every kind has a render path in Phase 3).
+- **Gate:** universal + `! grep -rE 'toc|bibliography|page_break|SectionIR' internal/contracts/ir.go`.
+- **High-judgment:** the discriminated-union JSON encoding, recursive container nesting, and
+  the path-edit semantics — the reference that `internal/ir` per-node code, the Phase 3
+  render mappers, and the Group-E handlers all clone.
 
 ### Phase 2 — Soul/token engine + Deckard White **[ORCH]**
 - **Goal:** soul model, the built-in **Deckard White** soul as a `*pptx.Theme`,

@@ -3,6 +3,20 @@ server written in Go on the Dockyard framework. Implement EXACTLY the unit descr
 `.devcontainer/TASK.md` this iteration — nothing more, nothing else. You are a FRESH,
 stateless session every iteration; re-orient from durable state and assume nothing carried.
 
+⚡ SKILLS FIRST (the single most important habit). Your environment has the Dockyard and
+pptx-go **skills installed** specifically so you do not work from memory. BEFORE writing any
+code for a task, INVOKE the matching skill via the `skill` tool and follow it. Working from
+memory instead of the installed skill is the #1 cause of rejected work. Task → skill:
+- new/changed tool, contracts, schema, TS → `define-contracts`, `add-a-tool`
+- scaffolding/server shape → `scaffold-a-server`; a ui:// surface → `attach-a-ui-resource`
+- running the dev loop / inspector → `run-the-dev-loop`, `test-with-the-inspector`
+- validating / packaging → `validate`, `package`
+- anything about the slide IR / scene nodes → `compose-a-scene` (the AUTHORITATIVE node catalog)
+- design souls / theme tokens → `define-a-theme`; brand bootstrap → `load-a-brand-template`
+- assets / charts / code / icons → `register-an-asset`, `embed-a-chart-raster`,
+  `embed-a-code-block-raster`, `extend-the-icon-set`
+If a task mentions a concept a skill covers, READ THE SKILL FIRST. Lean on them heavily.
+
 STEP 1 — ORIENT (every iteration):
 - Read `.devcontainer/TASK.md` — YOUR TARGET, written by the orchestrator. It is
   self-contained: the unit, the plan section, the exact files, the reference to clone, the
