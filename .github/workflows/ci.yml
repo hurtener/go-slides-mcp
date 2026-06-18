@@ -1,0 +1,60 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod   # pin the Go toolchain from go.mod
+
+      - name: Install dockyard CLI (pinned)
+        env:
+          GOPRIVATE: github.com/hurtener
+          GH_TOKEN: ${{ secrets.GO_MODULE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          go install github.com/hurtener/dockyard/cmd/dockyard@v1.7.3
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Install golangci-lint (pinned v2.12.2)
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+
+      - name: gofmt
+        run: |
+          out=$(gofmt -l $(git ls-files '*.go')); [ -z "$out" ] || { echo "unformatted:"; echo "$out"; exit 1; }
+
+      - name: Mirror check (AGENTS.md == CLAUDE.md)
+        run: diff -q AGENTS.md CLAUDE.md
+
+      - name: Generate + no stale codegen
+        run: |
+          GOFLAGS="" dockyard generate
+          git diff --exit-code internal/contracts
+
+      - name: dockyard validate
+        run: GOFLAGS="" dockyard validate
+
+      - name: go vet
+        run: GOFLAGS="" go vet ./...
+
+      - name: build (CGo-free)
+        run: GOFLAGS="" CGO_ENABLED=0 go build ./...
+
+      - name: test (race)
+        run: GOFLAGS="" go test -race ./...
+
+      - name: dockyard test
+        run: GOFLAGS="" dockyard test
+
+      - name: lint
+        run: golangci-lint run

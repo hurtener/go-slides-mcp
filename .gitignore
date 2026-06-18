@@ -1,0 +1,45 @@
+# Reference implementation (gitignored — behavioral reference only, not product code)
+_ref/
+
+# Autonomous build loop scratch (per-unit brief, injected secrets, run logs) — never committed
+.devcontainer/secrets/
+.devcontainer/var/
+.devcontainer/TASK.md
+
+# Go
+bin/
+dist/
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Node / web
+node_modules/
+web/**/node_modules/
+.svelte-kit/
+build/
+dist/
+
+# Dockyard build output
+*.dockyard-bin
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+.playwright-mcp/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Built MCP App UI bundles are go:embed inputs — must be committed despite dist/ above
+!web/**/dist/
+!web/**/dist/**

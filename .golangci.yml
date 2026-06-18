@@ -1,0 +1,27 @@
+# golangci-lint v2 config (pinned tool version v2.12.2). See CLAUDE.md §5.
+# Modest, high-signal set — a real gate without drowning the builder in noise.
+version: "2"
+
+linters:
+  default: standard          # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - bodyclose
+    - errorlint              # enforce %w / errors.Is/As (CLAUDE.md §5)
+    - misspell
+    - revive
+    - unconvert
+    - whitespace
+  exclusions:
+    generated: lax
+    paths:
+      - _ref
+      - internal/contracts/.*\.gen\.go$
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

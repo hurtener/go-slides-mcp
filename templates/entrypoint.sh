@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Runtime bootstrap: inject secrets and configure git/gh before the build loop.
+# Secrets arrive read-only at /run/secrets (bind mount) — never baked into the image.
+# ADAPT: the OPENCODE_CONFIG path, the git identity, and the warm-cache step.
+set -uo pipefail
+SEC=/run/secrets
+
+echo "[entrypoint] bootstrapping $(date -u)"
+
+# 1. opencode auth — the OAuth that authorizes opencode + other providers.
+if [ -f "$SEC/auth.json" ]; then
+  mkdir -p /root/.local/share/opencode
+  cp "$SEC/auth.json" /root/.local/share/opencode/auth.json
+  chmod 600 /root/.local/share/opencode/auth.json
+  echo "[entrypoint] opencode auth installed"
+else
+  echo "[entrypoint] WARN: no auth.json in /run/secrets — model calls may fail"
+fi
+
+# 2a. HF_TOKEN — authorizes GLM-5.2 via the HF Router → Fireworks provider (PRIMARY).
+#     Exported for `exec "$@"` AND written to profile.d (the loop runs as `bash -lc`).
+if [ -f "$SEC/hf_token" ]; then
+  HF_TOKEN="$(tr -d '[:space:]' < "$SEC/hf_token")"
+  export HF_TOKEN
+  echo "export HF_TOKEN=$HF_TOKEN" > /etc/profile.d/hf.sh
+  chmod 644 /etc/profile.d/hf.sh
+  echo "[entrypoint] HF token installed (HF_TOKEN set)"
+else
+  echo "[entrypoint] WARN: no hf_token in /run/secrets — GLM-5.2 calls will fail"
+fi
+
+# 2b. NVIDIA NIM API key — authorizes the OpenAI-compatible NIM provider (FALLBACK).
+if [ -f "$SEC/nvidia_api_key" ]; then
+  NVIDIA_API_KEY="$(tr -d '[:space:]' < "$SEC/nvidia_api_key")"
+  export NVIDIA_API_KEY
+  echo "export NVIDIA_API_KEY=$NVIDIA_API_KEY" > /etc/profile.d/nvidia.sh
+  chmod 644 /etc/profile.d/nvidia.sh
+  echo "[entrypoint] NVIDIA NIM key installed (NVIDIA_API_KEY set)"
+else
+  echo "[entrypoint] WARN: no nvidia_api_key in /run/secrets — NIM fallback will fail"
+fi
+
+# 3. GitHub token — gh CLI (PRs) + git over HTTPS.
+if [ -f "$SEC/gh_token" ]; then
+  TOKEN="$(tr -d '[:space:]' < "$SEC/gh_token")"
+  echo "$TOKEN" | gh auth login --with-token >/dev/null 2>&1 \
+    && echo "[entrypoint] gh authenticated" \
+    || echo "[entrypoint] WARN: gh auth login failed"
+  git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+else
+  echo "[entrypoint] WARN: no gh_token — pushes and PRs will fail"
+fi
+
+# 3b. Point opencode at the repo config (.devcontainer/opencode.json is not at the repo
+#     root, so opencode won't auto-load it from cwd). Sets the provider blocks + output
+#     limit + permission:allow for every login shell.
+echo 'export OPENCODE_CONFIG=/workspace/project/.devcontainer/opencode.json' > /etc/profile.d/opencode-config.sh
+chmod 644 /etc/profile.d/opencode-config.sh
+
+# 4. git identity — ADAPT to the account that should own the commits/PRs.
+git config --global user.name "your-username"
+git config --global user.email "you@example.com"
+git config --global commit.gpgsign false
+git config --global tag.gpgsign false
+git config --global init.defaultBranch main
+git config --global --add safe.directory /workspace/project
+
+# 5. Warm the build cache once so the first iteration's gates aren't slow.
+#    Best-effort; never fail the bootstrap on a transient network hiccup. (Go example.)
+( cd /workspace/project && go mod download 2>/dev/null ) || true
+
+echo "[entrypoint] ready"
+exec "$@"

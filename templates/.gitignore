@@ -1,0 +1,5 @@
+# Injected secrets and runtime logs — never commit.
+# Place this in .devcontainer/.gitignore when you copy the templates into a project.
+secrets/
+var/
+TASK.md

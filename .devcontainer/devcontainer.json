@@ -1,0 +1,13 @@
+{
+  "name": "go-slides-builder",
+  "build": { "dockerfile": "Dockerfile" },
+  "workspaceFolder": "/workspace/go-slides-mcp",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/go-slides-mcp,type=bind",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/secrets,target=/run/secrets,type=bind,readonly",
+    "source=${localWorkspaceFolder}/.devcontainer/var,target=/var/go-slides,type=bind"
+  ],
+  "remoteUser": "root",
+  "overrideCommand": true,
+  "shutdownAction": "none"
+}

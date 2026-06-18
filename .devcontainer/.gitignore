@@ -1,0 +1,5 @@
+# Injected secrets + runtime logs/status — NEVER committed.
+secrets/
+var/
+# Per-unit builder brief (orchestrator rewrites it each unit; not durable history).
+TASK.md
