@@ -33,6 +33,117 @@ export interface GreetOutput {
   length: number /* int */;
 }
 /**
+ * AssetID names caller-supplied bytes resolved by the render-time
+ * AssetResolver (mirrors pptx-go's scene.AssetID; see register-an-asset).
+ * It is free-form: bare keys, content hashes, UUIDs, or "asset://<uuid>"
+ * URIs — the engine imposes no scheme.
+ */
+export type AssetID = string;
+/**
+ * Crop is a per-edge image crop expressed as fractions in [0,1] (mirrors
+ * pptx-go's builder Crop; see compose-a-scene → Validation: each edge in
+ * [0,1], Left+Right < 1, Top+Bottom < 1). The zero value is no crop.
+ */
+export interface Crop {
+  /**
+   * Left is the fraction cropped from the left edge, in [0,1].
+   */
+  left?: number /* float64 */;
+  /**
+   * Top is the fraction cropped from the top edge, in [0,1].
+   */
+  top?: number /* float64 */;
+  /**
+   * Right is the fraction cropped from the right edge, in [0,1].
+   */
+  right?: number /* float64 */;
+  /**
+   * Bottom is the fraction cropped from the bottom edge, in [0,1].
+   */
+  bottom?: number /* float64 */;
+}
+/**
+ * Fit selects how an image fills its slot (mirrors pptx-go's builder Fit;
+ * FitFill is the default).
+ */
+export const FitFill = "fill";
+export const FitNone = "none";
+/**
+ * Fit modes (wire values mirror the builder enum).
+ */
+export type Fit = typeof FitFill | typeof FitNone;
+/**
+ * Position is a 2D point in slide coordinates (mirrors pptx-go's builder
+ * position types). Used by Decoration.Offset.
+ */
+export interface Position {
+  /**
+   * X is the horizontal coordinate (points).
+   */
+  x?: number /* float64 */;
+  /**
+   * Y is the vertical coordinate (points).
+   */
+  y?: number /* float64 */;
+}
+/**
+ * Size is a 2D extent in slide coordinates (mirrors pptx-go's builder size
+ * types). Used by Decoration.Size.
+ */
+export interface Size {
+  /**
+   * W is the width (points).
+   */
+  w?: number /* float64 */;
+  /**
+   * H is the height (points).
+   */
+  h?: number /* float64 */;
+}
+/**
+ * FrameKind selects a device frame around an image (mirrors pptx-go's
+ * scene.FrameKind). FrameName, when set, overrides Frame and selects a
+ * WithFrameExtension frame.
+ */
+export type FrameKind = string;
+/**
+ * Frame kinds (wire values per compose-a-scene).
+ */
+export const FrameNone: FrameKind = "none";
+/**
+ * Frame kinds (wire values per compose-a-scene).
+ */
+export const FrameBrowser: FrameKind = "browser";
+/**
+ * Frame kinds (wire values per compose-a-scene).
+ */
+export const FramePhone: FrameKind = "phone";
+/**
+ * Frame kinds (wire values per compose-a-scene).
+ */
+export const FrameDesktop: FrameKind = "desktop";
+/**
+ * Frame kinds (wire values per compose-a-scene).
+ */
+export const FrameLaptop: FrameKind = "laptop";
+/**
+ * Anchor names a slide anchor point for a Decoration (mirrors pptx-go's
+ * scene.Anchor). The Offset is interpreted relative to this anchor.
+ */
+export const AnchorTopLeft = "top_left";
+export const AnchorTop = "top";
+export const AnchorTopRight = "top_right";
+export const AnchorLeft = "left";
+export const AnchorCenter = "center";
+export const AnchorRight = "right";
+export const AnchorBottomLeft = "bottom_left";
+export const AnchorBottom = "bottom";
+export const AnchorBottomRight = "bottom_right";
+/**
+ * Slide anchor positions (9-point compass; wire values are snake_case).
+ */
+export type Anchor = typeof AnchorTopLeft | typeof AnchorTop | typeof AnchorTopRight | typeof AnchorLeft | typeof AnchorCenter | typeof AnchorRight | typeof AnchorBottomLeft | typeof AnchorBottom | typeof AnchorBottomRight;
+/**
  * Kind is the JSON "kind" discriminator that selects a concrete SlideNode.
  * Values are snake_case and match the pptx-go scene node (CONVENTIONS §2).
  */
@@ -46,11 +157,25 @@ export const KindGrid = "grid";
 export const KindCard = "card";
 export const KindCardSection = "card_section";
 /**
- * Node kinds implemented in this unit (Phase 1A). Later units register the
- * remaining leaf kinds (divider, quote, chip, arrow, section_divider, table,
- * flow, image, code_block, chart, decoration).
+ * Node kinds implemented in Phase 1A.
  */
 export type Kind = typeof KindHero | typeof KindHeading | typeof KindProse | typeof KindList | typeof KindCallout | typeof KindTwoColumn | typeof KindGrid | typeof KindCard | typeof KindCardSection;
+export const KindDivider = "divider";
+export const KindQuote = "quote";
+export const KindChip = "chip";
+export const KindArrow = "arrow";
+export const KindSectionDivider = "section_divider";
+export const KindTable = "table";
+export const KindFlow = "flow";
+export const KindImage = "image";
+export const KindCodeBlock = "code_block";
+export const KindChart = "chart";
+export const KindDecoration = "decoration";
+/**
+ * Node kinds implemented in Phase 1B — the remaining leaf kinds (mirror the
+ * compose-a-scene catalog). Wire values are snake_case per CONVENTIONS §2.
+ */
+export type Kind = typeof KindDivider | typeof KindQuote | typeof KindChip | typeof KindArrow | typeof KindSectionDivider | typeof KindTable | typeof KindFlow | typeof KindImage | typeof KindCodeBlock | typeof KindChart | typeof KindDecoration;
 /**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
@@ -250,6 +375,162 @@ export interface CardSection {
   body?: SlideNode[];
 }
 /**
+ * DecorationKind selects a decoration's render path (mirrors pptx-go's
+ * scene.DecorationKind). A preset decoration renders as native shapes; an
+ * asset decoration renders as a PPTX picture (D-018).
+ */
+export type DecorationKind = string;
+/**
+ * Decoration kinds (wire values per compose-a-scene).
+ */
+export const DecorationPreset: DecorationKind = "preset";
+/**
+ * Decoration kinds (wire values per compose-a-scene).
+ */
+export const DecorationAsset: DecorationKind = "asset";
+/**
+ * Layer selects a decoration's z-order layer (mirrors pptx-go's
+ * scene.Layer).
+ */
+export const LayerBackground = "background";
+export const LayerForeground = "foreground";
+/**
+ * Decoration layers (wire values per compose-a-scene).
+ */
+export type Layer = typeof LayerBackground | typeof LayerForeground;
+/**
+ * Decoration is an ornamental element layered over a slide. A preset
+ * decoration renders as native shapes; an asset decoration renders as a
+ * PPTX picture from AssetID-resolved bytes. Mirror of pptx-go's
+ * scene.Decoration. The JSON field for the variant is "decorationKind"
+ * (not "kind", which is the node discriminator — CONVENTIONS §2).
+ * Stage-1 validation: preset needs a Preset, asset needs an AssetID,
+ * Opacity in [0,1] (Opacity 0 = opaque) — later unit.
+ */
+export interface Decoration {
+  /**
+   * Kind is the decoration variant (preset or asset).
+   */
+  decorationKind?: DecorationKind;
+  /**
+   * Preset is the curated ornament name (preset kind only).
+   */
+  preset?: string;
+  /**
+   * AssetID is the resolver key for the ornament bytes (asset kind only).
+   */
+  assetId?: AssetID;
+  /**
+   * Layer is the z-order layer.
+   */
+  layer?: Layer;
+  /**
+   * Anchor is the slide anchor the Offset is relative to.
+   */
+  anchor?: Anchor;
+  /**
+   * Offset is the position offset from the anchor.
+   */
+  offset?: Position;
+  /**
+   * Size is the decoration extent.
+   */
+  size?: Size;
+  /**
+   * Bleed extends the decoration to the slide edges.
+   */
+  bleed?: boolean;
+  /**
+   * Opacity is the decoration opacity in [0,1]; 0 means opaque.
+   */
+  opacity?: number /* float64 */;
+  /**
+   * Rotation is the clockwise rotation in degrees.
+   */
+  rotation?: number /* float64 */;
+}
+/**
+ * Divider is a horizontal rule with surrounding spacing. Renders as native
+ * PPTX shapes. Mirror of pptx-go's scene.Divider.
+ */
+export interface Divider {
+  /**
+   * Spacing is the spacing token role above and below the rule.
+   */
+  spacing?: SpaceRole;
+}
+/**
+ * FlowOrientation selects a flow's axis (mirrors pptx-go's
+ * scene.FlowOrientation).
+ */
+export type FlowOrientation = string;
+/**
+ * Flow orientations (wire values per compose-a-scene).
+ */
+export const FlowHorizontal: FlowOrientation = "horizontal";
+/**
+ * Flow orientations (wire values per compose-a-scene).
+ */
+export const FlowVertical: FlowOrientation = "vertical";
+/**
+ * ConnectorKind selects the connector style between flow steps (mirrors
+ * pptx-go's scene.ConnectorKind; ConnectorArrow is the default).
+ */
+export type ConnectorKind = string;
+/**
+ * Connector styles (wire values per compose-a-scene).
+ */
+export const ConnectorArrow: ConnectorKind = "arrow";
+/**
+ * Connector styles (wire values per compose-a-scene).
+ */
+export const ConnectorArrowDashed: ConnectorKind = "arrow_dashed";
+/**
+ * Connector styles (wire values per compose-a-scene).
+ */
+export const ConnectorCycle: ConnectorKind = "cycle";
+/**
+ * Connector styles (wire values per compose-a-scene).
+ */
+export const ConnectorPlus: ConnectorKind = "plus";
+/**
+ * FlowStep is one step in a Flow. Mirror of scene.FlowStep. Icon is a closed-
+ * name curated/extension icon (Stage-1 validated at render time).
+ */
+export interface FlowStep {
+  /**
+   * Label is the step heading.
+   */
+  label?: RichText;
+  /**
+   * Detail is the step body/description.
+   */
+  detail?: RichText;
+  /**
+   * Icon is a closed-name curated/extension icon name.
+   */
+  icon?: string;
+}
+/**
+ * Flow is an ordered sequence of connected steps. Renders as native PPTX
+ * shapes. Mirror of pptx-go's scene.Flow. At least one step is required
+ * (validation, later unit).
+ */
+export interface Flow {
+  /**
+   * Orientation is the flow axis.
+   */
+  orientation?: FlowOrientation;
+  /**
+   * Steps is the ordered flow steps.
+   */
+  steps?: FlowStep[];
+  /**
+   * Connector is the connector style between steps.
+   */
+  connector?: ConnectorKind;
+}
+/**
  * Grid lays out children in a column grid. Columns is 2..4; Cells length is a
  * multiple of Columns; Ratio is empty or len == Columns (validation, later
  * unit). Mirror of scene.Grid. Children nest recursively.
@@ -360,6 +641,194 @@ export interface List {
    * Items is the ordered list entries.
    */
   items?: ListItem[];
+}
+/**
+ * Image is a picture placed from caller-supplied bytes resolved by
+ * AssetID. Renders as a PPTX picture (D-011). Mirror of pptx-go's
+ * scene.Image. Stage-1 validation: non-empty AssetID and crop bounds (each
+ * edge in [0,1], Left+Right < 1, Top+Bottom < 1) — later unit.
+ */
+export interface Image {
+  /**
+   * AssetID is the resolver key for the image bytes.
+   */
+  assetId?: AssetID;
+  /**
+   * Alt is the accessibility/alt-text description.
+   */
+  alt?: string;
+  /**
+   * Frame selects a device frame around the image.
+   */
+  frame?: FrameKind;
+  /**
+   * FrameName overrides Frame and selects a WithFrameExtension frame.
+   */
+  frameName?: string;
+  /**
+   * Crop is the per-edge crop fractions; the zero value is no crop.
+   */
+  crop?: Crop;
+  /**
+   * Fit selects how the image fills its slot; FitFill is the default.
+   */
+  fit?: Fit;
+}
+/**
+ * CodeBlock is a source-code listing placed from a pre-rasterized image
+ * resolved by AssetID (D-014). Renders as a PPTX picture. Mirror of
+ * pptx-go's scene.CodeBlock. Stage-1 validation: non-empty AssetID — later
+ * unit. Language and Caption are free-form and may be empty.
+ */
+export interface CodeBlock {
+  /**
+   * AssetID is the resolver key for the rendered code image.
+   */
+  assetId?: AssetID;
+  /**
+   * Language is the source language label (free-form).
+   */
+  language?: string;
+  /**
+   * Caption is the optional listing caption/filename.
+   */
+  caption?: string;
+}
+/**
+ * Chart is a chart placed from a pre-rasterized image resolved by AssetID
+ * (V1: image-shape; native c:chart is V2 — D-004). Renders as a PPTX
+ * picture, or a labeled ChartPlaceholder when the asset is unresolved.
+ * Mirror of pptx-go's scene.Chart. Stage-1 validation: non-empty AssetID —
+ * later unit.
+ */
+export interface Chart {
+  /**
+   * AssetID is the resolver key for the chart image bytes.
+   */
+  assetId?: AssetID;
+  /**
+   * Caption is the optional chart caption.
+   */
+  caption?: string;
+}
+/**
+ * ChipTone selects a chip's visual treatment (mirrors pptx-go's
+ * scene.ChipTone).
+ */
+export type ChipTone = string;
+/**
+ * Chip tones (wire values per compose-a-scene).
+ */
+export const ChipTint: ChipTone = "tint";
+/**
+ * Chip tones (wire values per compose-a-scene).
+ */
+export const ChipSolid: ChipTone = "solid";
+/**
+ * Chip tones (wire values per compose-a-scene).
+ */
+export const ChipOutline: ChipTone = "outline";
+/**
+ * Chip is a compact label/badge. Renders as native PPTX shapes. Mirror of
+ * pptx-go's scene.Chip. The JSON field for the tone is "tone" (the node
+ * discriminator "kind" is reserved — CONVENTIONS §2).
+ */
+export interface Chip {
+  /**
+   * Label is the chip text.
+   */
+  label?: string;
+  /**
+   * Tone is the chip visual treatment.
+   */
+  tone?: ChipTone;
+  /**
+   * Color is the chip color role.
+   */
+  color?: ColorRole;
+}
+/**
+ * ArrowDirection selects an arrow's direction (mirrors pptx-go's
+ * scene.ArrowDirection).
+ */
+export type ArrowDirection = string;
+/**
+ * Arrow directions (wire values per compose-a-scene).
+ */
+export const ArrowRight: ArrowDirection = "right";
+/**
+ * Arrow directions (wire values per compose-a-scene).
+ */
+export const ArrowLeft: ArrowDirection = "left";
+/**
+ * Arrow directions (wire values per compose-a-scene).
+ */
+export const ArrowUp: ArrowDirection = "up";
+/**
+ * Arrow directions (wire values per compose-a-scene).
+ */
+export const ArrowDown: ArrowDirection = "down";
+/**
+ * Arrow is a directional connector with an optional label. Renders as native
+ * PPTX shapes. Mirror of pptx-go's scene.Arrow.
+ */
+export interface Arrow {
+  /**
+   * Direction is the arrow direction.
+   */
+  direction?: ArrowDirection;
+  /**
+   * Label is the optional arrow label.
+   */
+  label?: string;
+}
+/**
+ * SectionDivider is a full-bleed section break with an eyebrow and a label.
+ * Renders as native PPTX shapes. Mirror of pptx-go's scene.SectionDivider.
+ */
+export interface SectionDivider {
+  /**
+   * Eyebrow is the small label above the section label.
+   */
+  eyebrow?: string;
+  /**
+   * Label is the section heading.
+   */
+  label?: string;
+}
+/**
+ * Quote is a block quotation with an optional attribution. Renders as native
+ * PPTX shapes. Mirror of pptx-go's scene.Quote.
+ */
+export interface Quote {
+  /**
+   * Text is the quotation content.
+   */
+  text?: RichText;
+  /**
+   * Attribution is the optional source/author line.
+   */
+  attribution?: string;
+}
+/**
+ * Table is a grid of cells with a header row and a caption. Renders as native
+ * PPTX shapes. Mirror of pptx-go's scene.Table. Each header cell and each
+ * body cell is a RichText; every row width MUST equal the header width
+ * (validation, later unit).
+ */
+export interface Table {
+  /**
+   * Headers is the header row, one RichText per column.
+   */
+  headers?: RichText[];
+  /**
+   * Rows is the body rows; each row is one RichText per column.
+   */
+  rows?: RichText[][];
+  /**
+   * Caption is the optional table caption.
+   */
+  caption?: string;
 }
 /**
  * ColumnRatio names a left:right width split (mirrors pptx-go's

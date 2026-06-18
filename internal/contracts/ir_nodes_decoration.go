@@ -1,0 +1,59 @@
+package contracts
+
+// DecorationKind selects a decoration's render path (mirrors pptx-go's
+// scene.DecorationKind). A preset decoration renders as native shapes; an
+// asset decoration renders as a PPTX picture (D-018).
+type DecorationKind string
+
+// Decoration kinds (wire values per compose-a-scene).
+const (
+	DecorationPreset DecorationKind = "preset"
+	DecorationAsset  DecorationKind = "asset"
+)
+
+// Layer selects a decoration's z-order layer (mirrors pptx-go's
+// scene.Layer).
+type Layer string
+
+// Decoration layers (wire values per compose-a-scene).
+const (
+	LayerBackground Layer = "background"
+	LayerForeground Layer = "foreground"
+)
+
+// Decoration is an ornamental element layered over a slide. A preset
+// decoration renders as native shapes; an asset decoration renders as a
+// PPTX picture from AssetID-resolved bytes. Mirror of pptx-go's
+// scene.Decoration. The JSON field for the variant is "decorationKind"
+// (not "kind", which is the node discriminator — CONVENTIONS §2).
+// Stage-1 validation: preset needs a Preset, asset needs an AssetID,
+// Opacity in [0,1] (Opacity 0 = opaque) — later unit.
+type Decoration struct {
+	// Kind is the decoration variant (preset or asset).
+	Kind DecorationKind `json:"decorationKind,omitempty"`
+	// Preset is the curated ornament name (preset kind only).
+	Preset string `json:"preset,omitempty"`
+	// AssetID is the resolver key for the ornament bytes (asset kind only).
+	AssetID AssetID `json:"assetId,omitempty"`
+	// Layer is the z-order layer.
+	Layer Layer `json:"layer,omitempty"`
+	// Anchor is the slide anchor the Offset is relative to.
+	Anchor Anchor `json:"anchor,omitempty"`
+	// Offset is the position offset from the anchor.
+	Offset Position `json:"offset,omitempty"`
+	// Size is the decoration extent.
+	Size Size `json:"size,omitempty"`
+	// Bleed extends the decoration to the slide edges.
+	Bleed bool `json:"bleed,omitempty"`
+	// Opacity is the decoration opacity in [0,1]; 0 means opaque.
+	Opacity float64 `json:"opacity,omitempty"`
+	// Rotation is the clockwise rotation in degrees.
+	Rotation float64 `json:"rotation,omitempty"`
+}
+
+func (Decoration) slideNodeKind() Kind { return KindDecoration }
+
+// MarshalJSON injects the "decoration" kind discriminator via marshalNode.
+func (d *Decoration) MarshalJSON() ([]byte, error) { return marshalNode(KindDecoration, *d) }
+
+func init() { registerNodeKind(KindDecoration, func() SlideNode { return &Decoration{} }) }

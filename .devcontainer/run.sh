@@ -56,6 +56,11 @@ docker run -d --name "$NAME" \
   "$IMAGE" \
   bash -lc '/workspace/go-slides-mcp/.devcontainer/loop.sh'
 
+# Clear any stale terminal status from a prior run BEFORE the new loop writes RUNNING
+# (the entrypoint bootstrap delays loop.sh ~30-60s; without this, a monitor would catch the
+# previous run's COMPLETE/BLOCKED in the bind-mounted var/ and false-fire).
+mkdir -p "$DC/var"; echo "STARTING" > "$DC/var/status.txt"
+
 # Inject the pptx-go engine skills + the Svelte/bridge study skill into the container's
 # opencode skill dir (they live in host ~/.claude/skills, not the Go module cache).
 for s in compose-a-scene define-a-theme scaffold-a-presentation load-a-brand-template \

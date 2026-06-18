@@ -4,9 +4,7 @@ package contracts
 // Values are snake_case and match the pptx-go scene node (CONVENTIONS §2).
 type Kind string
 
-// Node kinds implemented in this unit (Phase 1A). Later units register the
-// remaining leaf kinds (divider, quote, chip, arrow, section_divider, table,
-// flow, image, code_block, chart, decoration).
+// Node kinds implemented in Phase 1A.
 const (
 	KindHero        Kind = "hero"
 	KindHeading     Kind = "heading"
@@ -17,6 +15,22 @@ const (
 	KindGrid        Kind = "grid"
 	KindCard        Kind = "card"
 	KindCardSection Kind = "card_section"
+)
+
+// Node kinds implemented in Phase 1B — the remaining leaf kinds (mirror the
+// compose-a-scene catalog). Wire values are snake_case per CONVENTIONS §2.
+const (
+	KindDivider        Kind = "divider"
+	KindQuote          Kind = "quote"
+	KindChip           Kind = "chip"
+	KindArrow          Kind = "arrow"
+	KindSectionDivider Kind = "section_divider"
+	KindTable          Kind = "table"
+	KindFlow           Kind = "flow"
+	KindImage          Kind = "image"
+	KindCodeBlock      Kind = "code_block"
+	KindChart          Kind = "chart"
+	KindDecoration     Kind = "decoration"
 )
 
 // LayoutKind is a slide's structural intent, mapping to a master layout
