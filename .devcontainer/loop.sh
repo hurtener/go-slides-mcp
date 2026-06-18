@@ -60,7 +60,7 @@ while [ "$i" -lt "$MAX_ITERS" ]; do
   if printf '%s' "$out" | grep -q '\[goal:blocked\]'; then
     note "BLOCKED — model reported a blocker at iteration $i"; echo "BLOCKED" > "$STATUS"; break
   fi
-  if printf '%s' "$out" | grep -qiE 'rate.?limit|quota exceeded|usage limit|429|402|insufficient[_ ]?(quota|credit|fund)'; then
+  if printf '%s' "$out" | grep -qiE 'rate.?limit|quota exceeded|usage limit|429|402|insufficient[_ ]?(quota|credit|fund)|payment required|depleted|included credits|out of credits|purchase.*credits'; then
     if [ "$ACTIVE" = "primary" ]; then
       note "LIMIT on primary $CUR_MODEL (iter $i) → switching to fallback $FALLBACK_MODEL"
       echo "RATE_LIMITED->fallback (iter $i)" > "$STATUS"; ACTIVE="fallback"; FB_ITERS=0
