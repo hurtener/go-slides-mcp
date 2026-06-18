@@ -32,3 +32,670 @@ export interface GreetOutput {
    */
   length: number /* int */;
 }
+/**
+ * Kind is the JSON "kind" discriminator that selects a concrete SlideNode.
+ * Values are snake_case and match the pptx-go scene node (CONVENTIONS §2).
+ */
+export const KindHero = "hero";
+export const KindHeading = "heading";
+export const KindProse = "prose";
+export const KindList = "list";
+export const KindCallout = "callout";
+export const KindTwoColumn = "two_column";
+export const KindGrid = "grid";
+export const KindCard = "card";
+export const KindCardSection = "card_section";
+/**
+ * Node kinds implemented in this unit (Phase 1A). Later units register the
+ * remaining leaf kinds (divider, quote, chip, arrow, section_divider, table,
+ * flow, image, code_block, chart, decoration).
+ */
+export type Kind = typeof KindHero | typeof KindHeading | typeof KindProse | typeof KindList | typeof KindCallout | typeof KindTwoColumn | typeof KindGrid | typeof KindCard | typeof KindCardSection;
+/**
+ * LayoutKind is a slide's structural intent, mapping to a master layout
+ * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
+ */
+export type LayoutKind = string;
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutCover: LayoutKind = "cover";
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutTitleContent: LayoutKind = "title_content";
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutTwoColumn: LayoutKind = "two_column";
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutCardGrid: LayoutKind = "card_grid";
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutFullBleed: LayoutKind = "full_bleed";
+/**
+ * Slide layouts (wire values per CONVENTIONS §2).
+ */
+export const LayoutBlank: LayoutKind = "blank";
+/**
+ * SlideNode is the sealed-ish union of every slide IR node kind. The marker
+ * method slideNodeKind is unexported, so only types in this package satisfy
+ * the interface; the kind registry is the closed dispatch surface.
+ * CONVENTIONS §3.
+ */
+export type SlideNode = any;
+/**
+ * CalloutKind selects a callout variant (mirrors pptx-go's scene.CalloutKind).
+ */
+export type CalloutKind = string;
+/**
+ * Callout variants.
+ */
+export const CalloutNote: CalloutKind = "note";
+/**
+ * Callout variants.
+ */
+export const CalloutWarning: CalloutKind = "warning";
+/**
+ * Callout variants.
+ */
+export const CalloutTip: CalloutKind = "tip";
+/**
+ * Callout variants.
+ */
+export const CalloutImportant: CalloutKind = "important";
+/**
+ * Callout is a highlighted note with a title and rich body. Mirror of
+ * scene.Callout. The JSON field for the variant is "calloutKind" (not
+ * "kind", which is the node discriminator).
+ */
+export interface Callout {
+  /**
+   * Kind is the callout variant.
+   */
+  calloutKind?: CalloutKind;
+  /**
+   * Title is the callout heading.
+   */
+  title?: string;
+  /**
+   * Body is the callout body content.
+   */
+  body?: RichText;
+}
+/**
+ * BodyLayout selects how a card body stacks its children (mirrors pptx-go's
+ * scene.BodyLayout; BodyVertical is the default).
+ */
+export type BodyLayout = string;
+/**
+ * Body layouts.
+ */
+export const BodyVertical: BodyLayout = "vertical";
+/**
+ * Body layouts.
+ */
+export const BodyHorizontal: BodyLayout = "horizontal";
+/**
+ * BorderStyle selects a card border style (mirrors scene.BorderStyle;
+ * BorderDefault defers to the Outline flag).
+ */
+export type BorderStyle = string;
+/**
+ * Border styles.
+ */
+export const BorderDefault: BorderStyle = "default";
+/**
+ * Border styles.
+ */
+export const BorderNone: BorderStyle = "none";
+/**
+ * Border styles.
+ */
+export const BorderSolid: BorderStyle = "solid";
+/**
+ * Border styles.
+ */
+export const BorderAccent: BorderStyle = "accent";
+/**
+ * CardSize selects a card size variant (mirrors scene.CardSize).
+ */
+export const CardSizeMD = "md";
+export const CardSizeSM = "sm";
+export const CardSizeLG = "lg";
+/**
+ * Card sizes.
+ */
+export type CardSize = typeof CardSizeMD | typeof CardSizeSM | typeof CardSizeLG;
+/**
+ * CardLayout selects a card layout variant (mirrors scene.CardLayout).
+ */
+export const CardLayoutDefault = "default";
+export const CardLayoutIconTop = "iconTop";
+/**
+ * Card layouts.
+ */
+export type CardLayout = typeof CardLayoutDefault | typeof CardLayoutIconTop;
+/**
+ * Card is an accent card holding a body of child nodes. All fields beyond
+ * Header/Body are additive (zero values reproduce the default render).
+ * Mirror of scene.Card. Children nest recursively.
+ */
+export interface Card {
+  /**
+   * Header is the card title.
+   */
+  header?: string;
+  /**
+   * Eyebrow is the small label above the header.
+   */
+  eyebrow?: string;
+  /**
+   * Icon is a closed-name curated/extension icon.
+   */
+  icon?: string;
+  /**
+   * HeaderPill is a pill-shaped badge in the header.
+   */
+  headerPill?: string;
+  /**
+   * Body is the card body children.
+   */
+  body?: SlideNode[];
+  /**
+   * BodyLayout stacks the body vertically (default) or horizontally.
+   */
+  bodyLayout?: BodyLayout;
+  /**
+   * Fill is the card surface color role.
+   */
+  fill?: ColorRole;
+  /**
+   * Outline enables a card border.
+   */
+  outline?: boolean;
+  /**
+   * BorderStyle selects the border style.
+   */
+  borderStyle?: BorderStyle;
+  /**
+   * Size is the card size variant.
+   */
+  size?: CardSize;
+  /**
+   * Layout is the card layout variant.
+   */
+  layout?: CardLayout;
+  /**
+   * Elevation is the card shadow role.
+   */
+  elevation?: ElevationRole;
+}
+/**
+ * CardSection is a top-level card accepting grids, two-columns, or nested
+ * cards. Body must be non-empty (validation, later unit). Mirror of
+ * scene.CardSection. Children nest recursively.
+ */
+export interface CardSection {
+  /**
+   * Header is the section title.
+   */
+  header?: string;
+  /**
+   * Body is the section body children (must be non-empty).
+   */
+  body?: SlideNode[];
+}
+/**
+ * Grid lays out children in a column grid. Columns is 2..4; Cells length is a
+ * multiple of Columns; Ratio is empty or len == Columns (validation, later
+ * unit). Mirror of scene.Grid. Children nest recursively.
+ */
+export interface Grid {
+  /**
+   * Columns is the cell count per row, 2..4.
+   */
+  columns?: number /* int */;
+  /**
+   * Ratio is an optional per-column width ratio; empty or len == Columns.
+   */
+  ratio?: number /* int */[];
+  /**
+   * Gap is the spacing between cells.
+   */
+  gap?: SpaceRole;
+  /**
+   * Cells is the grid children, a multiple of Columns.
+   */
+  cells?: SlideNode[];
+}
+/**
+ * Hero is a cover/title slide node: an eyebrow, a title, and a subtitle.
+ * Renders as native PPTX shapes. Mirror of pptx-go's scene.Hero.
+ */
+export interface Hero {
+  /**
+   * Eyebrow is the small label above the title.
+   */
+  eyebrow?: string;
+  /**
+   * Title is the headline.
+   */
+  title?: string;
+  /**
+   * Subtitle is the supporting line under the title.
+   */
+  subtitle?: string;
+}
+/**
+ * Heading is a typed heading line at a 1..6 depth. Mirror of scene.Heading.
+ */
+export interface Heading {
+  /**
+   * Text is the heading content.
+   */
+  text?: RichText;
+  /**
+   * Level is the heading depth, 1..6.
+   */
+  level?: number /* int */;
+}
+/**
+ * Prose is body text: an ordered list of paragraphs, each a RichText. Mirror
+ * of scene.Prose.
+ */
+export interface Prose {
+  /**
+   * Paragraphs is the ordered body text, one RichText per paragraph.
+   */
+  paragraphs?: RichText[];
+}
+/**
+ * ListKind selects a list style (mirrors pptx-go's scene.ListKind).
+ */
+export type ListKind = string;
+/**
+ * List styles (wire values per CONVENTIONS §2 example).
+ */
+export const ListBullet: ListKind = "bullet";
+/**
+ * List styles (wire values per CONVENTIONS §2 example).
+ */
+export const ListNumber: ListKind = "number";
+/**
+ * List styles (wire values per CONVENTIONS §2 example).
+ */
+export const ListChecklist: ListKind = "checklist";
+/**
+ * ListItem is one entry in a List. Mirror of scene.ListItem.
+ */
+export interface ListItem {
+  /**
+   * Text is the item's content.
+   */
+  text?: RichText;
+  /**
+   * Level is the nesting depth (0 = top-level).
+   */
+  level?: number /* int */;
+  /**
+   * Checked marks a checklist item as done (ListChecklist only).
+   */
+  checked?: boolean;
+}
+/**
+ * List is a bullet, numbered, or checklist list. Mirror of scene.List. The
+ * JSON field for the list style is "listKind" (not "kind", which is reserved
+ * for the node discriminator — CONVENTIONS §2).
+ */
+export interface List {
+  /**
+   * Kind is the list style.
+   */
+  listKind?: ListKind;
+  /**
+   * Items is the ordered list entries.
+   */
+  items?: ListItem[];
+}
+/**
+ * ColumnRatio names a left:right width split (mirrors pptx-go's
+ * scene.ColumnRatio; CONVENTIONS §2 uses "1:1").
+ */
+export type ColumnRatio = string;
+/**
+ * Column ratios.
+ */
+export const Ratio11: ColumnRatio = "1:1";
+/**
+ * Column ratios.
+ */
+export const Ratio12: ColumnRatio = "1:2";
+/**
+ * Column ratios.
+ */
+export const Ratio21: ColumnRatio = "2:1";
+/**
+ * TwoColumn splits a slide into left and right child columns. Both sides
+ * must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
+ * Children are []SlideNode and nest recursively.
+ */
+export interface TwoColumn {
+  /**
+   * Ratio is the left:right width split.
+   */
+  ratio?: ColumnRatio;
+  /**
+   * Left is the left-column children.
+   */
+  left?: SlideNode[];
+  /**
+   * Right is the right-column children.
+   */
+  right?: SlideNode[];
+}
+/**
+ * ColorRole names a surface fill color role (mirrors pptx-go's ColorRole;
+ * the soul/theme resolves it to concrete RGB at render time).
+ */
+export type ColorRole = string;
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorCanvas: ColorRole = "canvas";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorSurface: ColorRole = "surface";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorSurfaceAlt: ColorRole = "surfaceAlt";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorAccent: ColorRole = "accent";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorAccentAlt: ColorRole = "accentAlt";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorAccentWarm: ColorRole = "accentWarm";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorSuccess: ColorRole = "success";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorWarning: ColorRole = "warning";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorError: ColorRole = "error";
+/**
+ * Surface color roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ColorInfo: ColorRole = "info";
+/**
+ * SpaceRole names a spacing token role (mirrors pptx-go's SpaceRole).
+ */
+export type SpaceRole = string;
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const SpaceXS: SpaceRole = "xs";
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const SpaceSM: SpaceRole = "sm";
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const SpaceMD: SpaceRole = "md";
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const SpaceLG: SpaceRole = "lg";
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const SpaceXL: SpaceRole = "xl";
+/**
+ * Spacing roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const Space2XL: SpaceRole = "2xl";
+/**
+ * ElevationRole names a shadow elevation role (mirrors pptx-go's
+ * ElevationRole).
+ */
+export type ElevationRole = string;
+/**
+ * Elevation roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ElevationFlat: ElevationRole = "flat";
+/**
+ * Elevation roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ElevationRaised: ElevationRole = "raised";
+/**
+ * Elevation roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const ElevationElevated: ElevationRole = "elevated";
+/**
+ * Slide is one slide: a stable ID, a structural layout, an ordered node tree,
+ * and optional speaker notes. Nodes and Notes route through the codec
+ * (CONVENTIONS §2/§3): marshaling injects each node's "kind" via the node's
+ * own MarshalJSON; unmarshaling dispatches each node through
+ * UnmarshalSlideNode (recursion) and each run through TextRun's unmarshaler.
+ */
+export interface Slide {
+  /**
+   * ID is the slide identifier (stable, agent/human addressable).
+   */
+  id: string;
+  /**
+   * Layout is the structural intent, mapping to a master layout.
+   */
+  layout?: LayoutKind;
+  /**
+   * Nodes is the slide's top-level node tree.
+   */
+  nodes?: SlideNode[];
+  /**
+   * Notes is the speaker notes.
+   */
+  notes?: RichText;
+}
+/**
+ * SlideDoc is the deck-of-slides wrapper: a title plus an ordered slide list.
+ * Slides route through Slide's own marshal/unmarshal, so node trees and notes
+ * are codec-handled throughout.
+ */
+export interface SlideDoc {
+  /**
+   * Title is the deck title.
+   */
+  title?: string;
+  /**
+   * Slides is the deck's slides, in order.
+   */
+  slides?: Slide[];
+}
+/**
+ * RichText is an ordered list of styled runs — the inline-text content type
+ * used across the slide IR (CONVENTIONS §4). It marshals as a JSON array of
+ * TextRun objects; each run is a flat { text, typeRole?, bold?, ... , color? }.
+ */
+export type RichText = TextRun[];
+/**
+ * TextRun is one styled run of text. Its JSON shape is flat (CONVENTIONS §4):
+ * the Style fields are inlined into the run object and Color is omitted when
+ * unset (meaning the token "primary").
+ */
+export interface TextRun {
+  /**
+   * Text is the literal run content.
+   */
+  Text: string;
+  /**
+   * Style carries typography and inline formatting.
+   */
+  Style: RunStyle;
+  /**
+   * Color is the run color; the zero value means the token "primary".
+   */
+  Color: TextColor;
+}
+/**
+ * RunStyle mirrors pptx-go's scene.RunStyle: typography role plus inline
+ * formatting flags and a link target.
+ */
+export interface RunStyle {
+  /**
+   * TypeRole selects a typography scale role (TypeBody, TypeH2, ...).
+   */
+  TypeRole: TypeRole;
+  /**
+   * Bold toggles bold weight.
+   */
+  Bold: boolean;
+  /**
+   * Italic toggles italic style.
+   */
+  Italic: boolean;
+  /**
+   * Underline toggles underline.
+   */
+  Underline: boolean;
+  /**
+   * Strike toggles strikethrough.
+   */
+  Strike: boolean;
+  /**
+   * Code marks the run as inline code (mono + tint).
+   */
+  Code: boolean;
+  /**
+   * Link marks the run as a hyperlink; Href is the target.
+   */
+  Link: boolean;
+  /**
+   * Href is the link URL when Link is true.
+   */
+  Href: string;
+}
+/**
+ * TextColor is a run color: either a soul-bound token role (the documented
+ * default) or a literal RGB escape hatch. The zero value is the token
+ * "primary". JSON: { "token": "<role>" } or { "literal": "RRGGBB" }.
+ */
+export interface TextColor {
+  /**
+   * Token is a semantic text-color role resolved against the soul/theme.
+   */
+  token?: TextColorRole;
+  /**
+   * Literal is an explicit "RRGGBB" hex color bypassing the theme.
+   */
+  literal?: string;
+}
+/**
+ * TextColorRole names a semantic text-color role (mirrors pptx-go's
+ * TextColorRole; CONVENTIONS §4 lists the wire values verbatim).
+ */
+export type TextColorRole = string;
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextPrimary: TextColorRole = "primary";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextSecondary: TextColorRole = "secondary";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextTertiary: TextColorRole = "tertiary";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextInverse: TextColorRole = "inverse";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextMuted: TextColorRole = "muted";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextAccent: TextColorRole = "accent";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextAccentAlt: TextColorRole = "accentAlt";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextSuccess: TextColorRole = "success";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextWarning: TextColorRole = "warning";
+/**
+ * Text color roles (wire values per CONVENTIONS §4).
+ */
+export const TextError: TextColorRole = "error";
+/**
+ * TypeRole names a typography scale role (mirrors pptx-go's TypeRole; wire
+ * values per CONVENTIONS §4: body|h1|h2|h3|code|...).
+ */
+export type TypeRole = string;
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeDisplay: TypeRole = "display";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeH1: TypeRole = "h1";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeH2: TypeRole = "h2";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeH3: TypeRole = "h3";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeH4: TypeRole = "h4";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeH5: TypeRole = "h5";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeBody: TypeRole = "body";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeBodySmall: TypeRole = "bodySmall";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeCaption: TypeRole = "caption";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeMono: TypeRole = "mono";
+/**
+ * Typography roles (mirror the define-a-theme skill enum verbatim).
+ */
+export const TypeCode: TypeRole = "code";
