@@ -259,6 +259,7 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 	}
 	if err := tool.New[contracts.GetDeckOverviewInput, contracts.GetDeckOverviewOutput]("get_deck_overview").
 		Describe("Get the structure/reorder view of one deck for the overview surface.").
+		UI("deck-overview").
 		Handler(h.getDeckOverview).
 		Register(srv); err != nil {
 		return err

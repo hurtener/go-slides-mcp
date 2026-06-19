@@ -4,6 +4,12 @@
     "kind": {
       "type": "string"
     },
+    "state": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
     "slideId": {
       "type": "string"
     },
@@ -124,13 +130,38 @@
         "ok"
       ],
       "additionalProperties": false
+    },
+    "brand": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "defaultTheme": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "allowThemeSwitch": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowThemeSwitch"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
     "kind",
     "slideId",
     "ir",
-    "validation"
+    "validation",
+    "brand"
   ],
   "additionalProperties": false
 }

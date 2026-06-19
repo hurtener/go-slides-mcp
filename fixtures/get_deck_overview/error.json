@@ -1,0 +1,5 @@
+{
+  "name": "error", "description": "The deck does not exist.", "state": "error",
+  "input": { "deckId": "deck_missing" },
+  "output_override": { "kind": "overview", "state": "error", "message": "Deck \"deck_missing\" not found.", "deckId": "deck_missing", "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true }, "slides": [] }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "happy",
+  "description": "A 6-slide deck shown as a reorderable structure list.",
+  "state": "ready",
+  "input": { "deckId": "deck_platform_review" },
+  "output_override": {
+    "kind": "overview", "state": "ready", "deckId": "deck_platform_review", "title": "Platform Review",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "slides": [
+      { "slideId": "s1", "layout": "cover", "title": "Platform Review", "previewText": "2026 · H1" },
+      { "slideId": "s2", "layout": "title_content", "title": "Agenda", "previewText": "Results · Architecture · Roadmap" },
+      { "slideId": "s3", "layout": "two_column", "title": "Before / After", "previewText": "Chromium vs native render" },
+      { "slideId": "s4", "layout": "title_content", "title": "Highlight", "previewText": "38% lower p99 latency" },
+      { "slideId": "s5", "layout": "title_content", "title": "Latency", "previewText": "p99 by quarter" },
+      { "slideId": "s6", "layout": "title_content", "title": "The render call", "previewText": "render.go" }
+    ]
+  }
+}

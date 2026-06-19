@@ -4,6 +4,12 @@
     "kind": {
       "type": "string"
     },
+    "state": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
     "deckId": {
       "type": "string"
     },
@@ -63,11 +69,36 @@
         ],
         "additionalProperties": false
       }
+    },
+    "brand": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "defaultTheme": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "allowThemeSwitch": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowThemeSwitch"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
     "kind",
-    "deckId"
+    "deckId",
+    "brand"
   ],
   "additionalProperties": false
 }

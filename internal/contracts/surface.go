@@ -34,6 +34,10 @@ type DeckOverviewSection struct {
 type GetDeckOverviewOutput struct {
 	// Kind identifies this payload as the overview surface result.
 	Kind SurfaceKind `json:"kind"`
+	// State is the four-state page state (ready | empty | error | permission | loading).
+	State string `json:"state,omitempty"`
+	// Message is the human-readable note for empty/error/permission states.
+	Message string `json:"message,omitempty"`
 	// DeckID is the resolved deck identifier.
 	DeckID string `json:"deckId"`
 	// Title is the deck title at fetch time.
@@ -42,6 +46,8 @@ type GetDeckOverviewOutput struct {
 	Sections []DeckOverviewSection `json:"sections,omitempty"`
 	// Slides is the ordered preview summary of the deck's slides.
 	Slides []SlideSummary `json:"slides,omitempty"`
+	// Brand is the white-label brand config for the surface chrome/theme.
+	Brand AppBrand `json:"brand"`
 }
 
 // OpenSlideEditorInput is the typed input for open_slide_editor.
@@ -56,6 +62,10 @@ type OpenSlideEditorInput struct {
 type OpenSlideEditorOutput struct {
 	// Kind identifies this payload as the editor surface result.
 	Kind SurfaceKind `json:"kind"`
+	// State is the four-state page state (ready | empty | error | permission | loading).
+	State string `json:"state,omitempty"`
+	// Message is the human-readable note for empty/error/permission states.
+	Message string `json:"message,omitempty"`
 	// SlideID is the slide identifier opened in the editor.
 	SlideID string `json:"slideId"`
 	// IR is the slide's full IR snapshot for the editor.
@@ -64,6 +74,8 @@ type OpenSlideEditorOutput struct {
 	SoulID string `json:"soulId,omitempty"`
 	// Validation is the structural validation result for the slide IR.
 	Validation SlideValidation `json:"validation"`
+	// Brand is the white-label brand config for the surface chrome/theme.
+	Brand AppBrand `json:"brand"`
 }
 
 // GetDeckStateInput is the typed input for get_deck_state.

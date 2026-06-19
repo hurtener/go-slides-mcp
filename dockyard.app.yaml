@@ -219,6 +219,7 @@ tools:
     description: Get the structure/reorder view of one deck for the overview surface.
     input: internal/contracts.GetDeckOverviewInput
     output: internal/contracts.GetDeckOverviewOutput
+    ui: deck-overview
     task_support: forbidden
   - name: open_slide_editor
     description: Open one slide's full IR for editing in the slide-editor surface.
@@ -263,6 +264,14 @@ apps:
   - id: deck-preview
     uri: ui://go-slides-mcp/deck-preview/index.html
     entry: web/apps/deck-preview/src/App.svelte
+    display_modes: [inline]
+    csp:
+      connect: []
+      resource: []
+    visibility: [model, app]
+  - id: deck-overview
+    uri: ui://go-slides-mcp/deck-overview/index.html
+    entry: web/apps/deck-overview/src/App.svelte
     display_modes: [inline]
     csp:
       connect: []
