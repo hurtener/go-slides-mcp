@@ -352,6 +352,44 @@ func mapAnchor(anchor contracts.Anchor) scene.Anchor {
 	}
 }
 
+// mapVAlign converts the wire-level VAlign string to the scene enum.
+// The empty string and "top" both map to VAlignTop (the zero value).
+func mapVAlign(v contracts.VAlign) scene.VAlign {
+	switch v {
+	case contracts.VAlignCenter:
+		return scene.VAlignCenter
+	case contracts.VAlignBottom:
+		return scene.VAlignBottom
+	case contracts.VAlignJustify:
+		return scene.VAlignJustify
+	default:
+		// VAlignTop ("top") and empty string both map to the zero value (top).
+		return scene.VAlignTop
+	}
+}
+
+// mapHAlign converts the wire-level HAlign string to the scene enum.
+// The empty string and "left" both map to HAlignLeft (the zero value).
+func mapHAlign(h contracts.HAlign) scene.HAlign {
+	switch h {
+	case contracts.HAlignCenter:
+		return scene.HAlignCenter
+	case contracts.HAlignRight:
+		return scene.HAlignRight
+	default:
+		// HAlignLeft ("left") and empty string both map to the zero value (left).
+		return scene.HAlignLeft
+	}
+}
+
+// mapAlignment converts a contracts.Alignment to scene.Alignment.
+func mapAlignment(a contracts.Alignment) scene.Alignment {
+	return scene.Alignment{
+		Vertical:   mapVAlign(a.Vertical),
+		Horizontal: mapHAlign(a.Horizontal),
+	}
+}
+
 // mapPosition converts a points-based contracts.Position into the EMU-based
 // scene.Position. pptx.Pt performs the integer rounding.
 func mapPosition(p contracts.Position) scene.Position {

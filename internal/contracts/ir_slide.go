@@ -12,6 +12,10 @@ type Slide struct {
 	ID string `json:"id"`
 	// Layout is the structural intent, mapping to a master layout.
 	Layout LayoutKind `json:"layout,omitempty"`
+	// Align sets how the slide's body content sits in the frame: vertical
+	// top|center|bottom|justify, horizontal left|center|right. Empty = top-left.
+	// Per-node align fields override the horizontal axis for individual blocks.
+	Align Alignment `json:"align,omitempty"`
 	// Nodes is the slide's top-level node tree.
 	Nodes []SlideNode `json:"nodes,omitempty"`
 	// Notes is the speaker notes.
@@ -25,12 +29,14 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 	type plain struct {
 		ID     string      `json:"id"`
 		Layout LayoutKind  `json:"layout,omitempty"`
+		Align  Alignment   `json:"align,omitempty"`
 		Nodes  []SlideNode `json:"nodes,omitempty"`
 		Notes  RichText    `json:"notes,omitempty"`
 	}
 	return json.Marshal(plain{
 		ID:     s.ID,
 		Layout: s.Layout,
+		Align:  s.Align,
 		Nodes:  s.Nodes,
 		Notes:  s.Notes,
 	})
@@ -42,6 +48,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	type raw struct {
 		ID     string            `json:"id"`
 		Layout LayoutKind        `json:"layout,omitempty"`
+		Align  Alignment         `json:"align,omitempty"`
 		Nodes  []json.RawMessage `json:"nodes,omitempty"`
 		Notes  RichText          `json:"notes,omitempty"`
 	}
@@ -51,6 +58,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	}
 	s.ID = r.ID
 	s.Layout = r.Layout
+	s.Align = r.Align
 	nodes, err := unmarshalNodes(r.Nodes)
 	if err != nil {
 		return err

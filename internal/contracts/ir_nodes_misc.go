@@ -21,6 +21,9 @@ type Chip struct {
 	Tone ChipTone `json:"tone,omitempty"`
 	// Color is the chip color role.
 	Color ColorRole `json:"color,omitempty"`
+	// Align overrides the slide's horizontal alignment for this block:
+	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+	Align HAlign `json:"align,omitempty"`
 }
 
 func (Chip) slideNodeKind() Kind { return KindChip }
@@ -65,6 +68,9 @@ type SectionDivider struct {
 	Eyebrow string `json:"eyebrow,omitempty"`
 	// Label is the section heading.
 	Label string `json:"label,omitempty"`
+	// Align overrides the slide's horizontal alignment for this block:
+	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+	Align HAlign `json:"align,omitempty"`
 }
 
 func (SectionDivider) slideNodeKind() Kind { return KindSectionDivider }

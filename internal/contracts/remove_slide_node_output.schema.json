@@ -10,6 +10,18 @@
         "layout": {
           "type": "string"
         },
+        "align": {
+          "type": "object",
+          "properties": {
+            "vertical": {
+              "type": "string"
+            },
+            "horizontal": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
         "nodes": {
           "type": [
             "null",

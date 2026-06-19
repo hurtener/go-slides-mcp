@@ -59,6 +59,55 @@ object with a `kind` discriminator.
   chip, callout). To see the exact shape of any node, read a `get_slide` result —
   its text includes the slide's real IR you can copy.
 
+## Aligning slide content
+
+Two independent alignment axes let you control how the body stack sits in the
+slide frame. Both are optional; omitting them leaves the pre-existing top-left
+layout unchanged.
+
+**Slide-level alignment** — set `align` on the slide object (an object with
+`vertical` and/or `horizontal` keys):
+
+```json
+{ "align": { "vertical": "center", "horizontal": "center" } }
+```
+
+- `vertical`: `"top"` (default) · `"center"` · `"bottom"` · `"justify"` (spreads inter-node gaps).
+- `horizontal`: `"left"` (default) · `"center"` · `"right"` (narrows each leaf node to its natural text width).
+
+**Per-node alignment** — set `align` on individual `hero`, `heading`,
+`prose`, `quote`, `chip`, or `section_divider` nodes (a string, not an
+object):
+
+```json
+{ "kind": "prose", "align": "right", "paragraphs": [...] }
+```
+
+The per-node `align` overrides the slide's `horizontal` for that block only.
+Containers (`two_column`, `grid`, `card`, `table`, `flow`, …) always span the
+full body width and are not affected by alignment.
+
+**Center a cover** — a single `hero` node on a slide with vertical + horizontal
+centering:
+
+```json
+{
+  "layout": "cover",
+  "align": { "vertical": "center", "horizontal": "center" },
+  "nodes": [{ "kind": "hero", "title": "Q3 Review", "eyebrow": "All hands" }]
+}
+```
+
+**Right-align a caption** — override alignment on a single `prose` block while
+the rest of the slide defaults to left:
+
+```json
+{ "kind": "prose", "align": "right", "paragraphs": [[{ "text": "Source: internal data" }]] }
+```
+
+Note: slide `align` is an object (`{ "vertical": "…", "horizontal": "…" }`);
+node `align` is a string (`"left"` | `"center"` | `"right"`).
+
 ## Anti-patterns
 
 - A slide with 4+ stacked nodes — it will feel cramped and may overflow.

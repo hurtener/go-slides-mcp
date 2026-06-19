@@ -18,10 +18,11 @@ func mapSlides(slides []contracts.Slide) []scene.SceneSlide {
 
 func mapSlide(slide contracts.Slide) scene.SceneSlide {
 	return scene.SceneSlide{
-		ID:     slide.ID,
-		Layout: mapLayoutKind(slide.Layout),
-		Nodes:  mapNodes(slide.Nodes),
-		Notes:  mapRichText(slide.Notes),
+		ID:      slide.ID,
+		Layout:  mapLayoutKind(slide.Layout),
+		Content: mapAlignment(slide.Align),
+		Nodes:   mapNodes(slide.Nodes),
+		Notes:   mapRichText(slide.Notes),
 	}
 }
 
@@ -41,21 +42,21 @@ func mapNodes(nodes []contracts.SlideNode) []scene.SlideNode {
 func mapNode(node contracts.SlideNode) scene.SlideNode {
 	switch n := node.(type) {
 	case *contracts.Hero:
-		return scene.Hero{Eyebrow: n.Eyebrow, Title: n.Title, Subtitle: n.Subtitle}
+		return scene.Hero{Eyebrow: n.Eyebrow, Title: n.Title, Subtitle: n.Subtitle, Align: mapHAlign(n.Align)}
 	case *contracts.Heading:
-		return scene.Heading{Text: mapRichText(n.Text), Level: n.Level}
+		return scene.Heading{Text: mapRichText(n.Text), Level: n.Level, Align: mapHAlign(n.Align)}
 	case *contracts.Prose:
-		return scene.Prose{Paragraphs: mapParagraphs(n.Paragraphs)}
+		return scene.Prose{Paragraphs: mapParagraphs(n.Paragraphs), Align: mapHAlign(n.Align)}
 	case *contracts.List:
 		return scene.List{Kind: mapListKind(n.Kind), Items: mapListItems(n.Items)}
 	case *contracts.Divider:
 		return scene.Divider{Spacing: mapSpaceRole(n.Spacing)}
 	case *contracts.Quote:
-		return scene.Quote{Text: mapRichText(n.Text), Attribution: n.Attribution}
+		return scene.Quote{Text: mapRichText(n.Text), Attribution: n.Attribution, Align: mapHAlign(n.Align)}
 	case *contracts.Callout:
 		return scene.Callout{Kind: mapCalloutKind(n.Kind), Title: n.Title, Body: mapRichText(n.Body)}
 	case *contracts.Chip:
-		return scene.Chip{Label: n.Label, Tone: mapChipTone(n.Tone), Color: mapColorRole(n.Color)}
+		return scene.Chip{Label: n.Label, Tone: mapChipTone(n.Tone), Color: mapColorRole(n.Color), Align: mapHAlign(n.Align)}
 	case *contracts.Arrow:
 		return scene.Arrow{Direction: mapArrowDirection(n.Direction), Label: n.Label}
 	case *contracts.Table:
@@ -63,7 +64,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.Flow:
 		return scene.Flow{Orientation: mapFlowOrientation(n.Orientation), Steps: mapFlowSteps(n.Steps), Connector: mapConnectorKind(n.Connector)}
 	case *contracts.SectionDivider:
-		return scene.SectionDivider{Eyebrow: n.Eyebrow, Label: n.Label}
+		return scene.SectionDivider{Eyebrow: n.Eyebrow, Label: n.Label, Align: mapHAlign(n.Align)}
 	case *contracts.Image:
 		return scene.Image{
 			AssetID:   scene.AssetID(n.AssetID),
