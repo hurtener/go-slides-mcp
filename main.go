@@ -31,6 +31,7 @@ import (
 //
 //go:embed all:web/apps/deck-preview/dist
 //go:embed all:web/apps/deck-overview/dist
+//go:embed all:web/apps/slide-editor/dist
 var uiBundles embed.FS
 
 // The three UI surfaces. URIs are honored verbatim (CLAUDE.md §7).
@@ -39,6 +40,8 @@ const (
 	deckPreviewURI   = "ui://go-slides-mcp/deck-preview/index.html"
 	deckOverviewName = "deck-overview"
 	deckOverviewURI  = "ui://go-slides-mcp/deck-overview/index.html"
+	slideEditorName  = "slide-editor"
+	slideEditorURI   = "ui://go-slides-mcp/slide-editor/index.html"
 )
 
 // httpAddr is the address the HTTP transport listens on when
@@ -114,6 +117,7 @@ func registerApps(srv *server.Server) error {
 	for _, a := range []uiApp{
 		{deckPreviewName, deckPreviewURI, "Deckard — Deck preview", "web/apps/deck-preview/dist/index.html"},
 		{deckOverviewName, deckOverviewURI, "Deckard — Deck overview", "web/apps/deck-overview/dist/index.html"},
+		{slideEditorName, slideEditorURI, "Deckard — Slide editor", "web/apps/slide-editor/dist/index.html"},
 	} {
 		html, err := fs.ReadFile(uiBundles, a.path)
 		if err != nil {

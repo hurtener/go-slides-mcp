@@ -1,0 +1,100 @@
+{
+  "name": "happy",
+  "description": "A content slide with editable + read-only nodes.",
+  "state": "ready",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "ready",
+    "deckId": "d1",
+    "slideId": "s1",
+    "soulId": "deckard-white",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "validation": {
+      "ok": true
+    },
+    "ir": {
+      "id": "s1",
+      "layout": "title_content",
+      "nodes": [
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": [
+            {
+              "text": "The render call"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "tip",
+          "title": "Highlight",
+          "body": [
+            {
+              "text": "38% lower p99 latency"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "listKind": "bullet",
+          "items": [
+            {
+              "text": [
+                {
+                  "text": "Native render path"
+                }
+              ]
+            },
+            {
+              "text": [
+                {
+                  "text": "Pure-Go rasterizers"
+                }
+              ]
+            },
+            {
+              "text": [
+                {
+                  "text": "StyleScore validation"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "quote",
+          "text": [
+            {
+              "text": "Everything enters through the eyes."
+            }
+          ],
+          "attribution": "Design principle"
+        },
+        {
+          "kind": "chart",
+          "assetId": "asset://chart1",
+          "caption": "p99 by quarter"
+        },
+        {
+          "kind": "prose",
+          "paragraphs": [
+            [
+              {
+                "text": "This paragraph is shown read-only in the editor."
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

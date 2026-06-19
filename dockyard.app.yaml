@@ -222,6 +222,7 @@ tools:
     ui: deck-overview
     task_support: forbidden
   - name: open_slide_editor
+    ui: slide-editor
     description: Open one slide's full IR for editing in the slide-editor surface.
     input: internal/contracts.OpenSlideEditorInput
     output: internal/contracts.OpenSlideEditorOutput
@@ -272,6 +273,14 @@ apps:
   - id: deck-overview
     uri: ui://go-slides-mcp/deck-overview/index.html
     entry: web/apps/deck-overview/src/App.svelte
+    display_modes: [inline]
+    csp:
+      connect: []
+      resource: []
+    visibility: [model, app]
+  - id: slide-editor
+    uri: ui://go-slides-mcp/slide-editor/index.html
+    entry: web/apps/slide-editor/src/App.svelte
     display_modes: [inline]
     csp:
       connect: []

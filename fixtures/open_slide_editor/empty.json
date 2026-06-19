@@ -1,0 +1,29 @@
+{
+  "name": "empty",
+  "description": "A slide with no nodes yet.",
+  "state": "empty",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "empty",
+    "message": "This slide has no nodes yet.",
+    "deckId": "d1",
+    "slideId": "s1",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "validation": {
+      "ok": true
+    },
+    "ir": {
+      "id": "s1",
+      "layout": "blank",
+      "nodes": []
+    }
+  }
+}

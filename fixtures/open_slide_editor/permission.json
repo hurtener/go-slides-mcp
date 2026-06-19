@@ -1,0 +1,27 @@
+{
+  "name": "permission",
+  "description": "Not authorized to edit this slide.",
+  "state": "permission",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "permission",
+    "message": "You do not have permission to edit this slide.",
+    "deckId": "d1",
+    "slideId": "s1",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "validation": {
+      "ok": true
+    },
+    "ir": {
+      "nodes": []
+    }
+  }
+}

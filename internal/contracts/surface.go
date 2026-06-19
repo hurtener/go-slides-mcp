@@ -66,6 +66,8 @@ type OpenSlideEditorOutput struct {
 	State string `json:"state,omitempty"`
 	// Message is the human-readable note for empty/error/permission states.
 	Message string `json:"message,omitempty"`
+	// DeckID is the deck the slide belongs to (needed for the node-edit tools).
+	DeckID string `json:"deckId"`
 	// SlideID is the slide identifier opened in the editor.
 	SlideID string `json:"slideId"`
 	// IR is the slide's full IR snapshot for the editor.

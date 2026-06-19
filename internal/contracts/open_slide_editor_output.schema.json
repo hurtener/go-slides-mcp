@@ -10,6 +10,9 @@
     "message": {
       "type": "string"
     },
+    "deckId": {
+      "type": "string"
+    },
     "slideId": {
       "type": "string"
     },
@@ -158,6 +161,7 @@
   },
   "required": [
     "kind",
+    "deckId",
     "slideId",
     "ir",
     "validation",

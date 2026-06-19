@@ -1,0 +1,119 @@
+{
+  "name": "large",
+  "description": "A node-heavy slide exercising scroll.",
+  "state": "ready",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "ready",
+    "deckId": "d1",
+    "slideId": "s1",
+    "soulId": "deckard-white",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "validation": {
+      "ok": true
+    },
+    "ir": {
+      "id": "s1",
+      "layout": "title_content",
+      "nodes": [
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": [
+            {
+              "text": "Section heading"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 1",
+          "body": [
+            {
+              "text": "Detail for point 1"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 2",
+          "body": [
+            {
+              "text": "Detail for point 2"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 3",
+          "body": [
+            {
+              "text": "Detail for point 3"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 4",
+          "body": [
+            {
+              "text": "Detail for point 4"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 5",
+          "body": [
+            {
+              "text": "Detail for point 5"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 6",
+          "body": [
+            {
+              "text": "Detail for point 6"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 7",
+          "body": [
+            {
+              "text": "Detail for point 7"
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "calloutKind": "note",
+          "title": "Point 8",
+          "body": [
+            {
+              "text": "Detail for point 8"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
