@@ -61,7 +61,11 @@ STEP 3 — BUILD (USE THE SKILLS — never reverse-engineer the toolchain or an 
 STEP 4 — GATE (green or it is NOT done). Run from the repo root; every command must pass:
 ```
 gofmt -l .                                   # MUST print nothing
-GOFLAGS="" dockyard generate && git diff --exit-code internal/contracts   # no stale codegen
+GOFLAGS="" dockyard generate                 # regenerate from the Go contracts
+GOFLAGS="" dockyard generate                 # IDEMPOTENCE is the stale-codegen check: the 2nd run MUST report "no changes"
+# Do NOT gate on `git diff internal/contracts` vs HEAD — a unit that ADDS/REMOVES contract types
+# legitimately changes that dir; a clean 2nd generate (idempotence) is the real check. The
+# orchestrator commits the regenerated artifacts.
 GOFLAGS="" dockyard validate                 # 0 blockers
 GOFLAGS="" CGO_ENABLED=0 go build ./...
 GOFLAGS="" go vet ./...
