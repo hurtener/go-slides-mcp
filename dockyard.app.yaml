@@ -40,6 +40,36 @@ tools:
     input: internal/contracts.SetDeckSectionsInput
     output: internal/contracts.SetDeckSectionsOutput
     task_support: forbidden
+  - name: add_slide
+    description: Add one slide to a deck and return its validation result.
+    input: internal/contracts.AddSlideInput
+    output: internal/contracts.AddSlideOutput
+    task_support: forbidden
+  - name: update_slide
+    description: Replace one slide in a deck and return its validation result.
+    input: internal/contracts.UpdateSlideInput
+    output: internal/contracts.UpdateSlideOutput
+    task_support: forbidden
+  - name: get_slide
+    description: Get one slide by deck and slide ID and return its validation result.
+    input: internal/contracts.GetSlideInput
+    output: internal/contracts.GetSlideOutput
+    task_support: forbidden
+  - name: remove_slide
+    description: Remove one slide from a deck.
+    input: internal/contracts.RemoveSlideInput
+    output: internal/contracts.RemoveSlideOutput
+    task_support: forbidden
+  - name: reorder_slides
+    description: Replace a deck's slide order.
+    input: internal/contracts.ReorderSlidesInput
+    output: internal/contracts.ReorderSlidesOutput
+    task_support: forbidden
+  - name: duplicate_slide
+    description: Duplicate one slide in a deck.
+    input: internal/contracts.DuplicateSlideInput
+    output: internal/contracts.DuplicateSlideOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.

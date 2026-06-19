@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "removed": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "deckId",
+    "removed"
+  ],
+  "additionalProperties": false
+}

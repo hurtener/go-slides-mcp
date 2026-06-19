@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "order": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "deckId"
+  ],
+  "additionalProperties": false
+}
