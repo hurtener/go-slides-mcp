@@ -7,86 +7,80 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"math"
 	"strings"
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/gomono"
 )
 
 // code raster layout constants.
 const (
-	codeFontSize = 28.0
-	codeDPI      = 96.0
-	codePadding  = 48
-	codeLineH    = 40
-	codeCharW    = 17 // approx advance width per Go Mono glyph at the size/DPI above
-	codeMinW     = 640
-	codeMaxW     = 2400
+	// codeSlotAspect matches pptx-go's top-level code_block slot: the full body
+	// content width (slide 13.333" - 2*0.5" margin = 12.333") over the fixed
+	// preferredHeight of 2.6". The slot is filled with FitFill (a stretch), so a
+	// raster at this exact aspect scales uniformly — no horizontal distortion.
+	codeSlotAspect = 12.333 / 2.6
+
+	codeCanvasH    = 480 // raster height in px (width derives from the aspect)
+	codePad        = 56  // inset from the canvas edge to the text block
+	codeLineFactor = 1.5 // line height as a multiple of the font size
+	codeMinFont    = 12.0
+	codeMaxFont    = 44.0
+	codeAscentFrac = 0.78 // baseline offset within a line, as a fraction of size
 )
 
-// code surface colors: a dark warm Deckard surface with off-white text (classic,
-// legible code-block look; matches the Deckard palette).
+// code surface colors: a dark warm Deckard surface with off-white text.
 var (
 	codeBG   = color.RGBA{R: 0x2B, G: 0x27, B: 0x23, A: 0xFF} // #2B2723
 	codeText = color.RGBA{R: 0xFA, G: 0xF7, B: 0xF2, A: 0xFF} // #FAF7F2
 )
 
 // RasterizeCode renders source code to a deterministic PNG using the Go Mono
-// font (pure Go, CGo-free). language, if set, is drawn as a small header badge.
-// No syntax highlighting in V1 — monospace, legible, on the Deckard dark surface.
+// font (pure Go, CGo-free). The canvas matches the engine's code slot aspect so
+// it is not distorted when placed, and the font size auto-fits so the code
+// fills the fixed-height slot legibly at any line count. The language badge is
+// NOT drawn here — the scene renderer overlays a native badge over the picture.
 func RasterizeCode(code, language string) ([]byte, error) {
+	_ = language // the engine draws the language badge natively over the image.
 	if strings.TrimSpace(code) == "" {
 		return nil, fmt.Errorf("raster: code is empty")
 	}
-	font, err := truetype.Parse(gomono.TTF)
+	tt, err := truetype.Parse(gomono.TTF)
 	if err != nil {
 		return nil, fmt.Errorf("raster: parse mono font: %w", err)
 	}
 
 	lines := strings.Split(strings.ReplaceAll(code, "\t", "    "), "\n")
-	maxLen := len(language) + 2
-	for _, l := range lines {
-		if len(l) > maxLen {
-			maxLen = len(l)
-		}
-	}
-	width := codePadding*2 + maxLen*codeCharW
-	if width < codeMinW {
-		width = codeMinW
-	}
-	if width > codeMaxW {
-		width = codeMaxW
-	}
-	header := 0
-	if language != "" {
-		header = codeLineH
-	}
-	height := codePadding*2 + header + len(lines)*codeLineH
+	canvasW := int(math.Round(codeCanvasH * codeSlotAspect))
+	textW := canvasW - 2*codePad
+	textH := codeCanvasH - 2*codePad
 
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	size := fitFontSize(tt, lines, textW, textH)
+	lineH := int(size * codeLineFactor)
+
+	img := image.NewRGBA(image.Rect(0, 0, canvasW, codeCanvasH))
 	draw.Draw(img, img.Bounds(), image.NewUniform(codeBG), image.Point{}, draw.Src)
 
 	ctx := freetype.NewContext()
-	ctx.SetDPI(codeDPI)
-	ctx.SetFont(font)
-	ctx.SetFontSize(codeFontSize)
+	ctx.SetDPI(72) // size in points == pixels
+	ctx.SetFont(tt)
+	ctx.SetFontSize(size)
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
-
-	y := codePadding
-	if language != "" {
-		ctx.SetSrc(image.NewUniform(deckardTealUniform()))
-		if _, err := ctx.DrawString(strings.ToUpper(language), freetype.Pt(codePadding, y+codeLineH-12)); err != nil {
-			return nil, fmt.Errorf("raster: draw badge: %w", err)
-		}
-		y += codeLineH
-	}
-
 	ctx.SetSrc(image.NewUniform(codeText))
-	for _, line := range lines {
-		y += codeLineH
-		if _, err := ctx.DrawString(line, freetype.Pt(codePadding, y-12)); err != nil {
+
+	totalH := len(lines) * lineH
+	startY := codePad + (textH-totalH)/2
+	if startY < codePad {
+		startY = codePad
+	}
+	ascent := int(size * codeAscentFrac)
+	for i, line := range lines {
+		baseline := startY + ascent + i*lineH
+		if _, err := ctx.DrawString(line, freetype.Pt(codePad, baseline)); err != nil {
 			return nil, fmt.Errorf("raster: draw line: %w", err)
 		}
 	}
@@ -98,7 +92,27 @@ func RasterizeCode(code, language string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// deckardTealUniform is the Deckard accent teal for the language badge.
-func deckardTealUniform() color.Color {
-	return color.RGBA{R: 0x3B, G: 0x9C, B: 0x94, A: 0xFF} // #3B9C94
+// fitFontSize returns the largest font size (in px) at which every line fits the
+// text width and all lines fit the text height. Measured against real Go Mono
+// glyph advances so long lines never clip.
+func fitFontSize(tt *truetype.Font, lines []string, textW, textH int) float64 {
+	for size := codeMaxFont; size > codeMinFont; size -= 1.0 {
+		lineH := int(size * codeLineFactor)
+		if len(lines)*lineH > textH {
+			continue
+		}
+		face := truetype.NewFace(tt, &truetype.Options{Size: size, DPI: 72, Hinting: font.HintingFull})
+		d := &font.Drawer{Face: face}
+		maxW := 0
+		for _, line := range lines {
+			if w := d.MeasureString(line).Round(); w > maxW {
+				maxW = w
+			}
+		}
+		_ = face.Close()
+		if maxW <= textW {
+			return size
+		}
+	}
+	return codeMinFont
 }
