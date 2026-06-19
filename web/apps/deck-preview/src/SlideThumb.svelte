@@ -108,14 +108,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
   }
   .thumb.featured { width: 100%; }
-  .thumb.strip { width: 104px; flex: 0 0 auto; }
+  .thumb.strip { width: 84px; flex: 0 0 auto; }
   .thumb:focus-visible { outline: none; }
   .thumb:focus-visible .frame { outline: 2px solid var(--app-accent); outline-offset: 2px; }
 
