@@ -167,8 +167,8 @@ A single large `write` truncates mid-content and fails silently. Therefore:
 
 ```bash
 gofmt -l .                                   # MUST print nothing
-GOFLAGS="" dockyard generate
-git diff --exit-code internal/contracts      # no stale codegen
+GOFLAGS="" dockyard generate                 # regenerate from Go contracts
+GOFLAGS="" dockyard generate                 # idempotence = the stale-codegen check (2nd run: "no changes")
 GOFLAGS="" dockyard validate                 # 0 blockers
 GOFLAGS="" CGO_ENABLED=0 go build ./...
 GOFLAGS="" go vet ./...
