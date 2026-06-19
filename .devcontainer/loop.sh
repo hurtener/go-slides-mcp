@@ -51,7 +51,10 @@ while [ "$i" -lt "$MAX_ITERS" ]; do
 
   variant_args=()
   [ -n "$CUR_VARIANT" ] && variant_args=(--variant "$CUR_VARIANT")
-  out="$(opencode run --model "$CUR_MODEL" "${variant_args[@]}" --agent "$BUILD_AGENT" "$BUILD_PROMPT" 2>&1)"
+  # Per-iteration timeout so a wedged/hung opencode session (e.g. a stalled permission
+  # prompt or compaction) can't hang the loop indefinitely — it is killed and the next
+  # fresh iteration starts. Container is Linux, so coreutils `timeout` is available.
+  out="$(timeout "${ITER_TIMEOUT:-900}" opencode run --model "$CUR_MODEL" "${variant_args[@]}" --agent "$BUILD_AGENT" "$BUILD_PROMPT" 2>&1)"
   printf '%s\n' "$out" >> "$LOG"
 
   if printf '%s' "$out" | grep -q '\[goal:complete\]'; then
