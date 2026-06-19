@@ -46,3 +46,16 @@ func TestCompileChartInvalidSpecErrors(t *testing.T) {
 		t.Fatal("want error for invalid chart type")
 	}
 }
+
+func TestCompileMarkdownReturnsNodes(t *testing.T) {
+	h := testHandlers()
+	got, err := h.compileMarkdown(context.Background(), contracts.CompileMarkdownInput{
+		Markdown: "# Title\n\n- a\n- b",
+	})
+	if err != nil {
+		t.Fatalf("compileMarkdown: %v", err)
+	}
+	if len(got.Structured.Nodes) != 2 {
+		t.Fatalf("got %d nodes, want 2 (heading + list)", len(got.Structured.Nodes))
+	}
+}

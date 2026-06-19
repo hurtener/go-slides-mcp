@@ -287,6 +287,12 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.CompileMarkdownInput, contracts.CompileMarkdownOutput]("compile_markdown").
+		Describe("Parse markdown source into Deckard slide IR leaf nodes (headings, lists, quotes, prose).").
+		Handler(h.compileMarkdown).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

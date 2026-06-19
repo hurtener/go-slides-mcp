@@ -340,6 +340,28 @@ export interface CompileChartOutput {
   warnings?: string[];
 }
 /**
+ * CompileMarkdownInput is the model-facing input for compile_markdown.
+ */
+export interface CompileMarkdownInput {
+  /**
+   * Markdown is the source text to parse into IR leaf nodes.
+   */
+  markdown: string;
+}
+/**
+ * CompileMarkdownOutput returns the parsed IR leaf nodes and any parse warnings.
+ */
+export interface CompileMarkdownOutput {
+  /**
+   * Nodes are the parsed slide IR leaf nodes (headings, lists, quotes, prose).
+   */
+  nodes: SlideNode[];
+  /**
+   * Warnings are non-fatal parse notes.
+   */
+  warnings?: string[];
+}
+/**
  * CreateDeckInput is the typed input for create_deck.
  */
 export interface CreateDeckInput {

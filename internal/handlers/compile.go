@@ -7,8 +7,19 @@ import (
 	"github.com/hurtener/dockyard/runtime/tool"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/go-slides-mcp/internal/markdown"
 	"github.com/hurtener/go-slides-mcp/internal/raster"
 )
+
+// compileMarkdown parses markdown source into Deckard IR leaf nodes.
+func (h *handlers) compileMarkdown(_ context.Context, in contracts.CompileMarkdownInput) (tool.Result[contracts.CompileMarkdownOutput], error) {
+	nodes, warnings := markdown.Parse(in.Markdown)
+	out := contracts.CompileMarkdownOutput{Nodes: nodes, Warnings: warnings}
+	return tool.Result[contracts.CompileMarkdownOutput]{
+		Text:       fmt.Sprintf("Compiled markdown into %d node(s).", len(nodes)),
+		Structured: out,
+	}, nil
+}
 
 // compileChart rasterizes a chart spec to a PNG (pure Go), stores it as an asset,
 // and returns a chart IR node referencing it by asset id.
