@@ -293,6 +293,12 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.CompileCodeInput, contracts.CompileCodeOutput]("compile_code").
+		Describe("Rasterize source code to a PNG (pure Go, Go Mono), store it as an asset, and return a code_block IR node.").
+		Handler(h.compileCode).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

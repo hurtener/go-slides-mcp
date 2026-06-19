@@ -340,6 +340,42 @@ export interface CompileChartOutput {
   warnings?: string[];
 }
 /**
+ * CompileCodeInput is the model-facing input for compile_code. The server
+ * rasterizes the source to a PNG (pure-Go Go Mono font, no Chromium) and stores
+ * it as an asset, returning a ready-to-use code_block IR node.
+ */
+export interface CompileCodeInput {
+  /**
+   * Code is the source text to rasterize.
+   */
+  code: string;
+  /**
+   * Language labels the snippet and is drawn as a small header badge (optional).
+   */
+  language?: string;
+  /**
+   * Caption overrides the code_block node caption (optional).
+   */
+  caption?: string;
+}
+/**
+ * CompileCodeOutput returns a ready-to-use code_block IR node plus its asset id.
+ */
+export interface CompileCodeOutput {
+  /**
+   * Node is the code_block IR node referencing the rasterized image by asset id.
+   */
+  node: CodeBlock;
+  /**
+   * AssetID is the stored PNG's id ("asset://...").
+   */
+  assetId: string;
+  /**
+   * Warnings are non-fatal rasterization notes.
+   */
+  warnings?: string[];
+}
+/**
  * CompileMarkdownInput is the model-facing input for compile_markdown.
  */
 export interface CompileMarkdownInput {

@@ -47,6 +47,41 @@ func TestCompileChartInvalidSpecErrors(t *testing.T) {
 	}
 }
 
+func TestCompileCodeStoresAssetAndReturnsNode(t *testing.T) {
+	h := testHandlers()
+	got, err := h.compileCode(context.Background(), contracts.CompileCodeInput{
+		Code:     "func main() {\n\tprintln(\"hi\")\n}",
+		Language: "go",
+		Caption:  "main.go",
+	})
+	if err != nil {
+		t.Fatalf("compileCode: %v", err)
+	}
+	if got.Structured.AssetID == "" {
+		t.Fatal("compileCode: empty assetId")
+	}
+	if string(got.Structured.Node.AssetID) != got.Structured.AssetID {
+		t.Fatalf("node AssetID %q != AssetID %q", got.Structured.Node.AssetID, got.Structured.AssetID)
+	}
+	if got.Structured.Node.Language != "go" || got.Structured.Node.Caption != "main.go" {
+		t.Fatalf("node = %#v, want language=go caption=main.go", got.Structured.Node)
+	}
+	a, ok := h.deps.Assets.Get(got.Structured.AssetID)
+	if !ok {
+		t.Fatal("rasterized code not stored as an asset")
+	}
+	if a.MIME != "image/png" || len(a.Bytes) == 0 {
+		t.Fatalf("stored asset wrong: mime=%q bytes=%d", a.MIME, len(a.Bytes))
+	}
+}
+
+func TestCompileCodeEmptyErrors(t *testing.T) {
+	h := testHandlers()
+	if _, err := h.compileCode(context.Background(), contracts.CompileCodeInput{Code: "   "}); err == nil {
+		t.Fatal("want error for empty code")
+	}
+}
+
 func TestCompileMarkdownReturnsNodes(t *testing.T) {
 	h := testHandlers()
 	got, err := h.compileMarkdown(context.Background(), contracts.CompileMarkdownInput{
