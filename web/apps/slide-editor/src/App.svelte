@@ -69,16 +69,33 @@
     applyHostVariables(rootEl, hostVars);
   }
 
+  // applyPayload is the single place state is set — from the initial tool result
+  // AND from refresh() after a structural edit, so the server is the source of
+  // truth (nodes + layout + validation move together).
+  function applyPayload(p: Payload) {
+    payload = p;
+    nodes = [...(p.ir?.nodes ?? [])];
+    validation = p.validation ?? null;
+    const st = p.state ?? 'ready';
+    pageState = st === 'permission' ? 'error' : (st as PageStateValue);
+    message = p.message ?? '';
+    if (!userPicked) theme = themeById(p.brand?.defaultTheme);
+    if (selectedPath && !nodeAt(selectedPath)) selectedPath = null; // reconcile selection
+    applyChain();
+  }
+
+  // refresh re-fetches the authoritative editor payload (slide IR + layout +
+  // validation) after a structural edit, so the canvas geometry never drifts.
+  async function refresh() {
+    try {
+      const r = await bridge.callTool<unknown, Payload>('open_slide_editor', { deckId, slideId });
+      if (r?.structuredContent) applyPayload(r.structuredContent);
+    } catch (e) { flash(`Refresh failed: ${(e as Error)?.message ?? e}`); }
+  }
+
   const offResult = bridge.onToolResult<Payload>((r) => {
     if (!r.structuredContent) { pageState = 'error'; message = 'The tool returned no payload.'; return; }
-    payload = r.structuredContent;
-    nodes = [...(payload.ir?.nodes ?? [])];
-    validation = payload.validation ?? null;
-    const st = payload.state ?? 'ready';
-    pageState = st === 'permission' ? 'error' : (st as PageStateValue);
-    message = payload.message ?? '';
-    if (!userPicked) theme = themeById(payload.brand?.defaultTheme);
-    applyChain();
+    applyPayload(r.structuredContent);
   });
   const offHost = bridge.onHostContextChanged((p) => {
     if (p.styles?.variables) { hostVars = p.styles.variables as Record<string, string>; applyChain(); }
@@ -132,7 +149,7 @@
   function previewFor(n: Node): string {
     switch (n.kind) {
       case 'prose': { const p = (n.paragraphs as unknown[]) ?? []; return p.length ? rtText(p[0]) : 'Paragraph text'; }
-      case 'chart': return 'Chart image (edit via the agent)';
+      case 'chart': return 'Chart';
       case 'code_block': return `Code${n.language ? ` · ${n.language}` : ''}`;
       case 'image': return 'Image'; case 'table': return 'Table'; case 'divider': return 'Divider';
       case 'flow': return 'Process flow'; case 'two_column': return 'Two-column layout'; case 'grid': return 'Card grid';
@@ -141,42 +158,67 @@
     }
   }
 
+  // setLocal optimistically writes an edited value into the local node tree so
+  // the canvas reflects it immediately. preferredHeight is count-based (not
+  // text-length), so a text/field edit never changes geometry — no refetch needed.
+  function setLocal(path: unknown[], field: string, value: string, rich: boolean) {
+    const t = nodeAt(path) as Record<string, unknown> | undefined;
+    if (!t) return;
+    t[field] = rich ? [{ text: value }] : value;
+    nodes = [...nodes];
+  }
+
   function save(fl: Field, value: string) {
     if (value === fl.value) return;
     fl.value = value;
-    const base = { deckId, slideId, path: fl.path, field: fl.field };
-    const call = fl.rich ? bridge.callTool('patch_slide_text', { ...base, text: value }) : bridge.callTool('edit_slide_field', { ...base, value });
+    setLocal(fl.path, fl.field, value, fl.rich); // optimistic; geometry unchanged
+    const isItem = fl.path.length >= 2 && fl.path[fl.path.length - 2] === 'items';
+    let call: Promise<unknown>;
+    if (isItem) {
+      // List items aren't an addressable child slice (List.Items is []ListItem,
+      // not []SlideNode) — patch the whole List node via edit_slide_node instead.
+      const listPath = fl.path.slice(0, -2);
+      const j = fl.path[fl.path.length - 1] as number;
+      const list = structuredClone(nodeAt(listPath)) as { items?: Array<Record<string, unknown>> } | undefined;
+      if (!list || !Array.isArray(list.items)) { flash('Edit failed: list not found'); return; }
+      list.items[j] = { ...list.items[j], text: [{ text: value }] };
+      call = bridge.callTool('edit_slide_node', { deckId, slideId, path: listPath, node: list });
+    } else if (fl.rich) {
+      call = bridge.callTool('patch_slide_text', { deckId, slideId, path: fl.path, field: fl.field, text: value });
+    } else {
+      call = bridge.callTool('edit_slide_field', { deckId, slideId, path: fl.path, field: fl.field, value });
+    }
     void call
       .then((r: unknown) => { const v = (r as { structuredContent?: { validation?: Validation } })?.structuredContent?.validation; if (v) validation = v; })
       .catch((e: unknown) => flash(`Edit failed: ${(e as Error)?.message ?? e}`));
   }
 
+  // structural edits change geometry -> send the tool, then refetch the
+  // authoritative payload (nodes + layout) rather than guessing locally.
   function moveTop(i: number, dir: -1 | 1) {
     const j = i + dir;
     if (j < 0 || j >= nodes.length) return;
-    const next = [...nodes];
-    [next[i], next[j]] = [next[j], next[i]];
-    nodes = next;
-    if (selectedPath && selectedPath[1] === i) selectedPath = ['nodes', j];
-    void bridge.callTool('move_slide_node', { deckId, slideId, from: ['nodes', j], to: ['nodes', i] })
+    if (selectedPath && selectedPath.length === 2 && selectedPath[1] === i) selectedPath = ['nodes', j];
+    void bridge.callTool('move_slide_node', { deckId, slideId, from: ['nodes', i], to: ['nodes', j] })
+      .then(refresh)
       .catch((e: unknown) => flash(`Move failed: ${(e as Error)?.message ?? e}`));
   }
   function duplicate(path: unknown[]) {
     void bridge.callTool('duplicate_slide_node', { deckId, slideId, path })
-      .then(() => bridge.callTool('open_slide_editor', { deckId, slideId }))
+      .then(refresh)
       .catch((e: unknown) => flash(`Duplicate failed: ${(e as Error)?.message ?? e}`));
   }
   function confirmRemove() {
     const path = pendingRemove; pendingRemove = null;
     if (!path) return;
-    if (path.length === 2 && typeof path[1] === 'number') nodes = nodes.filter((_, idx) => idx !== path[1]);
     if (selectedKey === path.join('/')) selectedPath = null;
     void bridge.callTool('remove_slide_node', { deckId, slideId, path })
+      .then(refresh)
       .catch((e: unknown) => flash(`Remove failed: ${(e as Error)?.message ?? e}`));
   }
   function back() { void bridge.callTool('get_deck_overview', { deckId }).catch(() => flash('Couldn’t return to the deck.')); }
   async function openExport() {
-    try { await bridge.callTool('export_deck', { deckId }); flash('Export ready — open the deck:// resource in PowerPoint.'); }
+    try { await bridge.callTool('export_deck', { deckId }); flash('Your PowerPoint file is ready to download.'); }
     catch (e) { flash(`Export failed: ${(e as Error)?.message ?? e}`); }
   }
   async function enterCanvas() {
@@ -222,7 +264,7 @@
 
       {#if view === 'canvas'}
         <div class="canvasgrid">
-          <Canvas {layout} palette={palette ?? defaultPalette()} {nodes} {selectedKey} onselect={(p) => (selectedPath = p)} />
+          <Canvas {layout} {palette} {nodes} {selectedKey} onselect={(p) => (selectedPath = p)} />
           <aside class="inspector">
             {#if selectedNode}
               {@const fields = fieldsFor(selectedNode, selectedPath ?? [])}
@@ -245,11 +287,11 @@
                     </label>
                   {/each}
                 </div>
-              {:else}<p class="hint">{previewFor(selectedNode)} — edit via the agent.</p>{/if}
+              {:else}<p class="hint">{previewFor(selectedNode)} — edit it from chat.</p>{/if}
             {:else}
               <p class="hint">Click a node on the canvas to edit it.</p>
             {/if}
-            <button type="button" class="export" onclick={openExport}>↧ Open in PowerPoint (ground truth)</button>
+            <button type="button" class="export" onclick={openExport}>↧ Open in PowerPoint</button>
           </aside>
         </div>
       {:else}
@@ -297,13 +339,6 @@
     oncancel={() => (pendingRemove = null)}
   />
 </div>
-
-<script module lang="ts">
-  // a neutral palette so the canvas paints even if the payload omits one.
-  export function defaultPalette() {
-    return { canvas: '#FAF7F2', surface: '#FFFFFF', surfaceAlt: '#F4EFE6', accent: '#3B9C94', accentText: '#2B7A73', textPrimary: '#2B2723', textSecondary: '#6A625B', textInverse: '#FAF7F2', border: '#E0D5CA', headingFont: 'Georgia, serif', bodyFont: 'system-ui, sans-serif', monoFont: 'monospace' };
-  }
-</script>
 
 <style>
   .editor { padding: var(--app-space-3) var(--app-space-4); display: flex; flex-direction: column; gap: var(--app-space-3); }

@@ -25,7 +25,7 @@
     onselect,
   }: {
     layout: Layout;
-    palette: Palette;
+    palette?: Palette;
     nodes: Node[];
     selectedKey?: string;
     onselect?: (path: unknown[]) => void;
@@ -53,11 +53,15 @@
     }
     return cur as Node | undefined;
   }
+  // Fall back to the design-system --app-* tokens (never literal hex) if the
+  // server omits a soul palette — keeps §7 "no hardcoded hex" intact.
   const cssVars = $derived(
-    `--paper:${palette.canvas};--surface:${palette.surface};--surfaceAlt:${palette.surfaceAlt};` +
-    `--accent:${palette.accent};--accentText:${palette.accentText};--ink:${palette.textPrimary};` +
-    `--ink2:${palette.textSecondary};--inverse:${palette.textInverse};--bd:${palette.border};` +
-    `--fHead:${palette.headingFont};--fBody:${palette.bodyFont};--fMono:${palette.monoFont};`
+    `--paper:${palette?.canvas ?? 'var(--app-paper)'};--surface:${palette?.surface ?? 'var(--app-surface)'};` +
+    `--surfaceAlt:${palette?.surfaceAlt ?? 'var(--app-surface-raised)'};--accent:${palette?.accent ?? 'var(--app-accent)'};` +
+    `--accentText:${palette?.accentText ?? 'var(--app-accent-text)'};--ink:${palette?.textPrimary ?? 'var(--app-paper-ink)'};` +
+    `--ink2:${palette?.textSecondary ?? 'var(--app-text-muted)'};--inverse:${palette?.textInverse ?? 'var(--app-surface)'};` +
+    `--bd:${palette?.border ?? 'var(--app-border)'};--fHead:${palette?.headingFont ?? 'var(--app-font-serif)'};` +
+    `--fBody:${palette?.bodyFont ?? 'var(--app-font-sans)'};--fMono:${palette?.monoFont ?? 'var(--app-font-mono)'};`
   );
 </script>
 
@@ -140,8 +144,8 @@
   .htitle { font-family: var(--fHead); font-size: 5.2cqw; line-height: 1.05; color: var(--ink); }
   .hsub { font-family: var(--fBody); font-size: 2.2cqw; color: var(--ink2); }
   .heading { font-family: var(--fHead); font-size: 3.4cqw; line-height: 1.1; color: var(--ink); }
-  .body { font-family: var(--fBody); font-size: 2cqw; color: var(--ink2); line-height: 1.35; }
-  .list { margin: 0; padding-left: 3cqw; font-family: var(--fBody); font-size: 2cqw; color: var(--ink); line-height: 1.5; }
+  .body { font-family: var(--fBody); font-size: max(9px, 2cqw); color: var(--ink2); line-height: 1.35; }
+  .list { margin: 0; padding-left: 3cqw; font-family: var(--fBody); font-size: max(9px, 2cqw); color: var(--ink); line-height: 1.5; }
   .list li::marker { color: var(--accent); }
   .callout { display: flex; flex-direction: column; gap: 0.4cqw; border-left: 0.5cqw solid var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 3px; padding: 0.8cqw 1cqw; font-family: var(--fBody); font-size: 1.9cqw; color: var(--ink); }
   .quote { font-family: var(--fHead); font-style: italic; font-size: 2.6cqw; color: var(--ink2); border-left: 0.5cqw solid var(--bd); padding-left: 1.2cqw; display: flex; flex-direction: column; }
@@ -150,7 +154,7 @@
   .chart { display: flex; align-items: flex-end; gap: 6%; height: 100%; padding-top: 1cqw; }
   .chart i { flex: 1; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.9; }
   .code { background: #2b2723; border-radius: 4px; padding: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw; height: 100%; justify-content: center; }
-  .code i { height: 1.1cqw; border-radius: 2px; background: rgba(250,247,242,.5); width: 80%; }
+  .code i { height: 1.1cqw; border-radius: 2px; background: color-mix(in srgb, var(--inverse) 50%, transparent); width: 80%; }
   .code i.in { width: 60%; margin-left: 10%; }
   .table { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5cqw; width: 100%; }
   .table span { height: 2.4cqw; background: color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 2px; }
