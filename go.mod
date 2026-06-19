@@ -2,7 +2,10 @@ module github.com/hurtener/go-slides-mcp
 
 go 1.26.2
 
-require github.com/hurtener/dockyard v1.7.3
+require (
+	github.com/hurtener/dockyard v1.7.3
+	github.com/hurtener/pptx-go v0.0.0-20260618194806-6c3728428ce1
+)
 
 require (
 	github.com/fatih/structtag v1.2.0 // indirect
