@@ -1,0 +1,27 @@
+{
+  "name": "error",
+  "description": "The slide could not be loaded.",
+  "state": "error",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "error",
+    "message": "Slide \"s1\" not found in deck \"d1\".",
+    "deckId": "d1",
+    "slideId": "s1",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "validation": {
+      "ok": true
+    },
+    "ir": {
+      "nodes": []
+    }
+  }
+}

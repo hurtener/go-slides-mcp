@@ -3030,6 +3030,10 @@ export interface OpenSlideEditorOutput {
    */
   message?: string;
   /**
+   * DeckID is the deck the slide belongs to (needed for the node-edit tools).
+   */
+  deckId: string;
+  /**
    * SlideID is the slide identifier opened in the editor.
    */
   slideId: string;

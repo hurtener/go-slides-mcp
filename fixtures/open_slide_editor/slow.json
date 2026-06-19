@@ -1,0 +1,52 @@
+{
+  "name": "slow",
+  "description": "White-label demo + a validation issue banner.",
+  "state": "ready",
+  "input": {
+    "deckId": "d1",
+    "slideId": "s1"
+  },
+  "output_override": {
+    "kind": "editor",
+    "state": "ready",
+    "deckId": "d1",
+    "slideId": "s1",
+    "soulId": "deckard-white",
+    "brand": {
+      "title": "Acme Corp",
+      "defaultTheme": "slate",
+      "allowThemeSwitch": false,
+      "tokens": {
+        "app-accent": "#7c3aed",
+        "app-accent-text": "#6d28d9"
+      }
+    },
+    "validation": {
+      "ok": false,
+      "issues": [
+        "heading text should not be empty"
+      ]
+    },
+    "ir": {
+      "id": "s1",
+      "layout": "title_content",
+      "nodes": [
+        {
+          "kind": "hero",
+          "eyebrow": "Confidential",
+          "title": "Acme Quarterly",
+          "subtitle": "FY26"
+        },
+        {
+          "kind": "heading",
+          "level": 2,
+          "text": [
+            {
+              "text": ""
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

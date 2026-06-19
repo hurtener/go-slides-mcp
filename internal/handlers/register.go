@@ -266,6 +266,7 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 	}
 	if err := tool.New[contracts.OpenSlideEditorInput, contracts.OpenSlideEditorOutput]("open_slide_editor").
 		Describe("Open one slide's full IR for editing in the slide-editor surface.").
+		UI("slide-editor").
 		Handler(h.openSlideEditor).
 		Register(srv); err != nil {
 		return err

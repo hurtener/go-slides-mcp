@@ -47,6 +47,7 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 	out := contracts.OpenSlideEditorOutput{
 		Kind:       contracts.SurfaceKindEditor,
 		State:      "ready",
+		DeckID:     deckID,
 		SlideID:    slide.ID,
 		IR:         *slide,
 		SoulID:     soulID,
