@@ -49,6 +49,12 @@ ENV GOPRIVATE=github.com/hurtener
 # skills lands (the entrypoint also writes the dockyard skills here from the module cache).
 RUN mkdir -p /root/.config/opencode/skills
 
+# Global opencode config: the conductor + goal plugins. The conductor plugin PARSES the
+# non-standard tool-call syntax that NVIDIA NIM models (Nemotron, MiniMax) emit — WITHOUT it,
+# opencode never recognizes their tool calls and the agentic loop spins. (Matches the working
+# Portico/WorkBridge setup.) opencode auto-installs the plugins via Bun on first run.
+COPY opencode-global.json /root/.config/opencode/opencode.json
+
 WORKDIR /workspace/go-slides-mcp
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

@@ -64,6 +64,32 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.Flow{Orientation: mapFlowOrientation(n.Orientation), Steps: mapFlowSteps(n.Steps), Connector: mapConnectorKind(n.Connector)}
 	case *contracts.SectionDivider:
 		return scene.SectionDivider{Eyebrow: n.Eyebrow, Label: n.Label}
+	case *contracts.Image:
+		return scene.Image{
+			AssetID:   scene.AssetID(n.AssetID),
+			Alt:       n.Alt,
+			Frame:     mapFrameKind(n.Frame),
+			FrameName: n.FrameName,
+			Crop:      mapCrop(n.Crop),
+			Fit:       mapFit(n.Fit),
+		}
+	case *contracts.CodeBlock:
+		return scene.CodeBlock{AssetID: scene.AssetID(n.AssetID), Language: n.Language, Caption: n.Caption}
+	case *contracts.Chart:
+		return scene.Chart{AssetID: scene.AssetID(n.AssetID), Caption: n.Caption}
+	case *contracts.Decoration:
+		return scene.Decoration{
+			Kind:     mapDecorationKind(n.Kind),
+			Preset:   n.Preset,
+			AssetID:  scene.AssetID(n.AssetID),
+			Layer:    mapLayer(n.Layer),
+			Anchor:   mapAnchor(n.Anchor),
+			Offset:   mapPosition(n.Offset),
+			Size:     mapSize(n.Size),
+			Bleed:    n.Bleed,
+			Opacity:  n.Opacity,
+			Rotation: n.Rotation,
+		}
 	case *contracts.TwoColumn:
 		return scene.TwoColumn{Ratio: mapColumnRatio(n.Ratio), Left: mapNodes(n.Left), Right: mapNodes(n.Right)}
 	case *contracts.Grid:

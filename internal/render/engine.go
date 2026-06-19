@@ -18,11 +18,26 @@ type Stats struct {
 }
 
 // Render maps doc+soul to a scene and renders deterministic .pptx bytes.
+// Asset-free decks stay byte-identical across calls; pass a resolver via
+// RenderWithAssets to resolve asset-backed nodes (Image, Chart, CodeBlock,
+// asset Decoration). Render is the public, resolver-less entry point — see
+// RenderWithAssets for the asset-aware variant.
 func Render(doc contracts.SlideDoc, s *soul.Soul) ([]byte, Stats, error) {
-	return renderWithWorkers(doc, s, 0)
+	return RenderWithAssets(doc, s, nil)
 }
 
-func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int) ([]byte, Stats, error) {
+// RenderWithAssets renders doc into PPTX bytes and threads resolver into the
+// scene renderer so asset-backed nodes (Image/Chart/CodeBlock/asset
+// Decoration) can resolve their bytes via scene.WithAssetResolver. A nil
+// resolver is allowed and yields the asset-free rendering path (no asset
+// bytes, no resolution, no asset-loss warnings).
+//
+//nolint:revive // RenderWithAssets reads clearly and pairs with Render(doc, soul); the suggested "WithAssets" is less clear.
+func RenderWithAssets(doc contracts.SlideDoc, s *soul.Soul, resolver scene.AssetResolver) ([]byte, Stats, error) {
+	return renderWithWorkers(doc, s, 0, resolver)
+}
+
+func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolver scene.AssetResolver) ([]byte, Stats, error) {
 	if s == nil || s.Theme == nil {
 		return nil, Stats{}, fmt.Errorf("render: nil soul theme")
 	}
@@ -36,7 +51,11 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int) ([]byt
 		},
 	}
 
-	sceneStats, err := scene.Render(pres, sc, scene.WithWorkers(workers))
+	opts := []scene.RenderOption{scene.WithWorkers(workers)}
+	if resolver != nil {
+		opts = append(opts, scene.WithAssetResolver(resolver))
+	}
+	sceneStats, err := scene.Render(pres, sc, opts...)
 	if err != nil {
 		return nil, Stats{}, fmt.Errorf("render scene: %w", err)
 	}

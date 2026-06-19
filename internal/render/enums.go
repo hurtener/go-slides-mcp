@@ -272,3 +272,94 @@ func mapTypeRole(role contracts.TypeRole) pptx.TypeRole {
 		return scene.TypeBody
 	}
 }
+
+// mapFrameKind converts the wire-level FrameKind string to the scene enum.
+func mapFrameKind(kind contracts.FrameKind) scene.FrameKind {
+	switch kind {
+	case contracts.FrameBrowser:
+		return scene.FrameBrowser
+	case contracts.FramePhone:
+		return scene.FramePhone
+	case contracts.FrameDesktop:
+		return scene.FrameDesktop
+	case contracts.FrameLaptop:
+		return scene.FrameLaptop
+	case contracts.FrameNone:
+		fallthrough
+	default:
+		return scene.FrameNone
+	}
+}
+
+// mapFit converts the wire-level Fit string to the scene/pptx Fit enum.
+func mapFit(fit contracts.Fit) scene.Fit {
+	if fit == contracts.FitNone {
+		return scene.FitNone
+	}
+	return scene.FitFill
+}
+
+// mapCrop copies a Crop's fields. The scene Crop type is a re-export of
+// pptx.Crop and uses the same field set.
+func mapCrop(c contracts.Crop) scene.Crop {
+	return scene.Crop{Left: c.Left, Top: c.Top, Right: c.Right, Bottom: c.Bottom}
+}
+
+// mapDecorationKind converts the wire-level DecorationKind string to the scene
+// enum (preset vs asset).
+func mapDecorationKind(kind contracts.DecorationKind) scene.DecorationKind {
+	if kind == contracts.DecorationAsset {
+		return scene.DecorationAsset
+	}
+	return scene.DecorationPreset
+}
+
+// mapLayer converts the wire-level Layer string to the scene enum
+// (background vs foreground).
+func mapLayer(layer contracts.Layer) scene.Layer {
+	if layer == contracts.LayerForeground {
+		return scene.LayerForeground
+	}
+	return scene.LayerBackground
+}
+
+// mapAnchor translates the wire 9-point compass string to the scene/pptx
+// Anchor enum (the scene enum spells its middle row as "…CenterLeft" /
+// "…Center" / "…CenterRight", while the contracts spell it as "left" / "_" /
+// "right"). Unknown values fall back to AnchorTopLeft.
+func mapAnchor(anchor contracts.Anchor) scene.Anchor {
+	switch anchor {
+	case contracts.AnchorTopLeft:
+		return scene.AnchorTopLeft
+	case contracts.AnchorTop:
+		return scene.AnchorTopCenter
+	case contracts.AnchorTopRight:
+		return scene.AnchorTopRight
+	case contracts.AnchorLeft:
+		return scene.AnchorCenterLeft
+	case contracts.AnchorCenter:
+		return scene.AnchorCenter
+	case contracts.AnchorRight:
+		return scene.AnchorCenterRight
+	case contracts.AnchorBottomLeft:
+		return scene.AnchorBottomLeft
+	case contracts.AnchorBottom:
+		return scene.AnchorBottomCenter
+	case contracts.AnchorBottomRight:
+		return scene.AnchorBottomRight
+	default:
+		return scene.AnchorTopLeft
+	}
+}
+
+// mapPosition converts a points-based contracts.Position into the EMU-based
+// scene.Position. pptx.Pt performs the integer rounding.
+func mapPosition(p contracts.Position) scene.Position {
+	return scene.Position{X: pptx.Pt(p.X), Y: pptx.Pt(p.Y)}
+}
+
+// mapSize converts a points-based contracts.Size into the EMU-based
+// scene.Size.
+func mapSize(s contracts.Size) scene.Size {
+	return scene.Size{W: pptx.Pt(s.W), H: pptx.Pt(s.H)}
+}

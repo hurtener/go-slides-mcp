@@ -13,6 +13,7 @@ import (
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/exportstore"
+	"github.com/hurtener/go-slides-mcp/internal/raster"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
@@ -30,7 +31,8 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 	}
 
 	doc := contracts.SlideDoc{Title: stored.Title, Slides: append([]contracts.Slide(nil), stored.Slides...)}
-	path, stats, err := exportstore.Export(h.deps.Workspace, stored.ID, doc, deckSoul)
+	resolver := raster.NewStoreResolver(h.deps.Assets)
+	path, stats, err := exportstore.ExportWithResolver(h.deps.Workspace, stored.ID, doc, deckSoul, resolver)
 	if err != nil {
 		return tool.Result[contracts.ExportDeckOutput]{}, err
 	}
