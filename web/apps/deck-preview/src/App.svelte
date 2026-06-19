@@ -136,7 +136,7 @@
       <header class="head">
         <div class="titles">
           <h1>{payload.deck.title || 'Untitled deck'}</h1>
-          <p class="meta">{payload.deck.slideCount} slide{payload.deck.slideCount === 1 ? '' : 's'} · {brandTitle}</p>
+          <span class="meta">{payload.deck.slideCount} slide{payload.deck.slideCount === 1 ? '' : 's'}</span>
         </div>
         <div class="tools">
           <button type="button" class="icon primary" data-tip="Download .pptx" aria-label="Download .pptx" onclick={download}>{@html ICON_DOWNLOAD}</button>
@@ -166,27 +166,28 @@
 </div>
 
 <style>
-  .preview { padding: var(--app-space-4) var(--app-space-5) var(--app-space-5); display: flex; flex-direction: column; gap: var(--app-space-4); }
+  .preview { padding: var(--app-space-3) var(--app-space-4); display: flex; flex-direction: column; gap: var(--app-space-3); }
 
+  /* single-line header: title + inline count on the left, actions on the right */
   .head { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); }
-  .titles { min-width: 0; }
+  .titles { min-width: 0; display: flex; align-items: baseline; gap: var(--app-space-2); }
   .titles h1 {
     margin: 0;
     font-family: var(--app-font-serif);
     font-weight: var(--app-weight-medium);
-    font-size: var(--app-text-xl);
-    line-height: 1.15;
+    font-size: var(--app-text-lg);
+    line-height: 1.2;
     color: var(--app-text);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .meta { margin: 2px 0 0; font-size: var(--app-text-sm); color: var(--app-text-muted); }
+  .meta { font-size: var(--app-text-xs); color: var(--app-text-muted); white-space: nowrap; flex: 0 0 auto; }
 
   .tools { display: flex; align-items: center; gap: var(--app-space-2); flex: 0 0 auto; }
 
   /* icon action buttons with a CSS tooltip */
   .icon {
     position: relative;
-    width: 34px; height: 34px;
+    width: 30px; height: 30px;
     display: grid; place-items: center;
     border: 1px solid var(--app-border);
     border-radius: var(--app-radius-md);
@@ -214,10 +215,10 @@
   .featured :global(.frame) { box-shadow: var(--app-shadow-lg); }
 
   .rail {
-    display: flex; gap: var(--app-space-3);
+    display: flex; gap: var(--app-space-2);
     justify-content: safe center;
     overflow-x: auto;
-    padding: var(--app-space-1) 2px var(--app-space-2);
+    padding: 0 2px 2px;
     scrollbar-width: thin;
   }
 
