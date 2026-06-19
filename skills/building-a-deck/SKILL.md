@@ -21,11 +21,13 @@ you never need them. Decks render to a real `.pptx` in pure Go.
    (`cover`, `title_content`, `two_column`, `card_grid`, `full_bleed`, `blank`,
    `section_divider`) and compose nodes — see `composing-a-slide`.
 
-3. **Use the authoring helpers for rich content:**
-   - `compile_markdown { markdown }` → turns markdown into slide nodes (headings,
-     lists, quotes, prose). Fast way to draft a content slide.
-   - `compile_chart { spec }` → a pure-Go chart image + a `chart` node.
-   - `compile_code { code, language }` → a syntax-set code image + a `code_block` node.
+3. **Use the authoring helpers — they return ready-made nodes, so you never
+   hand-encode rich text** (each tool's result text includes the node JSON to copy):
+   - `compile_markdown { markdown }` → a `nodes` array (headings, lists, quotes,
+     prose). **This is the reliable way to build text slides** — pass the returned
+     nodes straight into `add_slide`. Prefer it over writing text nodes by hand.
+   - `compile_chart { spec }` → a `chart` node (pure-Go image).
+   - `compile_code { code, language }` → a `code_block` node.
    Drop the returned node(s) into a slide's `nodes`.
 
 4. **Preview as you go.** `get_deck_preview { deckId }` renders the glanceable
