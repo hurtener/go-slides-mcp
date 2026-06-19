@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "uri": {
+      "type": "string"
+    },
+    "mime": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "found": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "uri",
+    "found"
+  ],
+  "additionalProperties": false
+}

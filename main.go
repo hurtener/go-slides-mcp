@@ -15,6 +15,7 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/comment"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
+	"github.com/hurtener/go-slides-mcp/internal/exportstore"
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
@@ -58,6 +59,11 @@ func main() {
 		BuildInfo: buildInfo,
 		Workspace: workspace,
 		Logger:    logger,
+	}
+
+	if err := exportstore.RegisterResources(srv, deps.Workspace); err != nil {
+		logger.Error("register resources", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
 	if err := handlers.RegisterTools(srv, deps); err != nil {

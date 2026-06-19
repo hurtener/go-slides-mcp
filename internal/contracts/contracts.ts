@@ -733,6 +733,110 @@ export interface MoveSlideNodeOutput {
   validation: SlideValidation;
 }
 /**
+ * ExportDeckInput is the typed input for export_deck.
+ */
+export interface ExportDeckInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+}
+/**
+ * ExportStats is the structured render summary for one exported deck.
+ */
+export interface ExportStats {
+  /**
+   * Slides is the number of rendered slides.
+   */
+  slides: number /* int */;
+  /**
+   * Shapes is the number of rendered shapes.
+   */
+  shapes: number /* int */;
+  /**
+   * Warnings is the ordered list of render warnings.
+   */
+  warnings?: string[];
+}
+/**
+ * ExportDeckOutput is the structured result for export_deck.
+ */
+export interface ExportDeckOutput {
+  /**
+   * Path is the absolute workspace path of the exported .pptx file.
+   */
+  path: string;
+  /**
+   * ResourceURI is the readable deck:// resource URI for the exported .pptx file.
+   */
+  resourceUri: string;
+  /**
+   * Stats is the render summary for the export.
+   */
+  stats: ExportStats;
+}
+/**
+ * ListResourcesInput is the typed input for list_resources.
+ */
+export interface ListResourcesInput {
+}
+/**
+ * ResourceSummary is one exported deck resource summary.
+ */
+export interface ResourceSummary {
+  /**
+   * URI is the deck:// resource URI.
+   */
+  uri: string;
+  /**
+   * MIME is the resource MIME type.
+   */
+  mime: string;
+  /**
+   * Title is the human-readable exported filename.
+   */
+  title: string;
+}
+/**
+ * ListResourcesOutput is the structured result for list_resources.
+ */
+export interface ListResourcesOutput {
+  /**
+   * Resources is one entry per exported deck file present on disk.
+   */
+  resources?: ResourceSummary[];
+}
+/**
+ * GetResourceInput is the typed input for get_resource.
+ */
+export interface GetResourceInput {
+  /**
+   * URI is the absolute deck:// resource URI to resolve.
+   */
+  uri: string;
+}
+/**
+ * GetResourceOutput is the structured result for get_resource.
+ */
+export interface GetResourceOutput {
+  /**
+   * URI is the requested deck:// resource URI.
+   */
+  uri: string;
+  /**
+   * MIME is the resource MIME type.
+   */
+  mime?: string;
+  /**
+   * Path is the absolute workspace path backing the resource.
+   */
+  path?: string;
+  /**
+   * Found reports whether the resource exists on disk.
+   */
+  found: boolean;
+}
+/**
  * AssetID names caller-supplied bytes resolved by the render-time
  * AssetResolver (mirrors pptx-go's scene.AssetID; see register-an-asset).
  * It is free-form: bare keys, content hashes, UUIDs, or "asset://<uuid>"
