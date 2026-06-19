@@ -281,7 +281,9 @@ apps:
   - id: slide-editor
     uri: ui://go-slides-mcp/slide-editor/index.html
     entry: web/apps/slide-editor/src/App.svelte
-    display_modes: [inline]
+    # inline by default (the form view); the visual canvas requests fullscreen
+    # on the explicit "Canvas" action and degrades to inline when the host denies.
+    display_modes: [inline, fullscreen]
     csp:
       connect: []
       resource: []

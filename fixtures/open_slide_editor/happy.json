@@ -1,6 +1,6 @@
 {
   "name": "happy",
-  "description": "A content slide with editable + read-only nodes.",
+  "description": "A content slide for the editor \u2014 form fields + a fullscreen visual canvas.",
   "state": "ready",
   "input": {
     "deckId": "d1",
@@ -60,13 +60,6 @@
                   "text": "Pure-Go rasterizers"
                 }
               ]
-            },
-            {
-              "text": [
-                {
-                  "text": "StyleScore validation"
-                }
-              ]
             }
           ]
         },
@@ -81,20 +74,96 @@
         },
         {
           "kind": "chart",
-          "assetId": "asset://chart1",
+          "assetId": "asset://c1",
           "caption": "p99 by quarter"
-        },
-        {
-          "kind": "prose",
-          "paragraphs": [
-            [
-              {
-                "text": "This paragraph is shown read-only in the editor."
-              }
-            ]
-          ]
         }
       ]
+    },
+    "layout": {
+      "canvasWidth": 12192000,
+      "canvasHeight": 6858000,
+      "placements": [
+        {
+          "path": [
+            "nodes",
+            0
+          ],
+          "kind": "heading",
+          "box": {
+            "x": 457200,
+            "y": 457200,
+            "w": 11277600,
+            "h": 548640
+          }
+        },
+        {
+          "path": [
+            "nodes",
+            1
+          ],
+          "kind": "callout",
+          "box": {
+            "x": 457200,
+            "y": 1158240,
+            "w": 11277600,
+            "h": 914400
+          }
+        },
+        {
+          "path": [
+            "nodes",
+            2
+          ],
+          "kind": "list",
+          "box": {
+            "x": 457200,
+            "y": 2225040,
+            "w": 11277600,
+            "h": 585216
+          }
+        },
+        {
+          "path": [
+            "nodes",
+            3
+          ],
+          "kind": "quote",
+          "box": {
+            "x": 457200,
+            "y": 2962656,
+            "w": 11277600,
+            "h": 1005840
+          }
+        },
+        {
+          "path": [
+            "nodes",
+            4
+          ],
+          "kind": "chart",
+          "box": {
+            "x": 457200,
+            "y": 4120896,
+            "w": 11277600,
+            "h": 2743200
+          }
+        }
+      ],
+      "overflow": true
+    },
+    "palette": {
+      "canvas": "#FAF7F2",
+      "surface": "#FFFFFF",
+      "surfaceAlt": "#F4EFE6",
+      "accent": "#3B9C94",
+      "accentText": "#2B7A73",
+      "textPrimary": "#2B2723",
+      "textSecondary": "#6A625B",
+      "textInverse": "#FAF7F2",
+      "border": "#F4EFE6",
+      "headingFont": "Lora",
+      "bodyFont": "Inter",
+      "monoFont": "Consolas"
     }
   }
 }
