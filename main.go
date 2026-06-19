@@ -17,6 +17,7 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/exportstore"
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
+	"github.com/hurtener/go-slides-mcp/internal/recipe"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
@@ -55,6 +56,7 @@ func main() {
 		Souls:     soul.NewMemoryRegistry(),
 		Assets:    asset.NewMemoryStore(),
 		Comments:  comment.NewMemoryStore(),
+		Recipes:   recipe.NewMemoryStore(),
 		Session:   &handlers.SessionState{},
 		BuildInfo: buildInfo,
 		Workspace: workspace,
