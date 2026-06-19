@@ -83,6 +83,36 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.EditSlideNodeInput, contracts.EditSlideNodeOutput]("edit_slide_node").
+		Describe("Replace one slide node at a structural path.").
+		Handler(h.editSlideNode).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.InsertSlideNodeInput, contracts.InsertSlideNodeOutput]("insert_slide_node").
+		Describe("Insert one slide node at a structural path.").
+		Handler(h.insertSlideNode).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.RemoveSlideNodeInput, contracts.RemoveSlideNodeOutput]("remove_slide_node").
+		Describe("Remove one slide node at a structural path.").
+		Handler(h.removeSlideNode).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.DuplicateSlideNodeInput, contracts.DuplicateSlideNodeOutput]("duplicate_slide_node").
+		Describe("Duplicate one slide node at a structural path.").
+		Handler(h.duplicateSlideNode).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.MoveSlideNodeInput, contracts.MoveSlideNodeOutput]("move_slide_node").
+		Describe("Move one slide node between structural paths.").
+		Handler(h.moveSlideNode).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

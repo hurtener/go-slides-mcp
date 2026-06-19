@@ -70,6 +70,31 @@ tools:
     input: internal/contracts.DuplicateSlideInput
     output: internal/contracts.DuplicateSlideOutput
     task_support: forbidden
+  - name: edit_slide_node
+    description: Replace one slide node at a structural path.
+    input: internal/contracts.EditSlideNodeInput
+    output: internal/contracts.EditSlideNodeOutput
+    task_support: forbidden
+  - name: insert_slide_node
+    description: Insert one slide node at a structural path.
+    input: internal/contracts.InsertSlideNodeInput
+    output: internal/contracts.InsertSlideNodeOutput
+    task_support: forbidden
+  - name: remove_slide_node
+    description: Remove one slide node at a structural path.
+    input: internal/contracts.RemoveSlideNodeInput
+    output: internal/contracts.RemoveSlideNodeOutput
+    task_support: forbidden
+  - name: duplicate_slide_node
+    description: Duplicate one slide node at a structural path.
+    input: internal/contracts.DuplicateSlideNodeInput
+    output: internal/contracts.DuplicateSlideNodeOutput
+    task_support: forbidden
+  - name: move_slide_node
+    description: Move one slide node between structural paths.
+    input: internal/contracts.MoveSlideNodeInput
+    output: internal/contracts.MoveSlideNodeOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.
