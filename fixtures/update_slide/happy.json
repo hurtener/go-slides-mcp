@@ -1,0 +1,1 @@
+{"deckId":"deck_example","slideId":"slide_1","slide":{"id":"slide_1","layout":"title_content","nodes":[{"kind":"heading","level":2,"text":[{"text":"Updated title"}]}]},"expectedRevisionHash":"revision_current"}

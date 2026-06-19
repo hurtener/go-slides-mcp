@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "deckId": {
+      "type": "string"
+    },
+    "slides": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "previewText": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slideId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "deckId"
+  ],
+  "additionalProperties": false
+}

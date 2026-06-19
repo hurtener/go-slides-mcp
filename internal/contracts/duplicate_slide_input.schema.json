@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "slideId": {
+      "type": "string"
+    },
+    "position": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "required": [
+    "deckId",
+    "slideId"
+  ],
+  "additionalProperties": false
+}

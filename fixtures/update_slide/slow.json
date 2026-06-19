@@ -1,0 +1,1 @@
+{"deckId":"deck_large","slideId":"slide_12","slide":{"id":"slide_12","layout":"two_column","nodes":[{"kind":"two_column","left":[{"kind":"prose","paragraphs":[[{"text":"Left column content."}]]}],"right":[{"kind":"prose","paragraphs":[[{"text":"Right column content."}]]}]}]},"expectedRevisionHash":"revision_large"}

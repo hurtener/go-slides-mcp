@@ -1413,3 +1413,204 @@ export const TypeMono: TypeRole = "mono";
  * Typography roles (mirror the define-a-theme skill enum verbatim).
  */
 export const TypeCode: TypeRole = "code";
+/**
+ * SlideValidation is the structural validation result for one slide.
+ */
+export interface SlideValidation {
+  /**
+   * OK reports whether ValidateSlide returned no issues.
+   */
+  ok: boolean;
+  /**
+   * Issues is the flattened list of validation issue messages.
+   */
+  issues?: string[];
+}
+/**
+ * AddSlideInput is the typed input for add_slide.
+ */
+export interface AddSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * Slide is the slide snapshot to insert. Its ID is ignored on add.
+   */
+  slide: Slide;
+  /**
+   * Position is the optional zero-based insertion index.
+   */
+  position?: number /* int */;
+}
+/**
+ * AddSlideOutput is the structured result for add_slide.
+ */
+export interface AddSlideOutput {
+  /**
+   * SlideID is the inserted slide identifier assigned by the store.
+   */
+  slideId: string;
+  /**
+   * Slide is the stored slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * UpdateSlideInput is the typed input for update_slide.
+ */
+export interface UpdateSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to replace.
+   */
+  slideId: string;
+  /**
+   * Slide is the replacement slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * UpdateSlideOutput is the structured result for update_slide.
+ */
+export interface UpdateSlideOutput {
+  /**
+   * SlideID is the updated slide identifier.
+   */
+  slideId: string;
+  /**
+   * Slide is the stored replacement slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * GetSlideInput is the typed input for get_slide.
+ */
+export interface GetSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to load.
+   */
+  slideId: string;
+}
+/**
+ * GetSlideOutput is the structured result for get_slide.
+ */
+export interface GetSlideOutput {
+  /**
+   * SlideID is the loaded slide identifier.
+   */
+  slideId: string;
+  /**
+   * Slide is the loaded slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the loaded slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * RemoveSlideInput is the typed input for remove_slide.
+ */
+export interface RemoveSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to delete.
+   */
+  slideId: string;
+}
+/**
+ * RemoveSlideOutput is the structured result for remove_slide.
+ */
+export interface RemoveSlideOutput {
+  /**
+   * DeckID is the updated deck identifier.
+   */
+  deckId: string;
+  /**
+   * Removed reports whether the slide was removed.
+   */
+  removed: boolean;
+}
+/**
+ * ReorderSlidesInput is the typed input for reorder_slides.
+ */
+export interface ReorderSlidesInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * Order is the complete ordered list of slide IDs.
+   */
+  order?: string[];
+}
+/**
+ * ReorderSlidesOutput is the structured result for reorder_slides.
+ */
+export interface ReorderSlidesOutput {
+  /**
+   * Kind identifies this payload as a deck result.
+   */
+  kind: DeckKind;
+  /**
+   * DeckID is the reordered deck identifier.
+   */
+  deckId: string;
+  /**
+   * Slides is the ordered preview summary after reordering.
+   */
+  slides?: SlideSummary[];
+}
+/**
+ * DuplicateSlideInput is the typed input for duplicate_slide.
+ */
+export interface DuplicateSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to copy.
+   */
+  slideId: string;
+  /**
+   * Position is the optional zero-based insertion index for the copy.
+   */
+  position?: number /* int */;
+}
+/**
+ * DuplicateSlideOutput is the structured result for duplicate_slide.
+ */
+export interface DuplicateSlideOutput {
+  /**
+   * SlideID is the inserted duplicate slide identifier.
+   */
+  slideId: string;
+  /**
+   * Slide is the stored duplicate slide snapshot.
+   */
+  slide: Slide;
+}
