@@ -1,5 +1,10 @@
 package contracts
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 // ListKind selects a list style (mirrors pptx-go's scene.ListKind).
 type ListKind string
 
@@ -34,5 +39,29 @@ func (List) slideNodeKind() Kind { return KindList }
 
 // MarshalJSON injects the "list" kind discriminator via marshalNode.
 func (l *List) MarshalJSON() ([]byte, error) { return marshalNode(KindList, *l) }
+
+// UnmarshalJSON strict-decodes a List and each ListItem so unknown keys are a
+// hard error naming the offending field(s). The injected "kind" discriminator
+// is explicitly allowed.
+func (l *List) UnmarshalJSON(data []byte) error {
+	type listWire struct {
+		Kind  ListKind          `json:"listKind,omitempty"`
+		Items []json.RawMessage `json:"items,omitempty"`
+	}
+	var wire listWire
+	if err := strictUnmarshal(data, &wire, "kind"); err != nil {
+		return err
+	}
+	l.Kind = wire.Kind
+	if wire.Items != nil {
+		l.Items = make([]ListItem, len(wire.Items))
+		for i, raw := range wire.Items {
+			if err := strictUnmarshal(raw, &l.Items[i]); err != nil {
+				return fmt.Errorf("items[%d]: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
 
 func init() { registerNodeKind(KindList, func() SlideNode { return &List{} }) }

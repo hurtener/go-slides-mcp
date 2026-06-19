@@ -2995,6 +2995,26 @@ export interface GetDesignTokensOutput {
   tokens?: TokenEntry[];
 }
 /**
+ * UnknownFieldError is returned when a JSON object carries a key that is not
+ * declared on the target struct. Kind identifies what is being decoded and
+ * selects the correct-shape hint in Error(); Unknown lists the rejected keys;
+ * Allowed lists the accepted keys.
+ */
+export interface UnknownFieldError {
+  /**
+   * Kind identifies the type being decoded (e.g. "FlowStep", "run").
+   */
+  Kind: string;
+  /**
+   * Unknown is the sorted list of unrecognised JSON keys.
+   */
+  Unknown: string[];
+  /**
+   * Allowed is the sorted list of accepted JSON keys.
+   */
+  Allowed: string[];
+}
+/**
  * SurfaceKind identifies which UI surface a surface tool's structured output
  * is shaped for. The discriminator lets a single dispatcher branch on the
  * payload shape without sniffing its fields.
