@@ -29,8 +29,9 @@ most judgment- and taste-sensitive work in the project.
    (Phase 3) and rasterizers (Phase 7) land, the orchestrator renders representative decks under
    each built-in soul, **opens/screenshots them**, and iterates the soul tokens + render mapping
    until the output is genuinely impressive — verified by eye, not just "it renders."
-5. **Naming.** The product uses no "pengui" anywhere; the aesthetic the owner calls "pengui" is
-   the **Deckard White** soul. (ADR-0001 / the forbidden-name rule still hold.)
+5. **Naming.** The product uses no legacy product/aesthetic name anywhere; the editorial
+   off-white aesthetic the owner referred to ships as the **Deckard White** soul.
+   (ADR-0001 / the forbidden-name rule still hold.)
 
 ## Consequences
 
