@@ -74,6 +74,23 @@ func TestValidateDeckForExportAggregatesPerSlide(t *testing.T) {
 	}
 }
 
+func TestValidateSlideIRReturnsScoreAndFindings(t *testing.T) {
+	h := testHandlers()
+	got, err := h.validateSlideIR(context.Background(), contracts.ValidateSlideIRInput{Slide: testSlide("Scored")})
+	if err != nil {
+		t.Fatalf("validateSlideIR: %v", err)
+	}
+	if got.Structured.Score <= 0 || got.Structured.Score > 1 {
+		t.Fatalf("score = %v, want in (0,1]", got.Structured.Score)
+	}
+	// every structured finding must carry a category + severity.
+	for _, f := range got.Structured.Findings {
+		if f.Category == "" || (f.Severity != "error" && f.Severity != "warning") {
+			t.Fatalf("malformed finding: %+v", f)
+		}
+	}
+}
+
 func TestValidateSlideUsesStoredSlide(t *testing.T) {
 	h := testHandlers()
 	ctx := context.Background()

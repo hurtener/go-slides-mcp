@@ -4,6 +4,9 @@
     "ok": {
       "type": "boolean"
     },
+    "score": {
+      "type": "number"
+    },
     "issues": {
       "type": [
         "null",
@@ -12,10 +15,40 @@
       "items": {
         "type": "string"
       }
+    },
+    "findings": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [
-    "ok"
+    "ok",
+    "score"
   ],
   "additionalProperties": false
 }
