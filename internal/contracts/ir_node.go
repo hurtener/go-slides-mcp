@@ -13,6 +13,15 @@ type SlideNode interface {
 	slideNodeKind() Kind
 }
 
+// KindOf returns a node's Kind discriminator — the exported accessor over the
+// unexported marker, used by previews/thumbnails outside this package.
+func KindOf(n SlideNode) Kind {
+	if n == nil {
+		return ""
+	}
+	return n.slideNodeKind()
+}
+
 // nodeRegistry maps each Kind discriminator to a constructor returning a
 // fresh, zeroed pointer of the concrete node type. Populated by each node
 // file's init().

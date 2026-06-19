@@ -250,20 +250,32 @@ tools:
     input: internal/contracts.CompileCodeInput
     output: internal/contracts.CompileCodeOutput
     task_support: forbidden
+  - name: get_deck_preview
+    description: Get the glanceable deck-preview payload (brand, deck summary, per-slide thumbnails) for the deck-preview surface.
+    input: internal/contracts.DeckPreviewInput
+    output: internal/contracts.DeckPreviewOutput
+    ui: deck-preview
+    task_support: forbidden
 
-# A no-template server ships no UI, so there is no apps[] block. Attach a
-# Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.
+# The three Deckard UI surfaces. URIs are honored verbatim (CLAUDE.md §7); each
+# is a single-file Svelte bundle under a deny-by-default CSP.
+apps:
+  - id: deck-preview
+    uri: ui://go-slides-mcp/deck-preview/index.html
+    entry: web/apps/deck-preview/src/App.svelte
+    display_modes: [inline]
+    csp:
+      connect: []
+      resource: []
+    visibility: [model, app]
 
 quality:                  # RFC §9.4 — enforced by 'dockyard validate'.
-  # UI-state gates are off: this server has no UI to require states of.
-  require_loading_state: false
-  require_empty_state: false
-  require_error_state: false
-  require_permission_state: false
-  # require_contract_tests applies to every server (the project must carry a
-  # contract test); require_fixtures is UI-scoped (it requires inspector
-  # fixtures for UI-bearing tools only — this server has none, so it is a
-  # no-op until you attach a UI). Both are enforced by 'dockyard validate'.
+  # All four UI-state gates on — every surface routes through PageState
+  # (CLAUDE.md §7, the four-state page rule).
+  require_loading_state: true
+  require_empty_state: true
+  require_error_state: true
+  require_permission_state: true
   require_fixtures: true
   require_contract_tests: true
   require_spec_compliance: true

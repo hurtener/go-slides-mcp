@@ -1,0 +1,12 @@
+{
+  "name": "permission",
+  "description": "The requestor is not authorized to preview this deck.",
+  "state": "permission",
+  "input": { "deckId": "deck_restricted" },
+  "output_override": {
+    "state": "permission",
+    "message": "You do not have permission to preview this deck.",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "deck": { "deckId": "deck_restricted", "title": "Restricted deck", "slideCount": 0 }
+  }
+}

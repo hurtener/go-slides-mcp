@@ -1,0 +1,152 @@
+/*
+ * Deckard design system — semantic app tokens (`--app-*`).
+ *
+ * WHITE-LABEL CONTRACT. Every surface reads ONLY these `--app-*` custom
+ * properties — never a literal hex. That makes the whole UI re-skinnable
+ * through three layers, in increasing precedence:
+ *
+ *   1. built-in theme preset   — `:root` (Deckard White) + `[data-app-theme=…]`
+ *   2. client brand tokens      — inline `style="--app-…: …"` on the root,
+ *                                 injected at startup from the brand JSON
+ *   3. host context variables   — applied last by the bridge (Claude theme)
+ *
+ * To add a theme: add one `[data-app-theme="name"]` block below. To white-label:
+ * the server emits `--app-*` overrides into the root element's inline style.
+ */
+
+:root,
+[data-app-theme='deckard-white'] {
+  color-scheme: light;
+
+  /* surfaces */
+  --app-bg: #faf7f2;
+  --app-surface: #ffffff;
+  --app-surface-raised: #f4efe6;
+  --app-surface-alt: #ece6dc;
+
+  /* text */
+  --app-text: #2b2723;
+  --app-text-muted: #6a625b;
+  --app-text-subtle: #b8b0a4;
+
+  /* borders */
+  --app-border: #e0d5ca;
+  --app-border-strong: #d8d0c4;
+
+  /* accent (fill vs text split — WCAG AA) */
+  --app-accent: #3b9c94;
+  --app-accent-text: #2b7a73;
+  --app-accent-hover: #2b8378;
+  --app-accent-pressed: #2d7a73;
+  --app-accent-soft: rgba(59, 156, 148, 0.12);
+
+  /* status */
+  --app-success: #3f8e6b;
+  --app-warning: #d97b1a;
+  --app-danger: #b64a4a;
+  --app-tooltip: #ff9645;
+
+  /* the slide "paper" the thumbnails sit on (mirrors the soul canvas) */
+  --app-paper: #faf7f2;
+  --app-paper-ink: #2b2723;
+}
+
+/* Deckard Dark — the warm dark companion (research 04 §2.2). */
+[data-app-theme='deckard-dark'] {
+  color-scheme: dark;
+  --app-bg: #2b2723;
+  --app-surface: #332e29;
+  --app-surface-raised: #3d372f;
+  --app-surface-alt: #46403a;
+  --app-text: #faf7f2;
+  --app-text-muted: #d8d0c4;
+  --app-text-subtle: #b8b0a4;
+  --app-border: #46403a;
+  --app-border-strong: #5a5249;
+  --app-accent: #3b9c94;
+  --app-accent-text: #6fd0c6;
+  --app-accent-hover: #48b3aa;
+  --app-accent-pressed: #3b9c94;
+  --app-accent-soft: #33413e;
+  --app-success: #4fa67e;
+  --app-warning: #ff9645;
+  --app-danger: #c86a6a;
+  --app-tooltip: #ff9645;
+  --app-paper: #332e29;
+  --app-paper-ink: #faf7f2;
+}
+
+/* Midnight — cool dark: deep slate/navy, cyan-teal accent. */
+[data-app-theme='midnight'] {
+  color-scheme: dark;
+  --app-bg: #0f1722;
+  --app-surface: #16202e;
+  --app-surface-raised: #1d2a3a;
+  --app-surface-alt: #243349;
+  --app-text: #e8eef6;
+  --app-text-muted: #9fb0c4;
+  --app-text-subtle: #5e7088;
+  --app-border: #243349;
+  --app-border-strong: #31435c;
+  --app-accent: #2dd4bf;
+  --app-accent-text: #5eead4;
+  --app-accent-hover: #34e0ca;
+  --app-accent-pressed: #22b3a1;
+  --app-accent-soft: rgba(45, 212, 191, 0.14);
+  --app-success: #4ade80;
+  --app-warning: #fbbf24;
+  --app-danger: #f87171;
+  --app-tooltip: #38bdf8;
+  --app-paper: #16202e;
+  --app-paper-ink: #e8eef6;
+}
+
+/* Slate — cool light pro: neutral gray/white, blue-teal accent. */
+[data-app-theme='slate'] {
+  color-scheme: light;
+  --app-bg: #f4f6f8;
+  --app-surface: #ffffff;
+  --app-surface-raised: #eef1f4;
+  --app-surface-alt: #e3e8ed;
+  --app-text: #1f2933;
+  --app-text-muted: #5a6878;
+  --app-text-subtle: #9aa7b4;
+  --app-border: #dce2e8;
+  --app-border-strong: #cbd3db;
+  --app-accent: #0ea5a3;
+  --app-accent-text: #0c8d8b;
+  --app-accent-hover: #0c9492;
+  --app-accent-pressed: #0a807e;
+  --app-accent-soft: rgba(14, 165, 163, 0.1);
+  --app-success: #16a34a;
+  --app-warning: #d97706;
+  --app-danger: #dc2626;
+  --app-tooltip: #2563eb;
+  --app-paper: #ffffff;
+  --app-paper-ink: #1f2933;
+}
+
+/* Editorial Sepia — high-contrast warm paper, near-black serif everything. */
+[data-app-theme='editorial-sepia'] {
+  color-scheme: light;
+  --app-bg: #f3e9d6;
+  --app-surface: #fbf4e4;
+  --app-surface-raised: #efe2c9;
+  --app-surface-alt: #e6d6b8;
+  --app-text: #221b12;
+  --app-text-muted: #5c4f3a;
+  --app-text-subtle: #9a8a6e;
+  --app-border: #d8c6a4;
+  --app-border-strong: #c8b389;
+  --app-accent: #9a5b2d;
+  --app-accent-text: #7a4621;
+  --app-accent-hover: #874f28;
+  --app-accent-pressed: #6c3e1d;
+  --app-accent-soft: rgba(154, 91, 45, 0.12);
+  --app-success: #5b7a3a;
+  --app-warning: #b5731a;
+  --app-danger: #9a3b2d;
+  --app-tooltip: #b5731a;
+  --app-paper: #fbf4e4;
+  --app-paper-ink: #221b12;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "large",
+  "description": "A high-slide-count deck (12 slides) exercising the filmstrip scroll and varied node thumbnails.",
+  "state": "ready",
+  "input": { "deckId": "deck_big" },
+  "output_override": {
+    "state": "ready",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "deck": { "deckId": "deck_big", "title": "Annual Review", "slideCount": 12, "soulId": "deckard-white" },
+    "resourceUri": "deck://export/deck_big.pptx",
+    "slides": [
+      { "id": "b1", "index": 0, "layout": "cover", "title": "Annual Review", "nodes": [ { "kind": "hero", "text": "Annual Review", "detail": "2026" } ] },
+      { "id": "b2", "index": 1, "layout": "title_content", "title": "Agenda", "nodes": [ { "kind": "heading", "text": "Agenda" }, { "kind": "list", "count": 5 } ] },
+      { "id": "b3", "index": 2, "layout": "section_divider", "title": "Part 1", "nodes": [ { "kind": "section_divider", "text": "Part 1 — Results" } ] },
+      { "id": "b4", "index": 3, "layout": "title_content", "title": "Revenue", "nodes": [ { "kind": "heading", "text": "Revenue" }, { "kind": "chart", "text": "by quarter" } ] },
+      { "id": "b5", "index": 4, "layout": "two_column", "title": "Wins / Risks", "nodes": [ { "kind": "two_column" } ] },
+      { "id": "b6", "index": 5, "layout": "title_content", "title": "NPS", "nodes": [ { "kind": "callout", "text": "NPS up 14 points", "accent": true }, { "kind": "table", "count": 5 } ] },
+      { "id": "b7", "index": 6, "layout": "section_divider", "title": "Part 2", "nodes": [ { "kind": "section_divider", "text": "Part 2 — Roadmap" } ] },
+      { "id": "b8", "index": 7, "layout": "card_grid", "title": "Themes", "nodes": [ { "kind": "grid", "count": 6 } ] },
+      { "id": "b9", "index": 8, "layout": "title_content", "title": "Flow", "nodes": [ { "kind": "heading", "text": "Delivery flow" }, { "kind": "flow", "count": 4 } ] },
+      { "id": "b10", "index": 9, "layout": "title_content", "title": "Quote", "nodes": [ { "kind": "quote", "text": "Ship the thing that ships the things.", "detail": "Eng" } ] },
+      { "id": "b11", "index": 10, "layout": "title_content", "title": "Code", "nodes": [ { "kind": "heading", "text": "Rollout" }, { "kind": "code_block", "text": "deploy.sh" } ] },
+      { "id": "b12", "index": 11, "layout": "cover", "title": "Thank you", "nodes": [ { "kind": "hero", "text": "Thank you", "detail": "Q&A" } ] }
+    ]
+  }
+}

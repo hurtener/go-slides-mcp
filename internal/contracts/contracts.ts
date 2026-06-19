@@ -2008,6 +2008,121 @@ export interface SlideDoc {
   slides?: Slide[];
 }
 /**
+ * AppBrand is the white-label brand configuration delivered to the UI surfaces.
+ * It is resolved at server startup from the brand-token JSON (or defaults) and
+ * lets a deployment re-skin the surfaces without a rebuild.
+ */
+export interface AppBrand {
+  /**
+   * Title is the product/brand name shown in surface chrome.
+   */
+  title?: string;
+  /**
+   * DefaultTheme is the built-in theme id selected by default
+   * (deckard-white | deckard-dark | midnight | slate | editorial-sepia).
+   */
+  defaultTheme?: string;
+  /**
+   * Tokens are per-token "--app-*" overrides (key without the leading "--"),
+   * applied over the selected preset.
+   */
+  tokens?: { [key: string]: string};
+  /**
+   * AllowThemeSwitch shows or hides the theme selector (false = locked brand).
+   */
+  allowThemeSwitch: boolean;
+}
+/**
+ * ThumbNode is a glanceable descriptor of one IR node, rendered as a block in a
+ * slide thumbnail. It carries just enough of the IR to compose a recognizable
+ * preview — never the full node payload.
+ */
+export interface ThumbNode {
+  /**
+   * Kind is the IR node kind (heading, prose, list, callout, chart, ...).
+   */
+  kind: string;
+  /**
+   * Text is the primary text snippet (title, first line, label).
+   */
+  text?: string;
+  /**
+   * Detail is an optional secondary snippet (subtitle, attribution).
+   */
+  detail?: string;
+  /**
+   * Count is an item count for repeating nodes (list items, grid cells, steps).
+   */
+  count?: number /* int */;
+  /**
+   * Accent marks a node that renders in the accent color (callout, chip, accent card).
+   */
+  accent?: boolean;
+}
+/**
+ * SlidePreview is one slide reduced to a thumbnail-renderable form.
+ */
+export interface SlidePreview {
+  /**
+   * ID is the stable slide identifier.
+   */
+  id: string;
+  /**
+   * Index is the zero-based position in the deck.
+   */
+  index: number /* int */;
+  /**
+   * Layout is the slide layout kind (cover, title_content, two_column, ...).
+   */
+  layout: string;
+  /**
+   * Title is a best-effort slide title for labelling the thumbnail.
+   */
+  title?: string;
+  /**
+   * Nodes are the top-level node descriptors composing the thumbnail.
+   */
+  nodes?: ThumbNode[];
+}
+/**
+ * DeckPreviewInput drives the deck-preview surface.
+ */
+export interface DeckPreviewInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug (empty = the active deck).
+   */
+  deckId?: string;
+}
+/**
+ * DeckPreviewOutput is the structured payload the deck-preview surface renders.
+ */
+export interface DeckPreviewOutput {
+  /**
+   * State is the four-state page state (ready | empty | error | permission | loading).
+   */
+  state: string;
+  /**
+   * Message is the human-readable note for empty/error/permission states.
+   */
+  message?: string;
+  /**
+   * Brand is the white-label brand configuration for the surface.
+   */
+  brand: AppBrand;
+  /**
+   * Deck is the deck-level summary.
+   */
+  deck: DeckSummary;
+  /**
+   * Slides are the per-slide thumbnail descriptors in deck order.
+   */
+  slides?: SlidePreview[];
+  /**
+   * ResourceURI is the deck:// export resource for the [download] action.
+   */
+  resourceUri?: string;
+}
+/**
  * SaveAsTemplateInput is the typed input for save_as_template.
  */
 export interface SaveAsTemplateInput {

@@ -1,0 +1,8 @@
+# Node deps and throwaway build dirs are not tracked.
+node_modules/
+dist-preview/
+*.tsbuildinfo
+
+# NOTE: each app's dist/ (the single-file Svelte bundle) IS tracked on purpose —
+# the Go binary embeds it via //go:embed and CI runs `go build` directly with no
+# node toolchain. Rebuild with `npm run build` in the app dir after UI changes.

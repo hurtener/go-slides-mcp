@@ -299,6 +299,13 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.DeckPreviewInput, contracts.DeckPreviewOutput]("get_deck_preview").
+		Describe("Get the glanceable deck-preview payload (brand, deck summary, per-slide thumbnails) for the deck-preview surface.").
+		UI("deck-preview").
+		Handler(h.getDeckPreview).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }
