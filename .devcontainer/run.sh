@@ -18,7 +18,7 @@ NAME="go-slides-builder"
 COMMAND="${1:-build}"
 # PRIMARY: GLM-5.2 (free window) via HF Router -> Fireworks. loop.sh auto-falls-back to
 # NVIDIA NIM Nemotron on a rate-limit signal. Override MODEL to change the primary.
-MODEL="${MODEL:-huggingface/zai-org/GLM-5.2:fireworks-ai}"
+MODEL="${MODEL:-openai/gpt-5.4}"   # GPT-5.4 low-effort via OpenAI oauth; loop falls back to gpt-5.4-mini
 VARIANT="${VARIANT-}"
 
 echo "[run] preparing secrets..."
