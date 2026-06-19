@@ -14,7 +14,10 @@
       ],
       "items": true
     },
-    "node": true,
+    "node": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "expectedRevisionHash": {
       "type": "string"
     }

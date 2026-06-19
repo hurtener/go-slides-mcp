@@ -17,7 +17,11 @@ func (h *handlers) editSlideField(_ context.Context, in contracts.EditSlideField
 		if err != nil {
 			return err
 		}
-		updated, err := setNodeField(node, in.Field, in.Value)
+		raw, err := json.Marshal(in.Value) // string → a JSON string value
+		if err != nil {
+			return err
+		}
+		updated, err := setNodeField(node, in.Field, raw)
 		if err != nil {
 			return err
 		}

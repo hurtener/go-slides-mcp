@@ -763,9 +763,9 @@ export interface EditSlideNodeInput {
    */
   path?: IRPath;
   /**
-   * Node is the replacement slide node encoded as raw JSON with a kind discriminator.
+   * Node is the replacement slide node as a JSON object with a "kind" discriminator.
    */
-  node: any /* json.RawMessage */;
+  node: { [key: string]: any};
   /**
    * ExpectedRevisionHash enforces optimistic concurrency when set.
    */
@@ -805,9 +805,11 @@ export interface EditSlideFieldInput {
    */
   field: string;
   /**
-   * Value is the replacement JSON value for the addressed field.
+   * Value is the replacement value for a string-valued field (e.g. a title,
+   * label, or eyebrow). For rich text use patch_slide_text; for structured
+   * fields (objects/arrays/numbers) replace the whole node via edit_slide_node.
    */
-  value: any /* json.RawMessage */;
+  value: string;
   /**
    * ExpectedRevisionHash enforces optimistic concurrency when set.
    */
@@ -885,9 +887,9 @@ export interface InsertSlideNodeInput {
    */
   path?: IRPath;
   /**
-   * Node is the inserted slide node encoded as raw JSON with a kind discriminator.
+   * Node is the inserted slide node as a JSON object with a "kind" discriminator.
    */
-  node: any /* json.RawMessage */;
+  node: { [key: string]: any};
   /**
    * ExpectedRevisionHash enforces optimistic concurrency when set.
    */

@@ -17,7 +17,9 @@
     "field": {
       "type": "string"
     },
-    "value": true,
+    "value": {
+      "type": "string"
+    },
     "expectedRevisionHash": {
       "type": "string"
     }
