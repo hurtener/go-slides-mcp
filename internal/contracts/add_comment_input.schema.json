@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "slideId": {
+          "type": "string"
+        },
+        "irPath": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deckId",
+    "target",
+    "body"
+  ],
+  "additionalProperties": false
+}

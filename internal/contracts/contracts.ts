@@ -135,6 +135,146 @@ export interface DeleteAssetOutput {
   deleted: boolean;
 }
 /**
+ * CommentTarget is the typed comment target address.
+ */
+export interface CommentTarget {
+  /**
+   * Kind identifies whether the comment points at a deck, slide, or node.
+   */
+  kind: string;
+  /**
+   * SlideID identifies the target slide when the comment is slide- or node-scoped.
+   */
+  slideId?: string;
+  /**
+   * IRPath is the optional structural path to a node target.
+   */
+  irPath?: any[];
+}
+/**
+ * AddCommentInput is the typed input for add_comment.
+ */
+export interface AddCommentInput {
+  /**
+   * DeckID identifies the deck that owns the comment thread.
+   */
+  deckId: string;
+  /**
+   * Target identifies what the comment points at.
+   */
+  target: CommentTarget;
+  /**
+   * Body is the comment text.
+   */
+  body: string;
+  /**
+   * Kind is the optional comment classification such as note, todo, or question.
+   */
+  kind?: string;
+  /**
+   * Origin is the optional caller origin such as agent or app.
+   */
+  origin?: string;
+}
+/**
+ * AddCommentOutput is the structured result for add_comment.
+ */
+export interface AddCommentOutput {
+  /**
+   * CommentID is the stored comment ID.
+   */
+  commentId: string;
+}
+/**
+ * ListCommentsInput is the typed input for list_comments.
+ */
+export interface ListCommentsInput {
+  /**
+   * DeckID identifies which deck's comments to list.
+   */
+  deckId: string;
+  /**
+   * Resolved optionally filters comments by resolution state.
+   */
+  resolved?: boolean;
+  /**
+   * TargetKind optionally filters comments by target kind.
+   */
+  targetKind?: string;
+}
+/**
+ * CommentView is the structured metadata for one stored comment.
+ */
+export interface CommentView {
+  /**
+   * CommentID is the stored comment ID.
+   */
+  commentId: string;
+  /**
+   * DeckID identifies the deck that owns the comment.
+   */
+  deckId: string;
+  /**
+   * Target identifies what the comment points at.
+   */
+  target: CommentTarget;
+  /**
+   * Body is the comment text.
+   */
+  body: string;
+  /**
+   * Kind is the comment classification.
+   */
+  kind?: string;
+  /**
+   * Origin is the caller origin such as agent or app.
+   */
+  origin?: string;
+  /**
+   * Resolved reports whether the comment has been resolved.
+   */
+  resolved: boolean;
+  /**
+   * CreatedAt is the comment creation time in UTC RFC3339 format.
+   */
+  createdAt: string;
+}
+/**
+ * ListCommentsOutput is the structured result for list_comments.
+ */
+export interface ListCommentsOutput {
+  /**
+   * Comments is the ordered list of comments that matched the filters.
+   */
+  comments?: CommentView[];
+}
+/**
+ * ResolveCommentInput is the typed input for resolve_comment.
+ */
+export interface ResolveCommentInput {
+  /**
+   * CommentID identifies which stored comment to resolve.
+   */
+  commentId: string;
+  /**
+   * Note is the optional resolution note.
+   */
+  note?: string;
+}
+/**
+ * ResolveCommentOutput is the structured result for resolve_comment.
+ */
+export interface ResolveCommentOutput {
+  /**
+   * CommentID identifies the resolved comment.
+   */
+  commentId: string;
+  /**
+   * Resolved reports whether the comment is now resolved.
+   */
+  resolved: boolean;
+}
+/**
  * CreateDeckInput is the typed input for create_deck.
  */
 export interface CreateDeckInput {

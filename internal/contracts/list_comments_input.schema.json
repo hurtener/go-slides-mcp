@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "targetKind": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deckId"
+  ],
+  "additionalProperties": false
+}
