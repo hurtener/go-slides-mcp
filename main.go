@@ -1,11 +1,4 @@
-// Command go-slides-mcp is an MCP server scaffolded by 'dockyard new'.
-//
-// It registers one example tool ("greet") and serves the MCP protocol. The
-// transport is chosen by the DOCKYARD_TRANSPORT environment variable — "stdio"
-// (the default: the local, single-user transport) or "http" (the
-// streamable-HTTP service mode). 'dockyard run --transport http' sets it for
-// you; you can also set it by hand. Wire the server into an MCP host (Claude,
-// Cursor, …) with 'dockyard install'.
+// Command go-slides-mcp serves the Deckard MCP protocol over stdio or HTTP.
 package main
 
 import (
@@ -17,6 +10,10 @@ import (
 	"os/signal"
 
 	"github.com/hurtener/dockyard/runtime/server"
+
+	"github.com/hurtener/go-slides-mcp/internal/deck"
+	"github.com/hurtener/go-slides-mcp/internal/handlers"
+	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
 // httpAddr is the address the HTTP transport listens on when
@@ -42,7 +39,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := registerTools(srv); err != nil {
+	workspace, err := workspaceDir()
+	if err != nil {
+		logger.Error("resolve workspace", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	deps := handlers.ToolDeps{
+		Store:     deck.NewMemoryStore(),
+		Souls:     soul.NewMemoryRegistry(),
+		Workspace: workspace,
+		Logger:    logger,
+	}
+
+	if err := handlers.RegisterTools(srv, deps); err != nil {
 		logger.Error("register tools", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
@@ -51,6 +60,13 @@ func main() {
 		logger.Error("serve", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+}
+
+func workspaceDir() (string, error) {
+	if dir := os.Getenv("DECKARD_WORKSPACE"); dir != "" {
+		return dir, nil
+	}
+	return os.Getwd()
 }
 
 // serve brings up the transport named by DOCKYARD_TRANSPORT. An unset or

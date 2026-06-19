@@ -1,15 +1,12 @@
 {
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string"
-    },
-    "greeting": {
+    "deckId": {
       "type": "string"
     }
   },
   "required": [
-    "name"
+    "deckId"
   ],
   "additionalProperties": false
 }
