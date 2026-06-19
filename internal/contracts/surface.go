@@ -86,42 +86,6 @@ type OpenSlideEditorOutput struct {
 	Palette SoulPalette `json:"palette"`
 }
 
-// GetDeckStateInput is the typed input for get_deck_state.
-type GetDeckStateInput struct {
-	// DeckID addresses the deck by stable ID or slug.
-	DeckID string `json:"deckId"`
-	// SelectedSlideID is the optional currently-focused slide identifier
-	// surfaced in the State payload.
-	SelectedSlideID string `json:"selectedSlideId,omitempty"`
-}
-
-// DeckStateSelection is the focused slide descriptor surfaced in the
-// get_deck_state payload.
-type DeckStateSelection struct {
-	// SlideID is the currently-focused slide identifier.
-	SlideID string `json:"slideId"`
-	// Layout is the focused slide's layout kind, when known.
-	Layout LayoutKind `json:"layout,omitempty"`
-	// Title is a best-effort headline extracted from the focused slide.
-	Title string `json:"title,omitempty"`
-}
-
-// GetDeckStateOutput is the structured result for get_deck_state.
-type GetDeckStateOutput struct {
-	// Kind identifies this payload as the aggregate state surface result.
-	Kind SurfaceKind `json:"kind"`
-	// DeckID is the resolved deck identifier.
-	DeckID string `json:"deckId"`
-	// Slides is the ordered preview summary of the deck's slides.
-	Slides []SlideSummary `json:"slides,omitempty"`
-	// Selected is the focused slide descriptor when one is selected.
-	Selected *DeckStateSelection `json:"selected,omitempty"`
-	// Souls is every stored soul summary available to the deck.
-	Souls []SoulSummary `json:"souls,omitempty"`
-	// Validation is the aggregated validation result for the deck.
-	Validation ValidateDeckForExportOutput `json:"validation"`
-}
-
 // SetActiveWorkspaceInput is the typed input for set_active_workspace.
 type SetActiveWorkspaceInput struct {
 	// DeckID is the optional deck ID to mark as the active workspace deck.

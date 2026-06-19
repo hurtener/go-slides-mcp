@@ -110,7 +110,7 @@ into the agent you connect.
   Svelte apps embedded in the binary.
 - **Contract-first.** Typed Go structs are the source of truth; JSON Schema + TS
   are generated.
-- **49 tools** covering decks, slides, node-level edits, souls, assets, comments,
+- **48 tools** covering decks, slides, node-level edits, souls, assets, comments,
   recipes, charts/code, validation, and export.
 - Built on the [Dockyard](https://github.com/hurtener/dockyard) MCP framework.
 

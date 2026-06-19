@@ -39,7 +39,7 @@ func (h *handlers) getSlide(_ context.Context, in contracts.GetSlideInput) (tool
 	}
 	validation := validateSlide(*slide)
 	out := contracts.GetSlideOutput{SlideID: slide.ID, Slide: *slide, Validation: validation}
-	return tool.Result[contracts.GetSlideOutput]{Text: fmt.Sprintf("Loaded slide %q from deck %q.", slide.ID, in.DeckID), Structured: out}, nil
+	return tool.Result[contracts.GetSlideOutput]{Text: agentText(fmt.Sprintf("Slide %q IR (this is the node shape to use with add_slide / the edit tools):", slide.ID), out.Slide), Structured: out}, nil
 }
 
 func (h *handlers) removeSlide(_ context.Context, in contracts.RemoveSlideInput) (tool.Result[contracts.RemoveSlideOutput], error) {

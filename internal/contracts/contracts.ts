@@ -3140,67 +3140,6 @@ export interface OpenSlideEditorOutput {
   palette: SoulPalette;
 }
 /**
- * GetDeckStateInput is the typed input for get_deck_state.
- */
-export interface GetDeckStateInput {
-  /**
-   * DeckID addresses the deck by stable ID or slug.
-   */
-  deckId: string;
-  /**
-   * SelectedSlideID is the optional currently-focused slide identifier
-   * surfaced in the State payload.
-   */
-  selectedSlideId?: string;
-}
-/**
- * DeckStateSelection is the focused slide descriptor surfaced in the
- * get_deck_state payload.
- */
-export interface DeckStateSelection {
-  /**
-   * SlideID is the currently-focused slide identifier.
-   */
-  slideId: string;
-  /**
-   * Layout is the focused slide's layout kind, when known.
-   */
-  layout?: LayoutKind;
-  /**
-   * Title is a best-effort headline extracted from the focused slide.
-   */
-  title?: string;
-}
-/**
- * GetDeckStateOutput is the structured result for get_deck_state.
- */
-export interface GetDeckStateOutput {
-  /**
-   * Kind identifies this payload as the aggregate state surface result.
-   */
-  kind: SurfaceKind;
-  /**
-   * DeckID is the resolved deck identifier.
-   */
-  deckId: string;
-  /**
-   * Slides is the ordered preview summary of the deck's slides.
-   */
-  slides?: SlideSummary[];
-  /**
-   * Selected is the focused slide descriptor when one is selected.
-   */
-  selected?: DeckStateSelection;
-  /**
-   * Souls is every stored soul summary available to the deck.
-   */
-  souls?: SoulSummary[];
-  /**
-   * Validation is the aggregated validation result for the deck.
-   */
-  validation: ValidateDeckForExportOutput;
-}
-/**
  * SetActiveWorkspaceInput is the typed input for set_active_workspace.
  */
 export interface SetActiveWorkspaceInput {
