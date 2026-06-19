@@ -27,6 +27,54 @@ type EditSlideNodeOutput struct {
 	Validation SlideValidation `json:"validation"`
 }
 
+// EditSlideFieldInput is the typed input for edit_slide_field.
+type EditSlideFieldInput struct {
+	// DeckID addresses the deck by stable ID or slug.
+	DeckID string `json:"deckId"`
+	// SlideID is the stable slide identifier to edit.
+	SlideID string `json:"slideId"`
+	// Path addresses the existing node whose field will be replaced.
+	Path IRPath `json:"path,omitempty"`
+	// Field is the JSON field name to replace on the addressed node.
+	Field string `json:"field"`
+	// Value is the replacement JSON value for the addressed field.
+	Value json.RawMessage `json:"value"`
+	// ExpectedRevisionHash enforces optimistic concurrency when set.
+	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
+}
+
+// EditSlideFieldOutput is the structured result for edit_slide_field.
+type EditSlideFieldOutput struct {
+	// Slide is the stored edited slide snapshot.
+	Slide Slide `json:"slide"`
+	// Validation is the structural validation result for the stored slide.
+	Validation SlideValidation `json:"validation"`
+}
+
+// PatchSlideTextInput is the typed input for patch_slide_text.
+type PatchSlideTextInput struct {
+	// DeckID addresses the deck by stable ID or slug.
+	DeckID string `json:"deckId"`
+	// SlideID is the stable slide identifier to edit.
+	SlideID string `json:"slideId"`
+	// Path addresses the existing node whose text field will be replaced.
+	Path IRPath `json:"path,omitempty"`
+	// Field is the RichText JSON field name to replace on the addressed node.
+	Field string `json:"field"`
+	// Text is the plain text to encode as a single RichText run.
+	Text string `json:"text"`
+	// ExpectedRevisionHash enforces optimistic concurrency when set.
+	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
+}
+
+// PatchSlideTextOutput is the structured result for patch_slide_text.
+type PatchSlideTextOutput struct {
+	// Slide is the stored edited slide snapshot.
+	Slide Slide `json:"slide"`
+	// Validation is the structural validation result for the stored slide.
+	Validation SlideValidation `json:"validation"`
+}
+
 // InsertSlideNodeInput is the typed input for insert_slide_node.
 type InsertSlideNodeInput struct {
 	// DeckID addresses the deck by stable ID or slug.

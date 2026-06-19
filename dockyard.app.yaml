@@ -75,6 +75,16 @@ tools:
     input: internal/contracts.EditSlideNodeInput
     output: internal/contracts.EditSlideNodeOutput
     task_support: forbidden
+  - name: edit_slide_field
+    description: Replace one field on a slide node at a structural path.
+    input: internal/contracts.EditSlideFieldInput
+    output: internal/contracts.EditSlideFieldOutput
+    task_support: forbidden
+  - name: patch_slide_text
+    description: Replace one RichText field on a slide node with plain text.
+    input: internal/contracts.PatchSlideTextInput
+    output: internal/contracts.PatchSlideTextOutput
+    task_support: forbidden
   - name: insert_slide_node
     description: Insert one slide node at a structural path.
     input: internal/contracts.InsertSlideNodeInput

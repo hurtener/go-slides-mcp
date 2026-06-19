@@ -589,6 +589,90 @@ export interface EditSlideNodeOutput {
   validation: SlideValidation;
 }
 /**
+ * EditSlideFieldInput is the typed input for edit_slide_field.
+ */
+export interface EditSlideFieldInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the existing node whose field will be replaced.
+   */
+  path?: IRPath;
+  /**
+   * Field is the JSON field name to replace on the addressed node.
+   */
+  field: string;
+  /**
+   * Value is the replacement JSON value for the addressed field.
+   */
+  value: any /* json.RawMessage */;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * EditSlideFieldOutput is the structured result for edit_slide_field.
+ */
+export interface EditSlideFieldOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * PatchSlideTextInput is the typed input for patch_slide_text.
+ */
+export interface PatchSlideTextInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the existing node whose text field will be replaced.
+   */
+  path?: IRPath;
+  /**
+   * Field is the RichText JSON field name to replace on the addressed node.
+   */
+  field: string;
+  /**
+   * Text is the plain text to encode as a single RichText run.
+   */
+  text: string;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * PatchSlideTextOutput is the structured result for patch_slide_text.
+ */
+export interface PatchSlideTextOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
  * InsertSlideNodeInput is the typed input for insert_slide_node.
  */
 export interface InsertSlideNodeInput {
