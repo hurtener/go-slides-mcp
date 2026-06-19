@@ -14,9 +14,9 @@ export OPENCODE_CONFIG="/workspace/go-slides-mcp/.devcontainer/opencode.json"
 
 cd /workspace/go-slides-mcp
 
-PRIMARY_MODEL="${MODEL:-huggingface/zai-org/GLM-5.2:fireworks-ai}"
+PRIMARY_MODEL="${MODEL:-openai/gpt-5.4}"          # GPT-5.4 low-effort via OpenAI oauth (opencode.json sets reasoningEffort)
 PRIMARY_VARIANT="${VARIANT-}"   # empty VARIANT omits --variant
-FALLBACK_MODEL="${FALLBACK_MODEL:-nvidia/nemotron-3-ultra-550b-a55b}"
+FALLBACK_MODEL="${FALLBACK_MODEL:-openai/gpt-5.4-mini}"   # lighter, same oauth account
 FALLBACK_VARIANT="${FALLBACK_VARIANT-}"
 ACTIVE="primary"
 FB_ITERS=0
