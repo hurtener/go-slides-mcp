@@ -418,6 +418,22 @@ Below, "gate" = the universal gate above plus the phase-specific checks named.
 - **Gate:** full machine gate (`docs/research/03` §5.4) + `grep -ri` forbidden-name
   scan returns nothing + four-pass polish (UI / wiring / no-stubs / inspector live-test).
 
+### Phase 12 — Deck fidelity & discoverability hardening **[ORCH] reference, [BUILD] fan-out**
+- **Goal:** close the MCP↔engine boundary defects the *El Mate* dogfood surfaced —
+  silent decode loss, a validator blind to empty content, opaque/misleading node
+  schemas, and a lossy preview. The engine is sound (`mapNode` is field-complete);
+  the levers are decode-loudness, validator-fidelity, discoverability, preview render.
+- **Files:** see **`docs/PHASE-12-FIDELITY.md`** (the binding punch-list, 31 items in
+  workstreams A–E, each with code evidence + binding acceptance criteria).
+- **Clone:** the strict-decode helper + one strict node (A1) and the flow fidelity
+  check (C1+C3) are the reference unit; replicate across the other node kinds.
+- **Acceptance:** rebuild the El Mate deck over MCP — flow steps land, bold/italic
+  survive, the preview shows card/list/prose/callout content, a wrong shape returns a
+  loud correctable error, and an all-empty repeating node fails `validate_deck_for_export`.
+  Every item's own acceptance criterion in `docs/PHASE-12-FIDELITY.md` is binding.
+- **Gate:** full §11 gate green per commit. E2/E3 (engine repo `pptx-go`) are HELD for
+  explicit go-ahead; A–D + E1 are in-repo and unblocked.
+
 ---
 
 ## 5. Ownership summary
