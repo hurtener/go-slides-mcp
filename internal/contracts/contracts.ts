@@ -1800,3 +1800,277 @@ export interface DuplicateSlideOutput {
    */
   slide: Slide;
 }
+/**
+ * SoulStatus filters or reports a soul lifecycle state.
+ */
+export type SoulStatus = string;
+/**
+ * TokenLayer identifies which theme layer produced one flattened design token.
+ */
+/**
+ * TokenLayerSurface marks a surface color token.
+ */
+export const TokenLayerSurface = "surface";
+/**
+ * TokenLayerText marks a text color token.
+ */
+export const TokenLayerText = "text";
+/**
+ * TokenLayerTypography marks a typography token.
+ */
+export const TokenLayerTypography = "typography";
+/**
+ * TokenLayerSpacing marks a spacing token.
+ */
+export const TokenLayerSpacing = "spacing";
+/**
+ * TokenLayerRadius marks a radius token.
+ */
+export const TokenLayerRadius = "radius";
+/**
+ * TokenLayerElevation marks an elevation token.
+ */
+export const TokenLayerElevation = "elevation";
+/**
+ * TokenLayerExtension marks a non-native extension token.
+ */
+export const TokenLayerExtension = "extension";
+export type TokenLayer = typeof TokenLayerSurface | typeof TokenLayerText | typeof TokenLayerTypography | typeof TokenLayerSpacing | typeof TokenLayerRadius | typeof TokenLayerElevation | typeof TokenLayerExtension;
+/**
+ * BootstrapSoulInput is the typed input for bootstrap_soul.
+ */
+export interface BootstrapSoulInput {
+  /**
+   * Name is the required soul name and the source of the stored soul ID.
+   */
+  name: string;
+  /**
+   * Description is an optional one-line soul summary.
+   */
+  description?: string;
+  /**
+   * Accent overrides the primary accent surface token as a six-digit hex string.
+   */
+  accent?: string;
+  /**
+   * AccentAlt overrides the alternate accent token as a six-digit hex string.
+   */
+  accentAlt?: string;
+  /**
+   * AccentWarm overrides the warm accent token as a six-digit hex string.
+   */
+  accentWarm?: string;
+  /**
+   * HeadingFont overrides the display and heading font family.
+   */
+  headingFont?: string;
+  /**
+   * BodyFont overrides the body and subheading font family.
+   */
+  bodyFont?: string;
+  /**
+   * MonoFont overrides the mono and code font family.
+   */
+  monoFont?: string;
+}
+/**
+ * BootstrapSoulOutput is the structured result for bootstrap_soul.
+ */
+export interface BootstrapSoulOutput {
+  /**
+   * SoulID is the stored soul identifier.
+   */
+  soulId: string;
+  /**
+   * Name is the stored soul name.
+   */
+  name: string;
+  /**
+   * Status is the stored soul lifecycle state.
+   */
+  status?: SoulStatus;
+  /**
+   * TokenCount is the number of flattened resolved design tokens in the soul.
+   */
+  tokenCount: number /* int */;
+}
+/**
+ * SoulOverride is one targeted refine instruction.
+ */
+export interface SoulOverride {
+  /**
+   * Category is the override family understood by the soul refiner.
+   */
+  category: string;
+  /**
+   * Token is the token name within the selected category.
+   */
+  token: string;
+  /**
+   * Value is the string form to apply to the selected token.
+   */
+  value: string;
+}
+/**
+ * RefineSoulInput is the typed input for refine_soul.
+ */
+export interface RefineSoulInput {
+  /**
+   * SoulID addresses the stored soul to refine.
+   */
+  soulId: string;
+  /**
+   * Overrides is the ordered set of token overrides to apply.
+   */
+  overrides?: SoulOverride[];
+}
+/**
+ * RefineSoulOutput is the structured result for refine_soul.
+ */
+export interface RefineSoulOutput {
+  /**
+   * SoulID is the refined soul identifier.
+   */
+  soulId: string;
+  /**
+   * Changed is the ordered set of category.token pairs overridden by this call.
+   */
+  changed?: string[];
+  /**
+   * TokenCount is the number of flattened resolved design tokens in the refined soul.
+   */
+  tokenCount: number /* int */;
+}
+/**
+ * ListSoulsInput is the typed input for list_souls.
+ */
+export interface ListSoulsInput {
+  /**
+   * Status filters the list to one lifecycle state when set.
+   */
+  status?: SoulStatus;
+}
+/**
+ * SoulSummary is the list payload for one stored soul.
+ */
+export interface SoulSummary {
+  /**
+   * SoulID is the stable soul identifier.
+   */
+  soulId: string;
+  /**
+   * Name is the human-facing soul name.
+   */
+  name: string;
+  /**
+   * Status is the soul lifecycle state.
+   */
+  status?: SoulStatus;
+  /**
+   * TokenCount is the number of flattened resolved design tokens in the soul.
+   */
+  tokenCount: number /* int */;
+}
+/**
+ * ListSoulsOutput is the structured result for list_souls.
+ */
+export interface ListSoulsOutput {
+  /**
+   * Souls is every stored soul summary matching the filter.
+   */
+  souls?: SoulSummary[];
+}
+/**
+ * GetSoulInput is the typed input for get_soul.
+ */
+export interface GetSoulInput {
+  /**
+   * SoulID addresses the stored soul to load.
+   */
+  soulId: string;
+  /**
+   * IncludeStyleGuide requests the soul voice guidance in the response.
+   */
+  includeStyleGuide?: boolean;
+}
+/**
+ * SoulStyleGuide is the model-facing soul voice guidance.
+ */
+export interface SoulStyleGuide {
+  /**
+   * NorthStar is the one-line design intent.
+   */
+  northStar?: string;
+  /**
+   * Do lists encouraged authoring behaviors.
+   */
+  do?: string[];
+  /**
+   * Dont lists discouraged authoring behaviors.
+   */
+  dont?: string[];
+}
+/**
+ * TokenEntry is one flattened design token from a soul theme.
+ */
+export interface TokenEntry {
+  /**
+   * Name is the stable token name within its layer.
+   */
+  name: string;
+  /**
+   * Value is the string form of the resolved token value.
+   */
+  value: string;
+  /**
+   * Layer identifies which token family produced this entry.
+   */
+  layer: TokenLayer;
+}
+/**
+ * GetSoulOutput is the structured result for get_soul.
+ */
+export interface GetSoulOutput {
+  /**
+   * SoulID is the loaded soul identifier.
+   */
+  soulId: string;
+  /**
+   * Name is the loaded soul name.
+   */
+  name: string;
+  /**
+   * Status is the loaded soul lifecycle state.
+   */
+  status?: SoulStatus;
+  /**
+   * Description is the optional one-line soul summary.
+   */
+  description?: string;
+  /**
+   * Tokens is the flattened token list for the soul theme.
+   */
+  tokens?: TokenEntry[];
+  /**
+   * StyleGuide is the optional voice guidance for the soul.
+   */
+  styleGuide?: SoulStyleGuide;
+}
+/**
+ * GetDesignTokensInput is the typed input for get_design_tokens.
+ */
+export interface GetDesignTokensInput {
+  /**
+   * SoulID addresses the stored soul whose flattened tokens should be returned.
+   */
+  soulId: string;
+}
+/**
+ * GetDesignTokensOutput is the structured result for get_design_tokens.
+ */
+export interface GetDesignTokensOutput {
+  /**
+   * Tokens is the flattened token list for the soul theme.
+   */
+  tokens?: TokenEntry[];
+}

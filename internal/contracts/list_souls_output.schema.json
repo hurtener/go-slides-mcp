@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "souls": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "soulId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tokenCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "soulId",
+          "name",
+          "tokenCount"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

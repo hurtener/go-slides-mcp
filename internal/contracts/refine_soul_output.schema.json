@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    },
+    "changed": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "tokenCount": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "soulId",
+    "tokenCount"
+  ],
+  "additionalProperties": false
+}

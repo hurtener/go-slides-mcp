@@ -95,6 +95,31 @@ tools:
     input: internal/contracts.MoveSlideNodeInput
     output: internal/contracts.MoveSlideNodeOutput
     task_support: forbidden
+  - name: bootstrap_soul
+    description: Bootstrap one design soul from a small set of token overrides.
+    input: internal/contracts.BootstrapSoulInput
+    output: internal/contracts.BootstrapSoulOutput
+    task_support: forbidden
+  - name: refine_soul
+    description: Refine one stored soul with targeted token overrides.
+    input: internal/contracts.RefineSoulInput
+    output: internal/contracts.RefineSoulOutput
+    task_support: forbidden
+  - name: list_souls
+    description: List every stored soul summary.
+    input: internal/contracts.ListSoulsInput
+    output: internal/contracts.ListSoulsOutput
+    task_support: forbidden
+  - name: get_soul
+    description: Get one stored soul, optionally including its style guide.
+    input: internal/contracts.GetSoulInput
+    output: internal/contracts.GetSoulOutput
+    task_support: forbidden
+  - name: get_design_tokens
+    description: Get the flattened design token list for one stored soul.
+    input: internal/contracts.GetDesignTokensInput
+    output: internal/contracts.GetDesignTokensOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.

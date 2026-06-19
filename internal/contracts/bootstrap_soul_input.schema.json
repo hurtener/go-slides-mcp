@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "accent": {
+      "type": "string"
+    },
+    "accentAlt": {
+      "type": "string"
+    },
+    "accentWarm": {
+      "type": "string"
+    },
+    "headingFont": {
+      "type": "string"
+    },
+    "bodyFont": {
+      "type": "string"
+    },
+    "monoFont": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}
