@@ -52,7 +52,7 @@ func UnmarshalSlideNode(data []byte) (SlideNode, error) {
 		return nil, fmt.Errorf("slide node: unknown kind %q", peek.Kind)
 	}
 	n := ctor()
-	if err := json.Unmarshal(data, n); err != nil {
+	if err := strictUnmarshal(data, n, "kind"); err != nil {
 		return nil, fmt.Errorf("slide node %q: %w", peek.Kind, err)
 	}
 	return n, nil

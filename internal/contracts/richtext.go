@@ -134,7 +134,9 @@ func (r TextRun) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON is the inverse of MarshalJSON: it re-folds the flat run
-// fields into Style and reads color when present.
+// fields into Style and reads color when present. Unknown keys (such as a
+// nested "style" object) are a hard error naming the offending key(s) and the
+// correct flat shape.
 func (r *TextRun) UnmarshalJSON(data []byte) error {
 	type plain struct {
 		Text      string     `json:"text"`
@@ -149,7 +151,10 @@ func (r *TextRun) UnmarshalJSON(data []byte) error {
 		Color     *TextColor `json:"color,omitempty"`
 	}
 	var p plain
-	if err := json.Unmarshal(data, &p); err != nil {
+	if err := strictUnmarshal(data, &p); err != nil {
+		if e := asUnknownFieldError(err); e != nil {
+			e.Kind = "run"
+		}
 		return err
 	}
 	r.Text = p.Text

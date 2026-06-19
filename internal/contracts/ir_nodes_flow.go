@@ -1,5 +1,10 @@
 package contracts
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 // FlowOrientation selects a flow's axis (mirrors pptx-go's
 // scene.FlowOrientation).
 type FlowOrientation string
@@ -50,5 +55,35 @@ func (Flow) slideNodeKind() Kind { return KindFlow }
 // MarshalJSON injects the "flow" kind discriminator via marshalNode. Step
 // RichText fields marshal through each TextRun's own MarshalJSON.
 func (f *Flow) MarshalJSON() ([]byte, error) { return marshalNode(KindFlow, *f) }
+
+// UnmarshalJSON strict-decodes a Flow, then strict-decodes each FlowStep so
+// wrong keys (e.g. {title,body} instead of {label,detail}) are a hard error
+// naming the offending key(s) and the correct shape. The injected "kind"
+// discriminator is explicitly allowed.
+func (f *Flow) UnmarshalJSON(data []byte) error {
+	type flowWire struct {
+		Orientation FlowOrientation   `json:"orientation,omitempty"`
+		Steps       []json.RawMessage `json:"steps,omitempty"`
+		Connector   ConnectorKind     `json:"connector,omitempty"`
+	}
+	var wire flowWire
+	if err := strictUnmarshal(data, &wire, "kind"); err != nil {
+		return err
+	}
+	f.Orientation = wire.Orientation
+	f.Connector = wire.Connector
+	if wire.Steps != nil {
+		f.Steps = make([]FlowStep, len(wire.Steps))
+		for i, raw := range wire.Steps {
+			if err := strictUnmarshal(raw, &f.Steps[i]); err != nil {
+				if e := asUnknownFieldError(err); e != nil {
+					e.Kind = "FlowStep"
+				}
+				return fmt.Errorf("steps[%d]: %w", i, err)
+			}
+		}
+	}
+	return nil
+}
 
 func init() { registerNodeKind(KindFlow, func() SlideNode { return &Flow{} }) }

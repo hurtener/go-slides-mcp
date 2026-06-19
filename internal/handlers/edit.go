@@ -16,6 +16,10 @@ import (
 func (h *handlers) editSlideNode(_ context.Context, in contracts.EditSlideNodeInput) (tool.Result[contracts.EditSlideNodeOutput], error) {
 	node, err := decodeSlideNode(in.Node)
 	if err != nil {
+		var ufe *contracts.UnknownFieldError
+		if errors.As(err, &ufe) {
+			return tool.Result[contracts.EditSlideNodeOutput]{Text: err.Error()}, nil
+		}
 		return tool.Result[contracts.EditSlideNodeOutput]{}, err
 	}
 	slide, validation, err := h.mutateSlide(in.DeckID, in.SlideID, in.ExpectedRevisionHash, func(slide *contracts.Slide) error {
@@ -31,6 +35,10 @@ func (h *handlers) editSlideNode(_ context.Context, in contracts.EditSlideNodeIn
 func (h *handlers) insertSlideNode(_ context.Context, in contracts.InsertSlideNodeInput) (tool.Result[contracts.InsertSlideNodeOutput], error) {
 	node, err := decodeSlideNode(in.Node)
 	if err != nil {
+		var ufe *contracts.UnknownFieldError
+		if errors.As(err, &ufe) {
+			return tool.Result[contracts.InsertSlideNodeOutput]{Text: err.Error()}, nil
+		}
 		return tool.Result[contracts.InsertSlideNodeOutput]{}, err
 	}
 	slide, validation, err := h.mutateSlide(in.DeckID, in.SlideID, in.ExpectedRevisionHash, func(slide *contracts.Slide) error {

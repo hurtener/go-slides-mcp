@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
@@ -146,5 +147,63 @@ func assertProseBody(t *testing.T, node contracts.SlideNode, want string) {
 	}
 	if got := richTextString(prose.Paragraphs[0]); got != want {
 		t.Fatalf("prose text = %q, want %q", got, want)
+	}
+}
+
+// TestEditSlideNodeUnknownFlowStepKeyReturnedInResultText is the acceptance
+// check for A3: edit_slide_node with a {title,body} flow step must return a
+// Result.Text containing the unknown key(s) and the {label,detail} hint — not
+// a bare Go error.
+func TestEditSlideNodeUnknownFlowStepKeyReturnedInResultText(t *testing.T) {
+	h, deckID, slideID, revision := setupEditableSlide(t)
+
+	// A flow node using the wrong step keys: {title,body} instead of {label,detail}.
+	badNode := map[string]any{
+		"kind": "flow",
+		"steps": []any{
+			map[string]any{"title": "Acquire", "body": "Step one"},
+		},
+	}
+	result, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{
+		DeckID:               deckID,
+		SlideID:              slideID,
+		Path:                 contracts.IRPath{"nodes", 0},
+		Node:                 badNode,
+		ExpectedRevisionHash: revision,
+	})
+	// Must NOT propagate a bare Go error — the error must be model-visible in Text.
+	if err != nil {
+		t.Fatalf("editSlideNode: unexpected Go error (should be surfaced as Result.Text): %v", err)
+	}
+	for _, want := range []string{"title", "label"} {
+		if !strings.Contains(result.Text, want) {
+			t.Errorf("Result.Text = %q; want it to contain %q", result.Text, want)
+		}
+	}
+}
+
+// TestInsertSlideNodeUnknownFieldReturnedInResultText verifies that
+// insert_slide_node also surfaces decode errors in Result.Text.
+func TestInsertSlideNodeUnknownFieldReturnedInResultText(t *testing.T) {
+	h, deckID, slideID, revision := setupEditableSlide(t)
+
+	badNode := map[string]any{
+		"kind": "flow",
+		"steps": []any{
+			map[string]any{"title": "Step", "body": "desc"},
+		},
+	}
+	result, err := h.insertSlideNode(context.Background(), contracts.InsertSlideNodeInput{
+		DeckID:               deckID,
+		SlideID:              slideID,
+		Path:                 contracts.IRPath{"nodes", 0},
+		Node:                 badNode,
+		ExpectedRevisionHash: revision,
+	})
+	if err != nil {
+		t.Fatalf("insertSlideNode: unexpected Go error (should be surfaced as Result.Text): %v", err)
+	}
+	if !strings.Contains(result.Text, "title") {
+		t.Errorf("Result.Text = %q; want it to contain %q", result.Text, "title")
 	}
 }
