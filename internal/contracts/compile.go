@@ -38,3 +38,17 @@ type CompileChartOutput struct {
 	// Warnings are non-fatal rasterization notes.
 	Warnings []string `json:"warnings,omitempty"`
 }
+
+// CompileMarkdownInput is the model-facing input for compile_markdown.
+type CompileMarkdownInput struct {
+	// Markdown is the source text to parse into IR leaf nodes.
+	Markdown string `json:"markdown"`
+}
+
+// CompileMarkdownOutput returns the parsed IR leaf nodes and any parse warnings.
+type CompileMarkdownOutput struct {
+	// Nodes are the parsed slide IR leaf nodes (headings, lists, quotes, prose).
+	Nodes []SlideNode `json:"nodes"`
+	// Warnings are non-fatal parse notes.
+	Warnings []string `json:"warnings,omitempty"`
+}

@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": true
+    },
+    "warnings": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "nodes"
+  ],
+  "additionalProperties": false
+}

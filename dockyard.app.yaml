@@ -240,6 +240,11 @@ tools:
     input: internal/contracts.CompileChartInput
     output: internal/contracts.CompileChartOutput
     task_support: forbidden
+  - name: compile_markdown
+    description: Parse markdown source into Deckard slide IR leaf nodes (headings, lists, quotes, prose).
+    input: internal/contracts.CompileMarkdownInput
+    output: internal/contracts.CompileMarkdownOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.
