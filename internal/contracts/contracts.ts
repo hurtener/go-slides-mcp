@@ -278,6 +278,192 @@ export interface SetDeckSectionsOutput {
   sections?: DeckSection[];
 }
 /**
+ * IRPath is a structural path into a slide's node tree.
+ */
+export type IRPath = any[];
+/**
+ * EditSlideNodeInput is the typed input for edit_slide_node.
+ */
+export interface EditSlideNodeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the existing node to replace.
+   */
+  path?: IRPath;
+  /**
+   * Node is the replacement slide node encoded as raw JSON with a kind discriminator.
+   */
+  node: any /* json.RawMessage */;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * EditSlideNodeOutput is the structured result for edit_slide_node.
+ */
+export interface EditSlideNodeOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * InsertSlideNodeInput is the typed input for insert_slide_node.
+ */
+export interface InsertSlideNodeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the insertion point in a node slice.
+   */
+  path?: IRPath;
+  /**
+   * Node is the inserted slide node encoded as raw JSON with a kind discriminator.
+   */
+  node: any /* json.RawMessage */;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * InsertSlideNodeOutput is the structured result for insert_slide_node.
+ */
+export interface InsertSlideNodeOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * RemoveSlideNodeInput is the typed input for remove_slide_node.
+ */
+export interface RemoveSlideNodeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the existing node to remove.
+   */
+  path?: IRPath;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * RemoveSlideNodeOutput is the structured result for remove_slide_node.
+ */
+export interface RemoveSlideNodeOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * DuplicateSlideNodeInput is the typed input for duplicate_slide_node.
+ */
+export interface DuplicateSlideNodeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * Path addresses the existing node to duplicate.
+   */
+  path?: IRPath;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * DuplicateSlideNodeOutput is the structured result for duplicate_slide_node.
+ */
+export interface DuplicateSlideNodeOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
+ * MoveSlideNodeInput is the typed input for move_slide_node.
+ */
+export interface MoveSlideNodeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to edit.
+   */
+  slideId: string;
+  /**
+   * From addresses the existing node to move.
+   */
+  from?: IRPath;
+  /**
+   * To addresses the destination insertion point.
+   */
+  to?: IRPath;
+  /**
+   * ExpectedRevisionHash enforces optimistic concurrency when set.
+   */
+  expectedRevisionHash?: string;
+}
+/**
+ * MoveSlideNodeOutput is the structured result for move_slide_node.
+ */
+export interface MoveSlideNodeOutput {
+  /**
+   * Slide is the stored edited slide snapshot.
+   */
+  slide: Slide;
+  /**
+   * Validation is the structural validation result for the stored slide.
+   */
+  validation: SlideValidation;
+}
+/**
  * AssetID names caller-supplied bytes resolved by the render-time
  * AssetResolver (mirrors pptx-go's scene.AssetID; see register-an-asset).
  * It is free-form: bare keys, content hashes, UUIDs, or "asset://<uuid>"

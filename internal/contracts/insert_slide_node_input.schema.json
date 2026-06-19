@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "slideId": {
+      "type": "string"
+    },
+    "path": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": true
+    },
+    "node": true,
+    "expectedRevisionHash": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deckId",
+    "slideId",
+    "node"
+  ],
+  "additionalProperties": false
+}
