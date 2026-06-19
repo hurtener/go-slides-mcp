@@ -95,6 +95,14 @@
   function pickTheme(id: AppThemeId) { userPicked = true; theme = id; applyChain(); }
   function flash(msg: string) { toast = msg; setTimeout(() => (toast = ''), 2600); }
 
+  // Inline action icons (stroke = currentColor so they adopt the theme).
+  const ICON_DOWNLOAD =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+  const ICON_GRID =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+  const ICON_EDIT =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+
   async function download() {
     if (!payload) return;
     try {
@@ -130,74 +138,88 @@
           <h1>{payload.deck.title || 'Untitled deck'}</h1>
           <p class="meta">{payload.deck.slideCount} slide{payload.deck.slideCount === 1 ? '' : 's'} · {brandTitle}</p>
         </div>
-        {#if allowSwitch}
-          <ThemeSelector current={theme} onchange={pickTheme} />
-        {/if}
+        <div class="tools">
+          <button type="button" class="icon primary" data-tip="Download .pptx" aria-label="Download .pptx" onclick={download}>{@html ICON_DOWNLOAD}</button>
+          <button type="button" class="icon" data-tip="Open overview" aria-label="Open overview" onclick={openOverview}>{@html ICON_GRID}</button>
+          <button type="button" class="icon" data-tip="Edit this slide" aria-label="Edit this slide" onclick={editSelected}>{@html ICON_EDIT}</button>
+          {#if allowSwitch}
+            <ThemeSelector current={theme} onchange={pickTheme} />
+          {/if}
+        </div>
       </header>
 
-      <div class="stage">
-        {#if featured}
-          <div class="featured-wrap">
-            <SlideThumb slide={featured} size="featured" />
-          </div>
-        {/if}
-        <div class="actions">
-          <button type="button" class="btn primary" onclick={download}>↓ Download .pptx</button>
-          <button type="button" class="btn" onclick={openOverview}>▦ Open overview</button>
-          <button type="button" class="btn" onclick={editSelected}>✎ Edit this slide</button>
-          {#if toast}<p class="toast">{toast}</p>{/if}
-        </div>
-      </div>
+      {#if featured}
+        <div class="featured"><SlideThumb slide={featured} size="featured" /></div>
+      {/if}
 
       {#if slides.length > 1}
-        <div class="strip" role="listbox" aria-label="Slides">
+        <div class="rail" role="listbox" aria-label="Slides">
           {#each slides as s (s.id)}
             <SlideThumb slide={s} size="strip" selected={s.index === selected} onselect={(i) => (selected = i)} />
           {/each}
         </div>
       {/if}
+
+      {#if toast}<p class="toast">{toast}</p>{/if}
     {/if}
   </PageState>
 </div>
 
 <style>
-  .preview { padding: var(--app-space-5); display: flex; flex-direction: column; gap: var(--app-space-4); }
-  .head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--app-space-4); }
+  .preview { padding: var(--app-space-4) var(--app-space-5) var(--app-space-5); display: flex; flex-direction: column; gap: var(--app-space-4); }
+
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-3); }
+  .titles { min-width: 0; }
   .titles h1 {
     margin: 0;
     font-family: var(--app-font-serif);
     font-weight: var(--app-weight-medium);
-    font-size: var(--app-text-2xl);
-    line-height: 1.1;
+    font-size: var(--app-text-xl);
+    line-height: 1.15;
     color: var(--app-text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .meta { margin: 4px 0 0; font-size: var(--app-text-sm); color: var(--app-text-muted); }
+  .meta { margin: 2px 0 0; font-size: var(--app-text-sm); color: var(--app-text-muted); }
 
-  .stage { display: grid; grid-template-columns: 1fr 200px; gap: var(--app-space-5); align-items: start; }
-  .featured-wrap { box-shadow: var(--app-shadow-lg); border-radius: var(--app-radius-lg); overflow: hidden; }
-  .actions { display: flex; flex-direction: column; gap: var(--app-space-2); }
+  .tools { display: flex; align-items: center; gap: var(--app-space-2); flex: 0 0 auto; }
 
-  .btn {
-    display: inline-flex; align-items: center; gap: var(--app-space-2);
-    padding: 9px 14px; border-radius: var(--app-radius-md);
+  /* icon action buttons with a CSS tooltip */
+  .icon {
+    position: relative;
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
     border: 1px solid var(--app-border);
-    background: var(--app-surface); color: var(--app-text);
-    font-size: var(--app-text-sm); cursor: pointer; text-align: left;
-    transition: border-color var(--app-dur) var(--app-ease), background var(--app-dur) var(--app-ease);
+    border-radius: var(--app-radius-md);
+    background: var(--app-surface);
+    color: var(--app-text);
+    cursor: pointer;
+    transition: border-color var(--app-dur) var(--app-ease), background var(--app-dur) var(--app-ease), color var(--app-dur) var(--app-ease);
   }
-  .btn:hover { border-color: var(--app-accent); background: var(--app-surface-raised); }
-  .btn:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 2px; }
-  .btn.primary { background: var(--app-accent); color: #fff; border-color: transparent; }
-  .btn.primary:hover { background: var(--app-accent-hover); }
-  .toast { margin: var(--app-space-2) 0 0; font-size: var(--app-text-xs); color: var(--app-text-muted); }
+  .icon:hover { border-color: var(--app-accent); color: var(--app-accent-text); }
+  .icon:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 2px; }
+  .icon.primary { background: var(--app-accent); color: #fff; border-color: transparent; }
+  .icon.primary:hover { background: var(--app-accent-hover); color: #fff; }
+  .icon[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+    background: var(--app-text); color: var(--app-bg);
+    font-size: var(--app-text-xs); white-space: nowrap;
+    padding: 4px 8px; border-radius: var(--app-radius-sm);
+    opacity: 0; pointer-events: none; transition: opacity var(--app-dur-fast) var(--app-ease);
+    z-index: 30;
+  }
+  .icon[data-tip]:hover::after, .icon[data-tip]:focus-visible::after { opacity: 1; }
 
-  .strip {
+  .featured { width: 100%; }
+  .featured :global(.frame) { box-shadow: var(--app-shadow-lg); }
+
+  .rail {
     display: flex; gap: var(--app-space-3);
-    overflow-x: auto; padding: var(--app-space-2) 2px var(--app-space-3);
+    justify-content: safe center;
+    overflow-x: auto;
+    padding: var(--app-space-1) 2px var(--app-space-2);
     scrollbar-width: thin;
   }
 
-  @media (max-width: 560px) {
-    .stage { grid-template-columns: 1fr; }
-  }
+  .toast { margin: 0; font-size: var(--app-text-xs); color: var(--app-text-muted); text-align: center; }
 </style>
