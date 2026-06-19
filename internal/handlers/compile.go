@@ -16,7 +16,7 @@ func (h *handlers) compileMarkdown(_ context.Context, in contracts.CompileMarkdo
 	nodes, warnings := markdown.Parse(in.Markdown)
 	out := contracts.CompileMarkdownOutput{Nodes: nodes, Warnings: warnings}
 	return tool.Result[contracts.CompileMarkdownOutput]{
-		Text:       fmt.Sprintf("Compiled markdown into %d node(s).", len(nodes)),
+		Text:       agentText(fmt.Sprintf("Compiled markdown into %d node(s). Pass these as a slide's \"nodes\" to add_slide:", len(nodes)), out.Nodes),
 		Structured: out,
 	}, nil
 }
@@ -42,7 +42,7 @@ func (h *handlers) compileCode(_ context.Context, in contracts.CompileCodeInput)
 		AssetID: asset.ID,
 	}
 	return tool.Result[contracts.CompileCodeOutput]{
-		Text:       fmt.Sprintf("Rasterized %s code -> %s (%d bytes).", in.Language, asset.ID, len(png)),
+		Text:       agentText(fmt.Sprintf("Rasterized %s code. Embed this node in a slide's \"nodes\":", in.Language), out.Node),
 		Structured: out,
 	}, nil
 }
@@ -78,7 +78,7 @@ func (h *handlers) compileChart(_ context.Context, in contracts.CompileChartInpu
 		AssetID: asset.ID,
 	}
 	return tool.Result[contracts.CompileChartOutput]{
-		Text:       fmt.Sprintf("Compiled %s chart -> %s (%d bytes).", spec.Type, asset.ID, len(png)),
+		Text:       agentText(fmt.Sprintf("Compiled %s chart. Embed this node in a slide's \"nodes\":", spec.Type), out.Node),
 		Structured: out,
 	}, nil
 }

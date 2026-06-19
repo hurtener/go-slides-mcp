@@ -7,7 +7,6 @@ import (
 	"github.com/hurtener/dockyard/runtime/tool"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
-	"github.com/hurtener/go-slides-mcp/internal/ir"
 	"github.com/hurtener/go-slides-mcp/internal/raster"
 	"github.com/hurtener/go-slides-mcp/internal/render"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -23,7 +22,7 @@ func (h *handlers) validateSlideIR(_ context.Context, in contracts.ValidateSlide
 		Issues:   report.Messages(),
 		Findings: findings(report.Issues),
 	}
-	return tool.Result[contracts.ValidateSlideIROutput]{Text: scoreText("slide IR", out.OK, out.Score, out.Issues), Structured: out}, nil
+	return tool.Result[contracts.ValidateSlideIROutput]{Text: agentText(scoreText("slide IR", out.OK, out.Score, out.Issues), out.Findings), Structured: out}, nil
 }
 
 func (h *handlers) validateSlide(_ context.Context, in contracts.ValidateSlideInput) (tool.Result[contracts.ValidateSlideOutput], error) {
@@ -45,7 +44,7 @@ func (h *handlers) validateSlide(_ context.Context, in contracts.ValidateSlideIn
 		Issues:   report.Messages(),
 		Findings: findings(report.Issues),
 	}
-	return tool.Result[contracts.ValidateSlideOutput]{Text: scoreText(fmt.Sprintf("slide %q", in.SlideID), out.OK, out.Score, out.Issues), Structured: out}, nil
+	return tool.Result[contracts.ValidateSlideOutput]{Text: agentText(scoreText(fmt.Sprintf("slide %q", in.SlideID), out.OK, out.Score, out.Issues), out.Findings), Structured: out}, nil
 }
 
 func (h *handlers) validateDeckForExport(_ context.Context, in contracts.ValidateDeckForExportInput) (tool.Result[contracts.ValidateDeckForExportOutput], error) {
@@ -74,7 +73,7 @@ func (h *handlers) validateDeckForExport(_ context.Context, in contracts.Validat
 			Issues:  r.Messages(),
 		})
 	}
-	return tool.Result[contracts.ValidateDeckForExportOutput]{Text: scoreText(fmt.Sprintf("deck %q", stored.ID), out.OK, out.Score, out.Blockers), Structured: out}, nil
+	return tool.Result[contracts.ValidateDeckForExportOutput]{Text: agentText(scoreText(fmt.Sprintf("deck %q", stored.ID), out.OK, out.Score, out.Blockers), out.Findings), Structured: out}, nil
 }
 
 // resolveSoul returns the named soul, or the built-in Deckard White default
@@ -121,17 +120,4 @@ func scoreText(target string, ok bool, score float64, issues []string) string {
 		status = fmt.Sprintf("%d issue(s)", len(issues))
 	}
 	return fmt.Sprintf("Validated %s: %s (StyleScore %.2f).", target, status, score)
-}
-
-// validateDoc remains for the inline structural validation used by the surface
-// handlers (fast, no render/contrast pass).
-func validateDoc(doc contracts.SlideDoc) contracts.ValidateDeckForExportOutput {
-	err := ir.ValidateDoc(doc)
-	if err == nil {
-		return contracts.ValidateDeckForExportOutput{OK: true, Score: 1}
-	}
-	issues := collectIssues(err)
-	blockers := make([]string, 0, len(issues))
-	blockers = append(blockers, issues...)
-	return contracts.ValidateDeckForExportOutput{OK: false, Blockers: blockers}
 }

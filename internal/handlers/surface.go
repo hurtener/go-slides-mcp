@@ -62,65 +62,6 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 	return tool.Result[contracts.OpenSlideEditorOutput]{Text: fmt.Sprintf("Opened editor for slide %q in deck %q.", slide.ID, deckID), Structured: out}, nil
 }
 
-func (h *handlers) getDeckState(_ context.Context, in contracts.GetDeckStateInput) (tool.Result[contracts.GetDeckStateOutput], error) {
-	stored, err := h.deps.Store.GetDeck(in.DeckID)
-	if err != nil {
-		return tool.Result[contracts.GetDeckStateOutput]{}, mapDeckError(in.DeckID, err)
-	}
-
-	souls := h.deps.Souls.List()
-	soulList := make([]contracts.SoulSummary, 0, len(souls))
-	for _, item := range souls {
-		name := item.Name
-		if name == "" {
-			name = item.ID
-		}
-		soulList = append(soulList, contracts.SoulSummary{
-			SoulID:     item.ID,
-			Name:       name,
-			Status:     contracts.SoulStatus(item.Status),
-			TokenCount: len(flattenTokens(item)),
-		})
-	}
-
-	doc := contracts.SlideDoc{Title: stored.Title, Slides: append([]contracts.Slide(nil), stored.Slides...)}
-	validation := validateDoc(doc)
-	perSlide := make([]contracts.DeckSlideValidation, 0, len(stored.Slides))
-	for _, slide := range stored.Slides {
-		slideValidation := validateSlide(slide)
-		perSlide = append(perSlide, contracts.DeckSlideValidation{SlideID: slide.ID, OK: slideValidation.OK, Issues: slideValidation.Issues})
-	}
-	validation.PerSlide = perSlide
-
-	out := contracts.GetDeckStateOutput{
-		Kind:       contracts.SurfaceKindState,
-		DeckID:     stored.ID,
-		Slides:     slideSummaries(stored),
-		Souls:      soulList,
-		Validation: validation,
-	}
-
-	selectedID := strings.TrimSpace(in.SelectedSlideID)
-	if selectedID != "" {
-		for _, slide := range stored.Slides {
-			if slide.ID == selectedID {
-				title, _ := summarizeSlide(slide)
-				out.Selected = &contracts.DeckStateSelection{
-					SlideID: slide.ID,
-					Layout:  slide.Layout,
-					Title:   title,
-				}
-				break
-			}
-		}
-		if out.Selected == nil {
-			out.Selected = &contracts.DeckStateSelection{SlideID: selectedID}
-		}
-	}
-
-	return tool.Result[contracts.GetDeckStateOutput]{Text: fmt.Sprintf("Loaded state for deck %q with %d slide(s) and %d soul(s).", deckLabel(stored), len(out.Slides), len(out.Souls)), Structured: out}, nil
-}
-
 func (h *handlers) setActiveWorkspace(_ context.Context, in contracts.SetActiveWorkspaceInput) (tool.Result[contracts.SetActiveWorkspaceOutput], error) {
 	if deckID := strings.TrimSpace(in.DeckID); deckID != "" {
 		if _, err := h.deps.Store.GetDeck(deckID); err != nil {

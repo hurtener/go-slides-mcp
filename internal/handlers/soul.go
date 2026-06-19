@@ -68,7 +68,7 @@ func (h *handlers) listSouls(_ context.Context, in contracts.ListSoulsInput) (to
 		}
 		out.Souls = append(out.Souls, contracts.SoulSummary{SoulID: item.ID, Name: item.Name, Status: contracts.SoulStatus(item.Status), TokenCount: len(flattenTokens(item))})
 	}
-	return tool.Result[contracts.ListSoulsOutput]{Text: fmt.Sprintf("Found %d soul(s).", len(out.Souls)), Structured: out}, nil
+	return tool.Result[contracts.ListSoulsOutput]{Text: agentText(fmt.Sprintf("Found %d soul(s). Pass a soulId to create_deck (or omit for the default):", len(out.Souls)), out.Souls), Structured: out}, nil
 }
 
 func (h *handlers) getSoul(_ context.Context, in contracts.GetSoulInput) (tool.Result[contracts.GetSoulOutput], error) {
@@ -80,7 +80,7 @@ func (h *handlers) getSoul(_ context.Context, in contracts.GetSoulInput) (tool.R
 	if in.IncludeStyleGuide {
 		out.StyleGuide = &contracts.SoulStyleGuide{NorthStar: stored.StyleGuide.NorthStar, Do: slices.Clone(stored.StyleGuide.Do), Dont: slices.Clone(stored.StyleGuide.Dont)}
 	}
-	return tool.Result[contracts.GetSoulOutput]{Text: fmt.Sprintf("Loaded soul %q.", stored.ID), Structured: out}, nil
+	return tool.Result[contracts.GetSoulOutput]{Text: agentText(fmt.Sprintf("Soul %q:", stored.ID), out), Structured: out}, nil
 }
 
 func (h *handlers) getDesignTokens(_ context.Context, in contracts.GetDesignTokensInput) (tool.Result[contracts.GetDesignTokensOutput], error) {
@@ -89,7 +89,7 @@ func (h *handlers) getDesignTokens(_ context.Context, in contracts.GetDesignToke
 		return tool.Result[contracts.GetDesignTokensOutput]{}, fmt.Errorf("soul %q not found", in.SoulID)
 	}
 	out := contracts.GetDesignTokensOutput{Tokens: flattenTokens(stored)}
-	return tool.Result[contracts.GetDesignTokensOutput]{Text: fmt.Sprintf("Loaded %d design token(s) for soul %q.", len(out.Tokens), stored.ID), Structured: out}, nil
+	return tool.Result[contracts.GetDesignTokensOutput]{Text: agentText(fmt.Sprintf("%d design token(s) for soul %q:", len(out.Tokens), stored.ID), out.Tokens), Structured: out}, nil
 }
 
 func flattenTokens(s *soul.Soul) []contracts.TokenEntry {

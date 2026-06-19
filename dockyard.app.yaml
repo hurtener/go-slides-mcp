@@ -227,11 +227,6 @@ tools:
     input: internal/contracts.OpenSlideEditorInput
     output: internal/contracts.OpenSlideEditorOutput
     task_support: forbidden
-  - name: get_deck_state
-    description: Get the rich hydration payload for the deck-overview surfaces on mount.
-    input: internal/contracts.GetDeckStateInput
-    output: internal/contracts.GetDeckStateOutput
-    task_support: forbidden
   - name: set_active_workspace
     description: Set the active workspace deck and soul in the session.
     input: internal/contracts.SetActiveWorkspaceInput
