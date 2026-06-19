@@ -12,6 +12,7 @@ import (
 	"github.com/hurtener/dockyard/runtime/server"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
+	"github.com/hurtener/go-slides-mcp/internal/comment"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
@@ -52,6 +53,7 @@ func main() {
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
 		Assets:    asset.NewMemoryStore(),
+		Comments:  comment.NewMemoryStore(),
 		Session:   &handlers.SessionState{},
 		BuildInfo: buildInfo,
 		Workspace: workspace,

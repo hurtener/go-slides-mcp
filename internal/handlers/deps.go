@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
+	"github.com/hurtener/go-slides-mcp/internal/comment"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -36,6 +37,8 @@ type ToolDeps struct {
 	Souls *soul.MemoryRegistry
 	// Assets persists uploaded binary assets in memory.
 	Assets *asset.MemoryStore
+	// Comments persists collaboration comments in memory.
+	Comments *comment.MemoryStore
 	// Session is the small in-memory workspace session state.
 	Session *SessionState
 	// BuildInfo identifies the running Deckard build.

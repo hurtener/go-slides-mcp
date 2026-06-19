@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "commentId": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "commentId"
+  ],
+  "additionalProperties": false
+}

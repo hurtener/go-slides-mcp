@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "commentId": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "commentId",
+    "resolved"
+  ],
+  "additionalProperties": false
+}

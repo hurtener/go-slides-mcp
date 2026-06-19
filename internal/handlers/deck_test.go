@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
+	"github.com/hurtener/go-slides-mcp/internal/comment"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -97,6 +98,7 @@ func testHandlers() *handlers {
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
 		Assets:    asset.NewMemoryStore(),
+		Comments:  comment.NewMemoryStore(),
 		Session:   &SessionState{},
 		BuildInfo: contracts.BuildInfo{Name: "go-slides-mcp", Version: "test"},
 		Workspace: "/tmp/deckard-test",

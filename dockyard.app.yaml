@@ -140,6 +140,21 @@ tools:
     input: internal/contracts.DeleteAssetInput
     output: internal/contracts.DeleteAssetOutput
     task_support: forbidden
+  - name: add_comment
+    description: Add one collaboration comment to a deck, slide, or node.
+    input: internal/contracts.AddCommentInput
+    output: internal/contracts.AddCommentOutput
+    task_support: forbidden
+  - name: list_comments
+    description: List stored collaboration comments for one deck.
+    input: internal/contracts.ListCommentsInput
+    output: internal/contracts.ListCommentsOutput
+    task_support: forbidden
+  - name: resolve_comment
+    description: Resolve one stored collaboration comment by comment ID.
+    input: internal/contracts.ResolveCommentInput
+    output: internal/contracts.ResolveCommentOutput
+    task_support: forbidden
   - name: validate_slide_ir
     description: Validate one slide IR snapshot without storage.
     input: internal/contracts.ValidateSlideIRInput

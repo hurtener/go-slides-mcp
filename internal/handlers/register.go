@@ -167,6 +167,24 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.AddCommentInput, contracts.AddCommentOutput]("add_comment").
+		Describe("Add one collaboration comment to a deck, slide, or node.").
+		Handler(h.addComment).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ListCommentsInput, contracts.ListCommentsOutput]("list_comments").
+		Describe("List stored collaboration comments for one deck.").
+		Handler(h.listComments).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ResolveCommentInput, contracts.ResolveCommentOutput]("resolve_comment").
+		Describe("Resolve one stored collaboration comment by comment ID.").
+		Handler(h.resolveComment).
+		Register(srv); err != nil {
+		return err
+	}
 	if err := tool.New[contracts.ValidateSlideIRInput, contracts.ValidateSlideIROutput]("validate_slide_ir").
 		Describe("Validate one slide IR snapshot without storage.").
 		Handler(h.validateSlideIR).

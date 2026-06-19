@@ -1,0 +1,69 @@
+{
+  "type": "object",
+  "properties": {
+    "comments": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "commentId": {
+            "type": "string"
+          },
+          "deckId": {
+            "type": "string"
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "slideId": {
+                "type": "string"
+              },
+              "irPath": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": true
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "body": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "commentId",
+          "deckId",
+          "target",
+          "body",
+          "resolved",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
