@@ -2,11 +2,31 @@ package handlers
 
 import (
 	"log/slog"
+	"sync"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
+	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
+
+// SessionState is the small in-memory workspace session shared by handlers.
+type SessionState struct {
+	mu           sync.RWMutex
+	activeDeckID string
+	activeSoulID string
+	openPanels   []string
+}
+
+// Snapshot returns a copy of the current session state.
+func (s *SessionState) Snapshot() (activeDeckID, activeSoulID string, openPanels []string) {
+	if s == nil {
+		return "", "", []string{}
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.activeDeckID, s.activeSoulID, append([]string{}, s.openPanels...)
+}
 
 // ToolDeps are the concrete dependencies shared by the tool handlers.
 type ToolDeps struct {
@@ -16,6 +36,10 @@ type ToolDeps struct {
 	Souls *soul.MemoryRegistry
 	// Assets persists uploaded binary assets in memory.
 	Assets *asset.MemoryStore
+	// Session is the small in-memory workspace session state.
+	Session *SessionState
+	// BuildInfo identifies the running Deckard build.
+	BuildInfo contracts.BuildInfo
 	// Workspace is the server workspace root for file-backed operations.
 	Workspace string
 	// Logger is the process logger.

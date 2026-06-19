@@ -12,6 +12,7 @@ import (
 	"github.com/hurtener/dockyard/runtime/server"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
+	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -20,6 +21,8 @@ import (
 // httpAddr is the address the HTTP transport listens on when
 // DOCKYARD_TRANSPORT=http. DOCKYARD_HTTP_ADDR overrides it.
 const httpAddr = "127.0.0.1:8080"
+
+var buildInfo = contracts.BuildInfo{Name: "go-slides-mcp", Version: "0.1.0"}
 
 func main() {
 	// A text slog handler — readable local logs (Dockyard convention).
@@ -31,9 +34,9 @@ func main() {
 	defer stop()
 
 	srv, err := server.New(server.Info{
-		Name:    "go-slides-mcp",
+		Name:    buildInfo.Name,
 		Title:   "Go Slides Mcp",
-		Version: "0.1.0",
+		Version: buildInfo.Version,
 	}, &server.Options{Logger: logger})
 	if err != nil {
 		logger.Error("create server", slog.String("error", err.Error()))
@@ -49,6 +52,8 @@ func main() {
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
 		Assets:    asset.NewMemoryStore(),
+		Session:   &handlers.SessionState{},
+		BuildInfo: buildInfo,
 		Workspace: workspace,
 		Logger:    logger,
 	}

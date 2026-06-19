@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "activeDeckId": {
+      "type": "string"
+    },
+    "activeSoulId": {
+      "type": "string"
+    },
+    "openPanels": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "buildInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "openPanels",
+    "buildInfo"
+  ],
+  "additionalProperties": false
+}

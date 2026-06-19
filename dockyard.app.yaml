@@ -140,6 +140,26 @@ tools:
     input: internal/contracts.DeleteAssetInput
     output: internal/contracts.DeleteAssetOutput
     task_support: forbidden
+  - name: validate_slide_ir
+    description: Validate one slide IR snapshot without storage.
+    input: internal/contracts.ValidateSlideIRInput
+    output: internal/contracts.ValidateSlideIROutput
+    task_support: forbidden
+  - name: validate_slide
+    description: Validate one stored slide by deck and slide ID.
+    input: internal/contracts.ValidateSlideInput
+    output: internal/contracts.ValidateSlideOutput
+    task_support: forbidden
+  - name: validate_deck_for_export
+    description: Validate every slide in one deck and report export blockers.
+    input: internal/contracts.ValidateDeckForExportInput
+    output: internal/contracts.ValidateDeckForExportOutput
+    task_support: forbidden
+  - name: get_session
+    description: Get the active in-memory workspace session and build info.
+    input: internal/contracts.GetSessionInput
+    output: internal/contracts.GetSessionOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.
