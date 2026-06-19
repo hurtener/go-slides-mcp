@@ -33,27 +33,53 @@ func Compute(slide contracts.Slide, theme *pptx.Theme) contracts.SlideLayout {
 	gap := theme.ResolveSpace(pptx.SpaceMD)
 	cw, ch := pptx.Slide16x9Width, pptx.Slide16x9Height
 	body := pptx.Box{X: bodyMargin, Y: bodyMargin, W: cw - 2*bodyMargin, H: ch - 2*bodyMargin}
+	full := pptx.Box{X: 0, Y: 0, W: cw, H: ch}
 
 	c := &computer{gap: gap}
-	overflow := c.stack(body, slide.Nodes, []any{"nodes"})
+	c.stackTop(body, full, slide.Nodes)
 
 	return contracts.SlideLayout{
 		CanvasWidth:  int64(cw),
 		CanvasHeight: int64(ch),
 		Placements:   c.out,
-		Overflow:     overflow,
+		Overflow:     c.overflow,
 	}
 }
 
 type computer struct {
-	gap pptx.EMU
-	out []contracts.NodePlacement
+	gap      pptx.EMU
+	out      []contracts.NodePlacement
+	overflow bool
+}
+
+// stackTop mirrors scene.layout(): Decoration and SectionDivider are full-slide
+// overlays that do NOT consume body-stack height; every other node stacks in the
+// body region. Paths keep the ORIGINAL slide.Nodes index so the edit tools
+// resolve correctly.
+func (c *computer) stackTop(body, full pptx.Box, nodes []contracts.SlideNode) {
+	y := body.Y
+	stacked := 0
+	for i, n := range nodes {
+		path := []any{"nodes", i}
+		switch n.(type) {
+		case *contracts.Decoration, *contracts.SectionDivider:
+			c.emit(full, n, path)
+		default:
+			h := preferredHeight(n)
+			c.emit(pptx.Box{X: body.X, Y: y, W: body.W, H: h}, n, path)
+			y += h + c.gap
+			stacked++
+		}
+	}
+	if stacked > 0 && y-c.gap > body.Bottom() {
+		c.overflow = true
+	}
 }
 
 // stack lays nodes top-to-bottom in box (full width, preferredHeight, gap),
 // mirroring scene.stackIn, emitting a placement per node and recursing into
-// containers. Returns true if the content overflows box.
-func (c *computer) stack(box pptx.Box, nodes []contracts.SlideNode, prefix []any) bool {
+// containers. Records overflow into the shared computer.
+func (c *computer) stack(box pptx.Box, nodes []contracts.SlideNode, prefix []any) {
 	y := box.Y
 	for i, n := range nodes {
 		h := preferredHeight(n)
@@ -61,7 +87,9 @@ func (c *computer) stack(box pptx.Box, nodes []contracts.SlideNode, prefix []any
 		c.emit(nb, n, appendPath(prefix, i))
 		y += h + c.gap
 	}
-	return len(nodes) > 0 && y-c.gap > box.Bottom()
+	if len(nodes) > 0 && y-c.gap > box.Bottom() {
+		c.overflow = true
+	}
 }
 
 // emit records a node's placement and recurses into two_column / grid children

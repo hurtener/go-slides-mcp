@@ -25,26 +25,47 @@
     oncancel?: () => void;
   } = $props();
 
-  function onkey(e: KeyboardEvent) {
-    if (e.key === 'Escape') oncancel?.();
+  import { tick } from 'svelte';
+
+  let modalEl: HTMLDivElement | undefined = $state();
+  let confirmEl: HTMLButtonElement | undefined = $state();
+  let lastFocused: HTMLElement | null = null;
+
+  // On open: remember the trigger, move focus into the dialog. On close: restore.
+  $effect(() => {
+    if (open) {
+      lastFocused = (document.activeElement as HTMLElement) ?? null;
+      void tick().then(() => confirmEl?.focus());
+    } else if (lastFocused) {
+      lastFocused.focus();
+      lastFocused = null;
+    }
+  });
+
+  function onWindowKey(e: KeyboardEvent) {
+    if (!open) return;
+    if (e.key === 'Escape') { e.preventDefault(); oncancel?.(); return; }
+    if (e.key === 'Tab' && modalEl) {
+      // simple focus trap: keep Tab within the dialog's focusables.
+      const f = modalEl.querySelectorAll<HTMLElement>('button');
+      if (f.length === 0) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   }
 </script>
 
+<svelte:window onkeydown={onWindowKey} />
+
 {#if open}
-  <div
-    class="scrim"
-    role="button"
-    tabindex="-1"
-    aria-label="Dismiss"
-    onclick={() => oncancel?.()}
-    onkeydown={onkey}
-  ></div>
-  <div class="modal" role="dialog" aria-modal="true" aria-label={title}>
+  <div class="scrim" onclick={() => oncancel?.()} aria-hidden="true"></div>
+  <div bind:this={modalEl} class="modal" role="dialog" aria-modal="true" aria-label={title}>
     <h2>{title}</h2>
     {#if message}<p>{message}</p>{/if}
     <div class="row">
       <button type="button" class="btn ghost" onclick={() => oncancel?.()}>{cancelLabel}</button>
-      <button type="button" class="btn {danger ? 'danger' : 'primary'}" onclick={() => onconfirm?.()}>{confirmLabel}</button>
+      <button bind:this={confirmEl} type="button" class="btn {danger ? 'danger' : 'primary'}" onclick={() => onconfirm?.()}>{confirmLabel}</button>
     </div>
   </div>
 {/if}
