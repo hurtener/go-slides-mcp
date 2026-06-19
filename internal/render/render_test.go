@@ -104,8 +104,19 @@ func testDoc() contracts.SlideDoc {
 					&contracts.Heading{Level: 2, Text: rt("Native node coverage")},
 					&contracts.Prose{Paragraphs: []contracts.RichText{rt("This deck exercises the core native render nodes."), rtStyled("Token and literal rich text both map through the adapter.")}},
 					&contracts.List{Kind: contracts.ListChecklist, Items: []contracts.ListItem{{Text: rt("Hero"), Checked: true}, {Text: rt("Heading"), Checked: true}, {Text: rt("Callout"), Checked: true}}},
+					&contracts.Divider{Spacing: contracts.SpaceLG},
 					&contracts.Callout{Kind: contracts.CalloutImportant, Title: "Open switch", Body: rt("Unsupported nodes can be added in Phase 3B without rewiring the driver.")},
+					&contracts.Chip{Label: "Native", Tone: contracts.ChipOutline, Color: contracts.ColorAccent},
+					&contracts.Arrow{Direction: contracts.ArrowRight, Label: "Mapped via enums"},
 					&contracts.Table{Headers: []contracts.RichText{rt("Kind"), rt("Status")}, Rows: [][]contracts.RichText{{rt("table"), rt("native")}, {rt("cards"), rt("recursive")}}, Caption: "Native table render"},
+					&contracts.Flow{
+						Orientation: contracts.FlowHorizontal,
+						Connector:   contracts.ConnectorArrowDashed,
+						Steps: []contracts.FlowStep{
+							{Label: rt("Map"), Detail: rt("Convert IR fields to scene"), Icon: "star"},
+							{Label: rt("Render"), Detail: rt("Emit deterministic PPTX"), Icon: "arrow-right"},
+						},
+					},
 					&contracts.TwoColumn{
 						Ratio: contracts.Ratio11,
 						Left: []contracts.SlideNode{
@@ -127,6 +138,13 @@ func testDoc() contracts.SlideDoc {
 							},
 						},
 					},
+				},
+			},
+			{
+				ID:     "section",
+				Layout: contracts.LayoutFullBleed,
+				Nodes: []contracts.SlideNode{
+					&contracts.SectionDivider{Eyebrow: "Phase 3B", Label: "Remaining native nodes"},
 				},
 			},
 		},
