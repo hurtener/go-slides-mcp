@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "labels": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "series": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "values": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "required": [
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "type",
+        "series"
+      ],
+      "additionalProperties": false
+    },
+    "caption": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "spec"
+  ],
+  "additionalProperties": false
+}

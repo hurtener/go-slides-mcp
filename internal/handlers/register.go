@@ -281,6 +281,12 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.CompileChartInput, contracts.CompileChartOutput]("compile_chart").
+		Describe("Rasterize a chart spec to a PNG (pure Go), store it as an asset, and return a chart IR node.").
+		Handler(h.compileChart).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }
