@@ -10,18 +10,35 @@ runtime:
   transports: [stdio]
 
 tools:
-  - name: greet
-    description: Greet a person by name and return the assembled greeting.
-    # input/output are Go type references — the contract-first source of
-    # truth (P1, RFC §6). Their JSON Schema is generated, never hand-written.
-    input: internal/contracts.GreetInput
-    output: internal/contracts.GreetOutput
-    # task_support declares the tool's relationship to the MCP Tasks
-    # extension (RFC §8.4). forbidden = the tool always runs synchronously;
-    # optional = the runtime may run it as a task; required = it always runs
-    # as a task. When at least one tool declares optional or required,
-    # the scaffold's main.go constructs a tasks.Engine and attaches it via
-    # server.Options{Tasks: engine} — dockyard new does this for you.
+  - name: create_deck
+    description: Create a new deck and return its deck summary.
+    input: internal/contracts.CreateDeckInput
+    output: internal/contracts.CreateDeckOutput
+    task_support: forbidden
+  - name: list_decks
+    description: List every stored deck summary.
+    input: internal/contracts.ListDecksInput
+    output: internal/contracts.ListDecksOutput
+    task_support: forbidden
+  - name: get_deck
+    description: Get one deck by ID or slug and return its current summary.
+    input: internal/contracts.GetDeckInput
+    output: internal/contracts.GetDeckOutput
+    task_support: forbidden
+  - name: delete_deck
+    description: Delete one deck by ID or slug.
+    input: internal/contracts.DeleteDeckInput
+    output: internal/contracts.DeleteDeckOutput
+    task_support: forbidden
+  - name: set_deck_chrome
+    description: Replace a deck's header and footer chrome.
+    input: internal/contracts.SetDeckChromeInput
+    output: internal/contracts.SetDeckChromeOutput
+    task_support: forbidden
+  - name: set_deck_sections
+    description: Replace a deck's named section grouping.
+    input: internal/contracts.SetDeckSectionsInput
+    output: internal/contracts.SetDeckSectionsOutput
     task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a

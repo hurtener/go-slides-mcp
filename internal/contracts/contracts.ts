@@ -6,31 +6,276 @@
 // with `dockyard generate` and never edit this file by hand.
 
 /**
- * GreetInput is the greet tool's typed input contract.
+ * CreateDeckInput is the typed input for create_deck.
  */
-export interface GreetInput {
+export interface CreateDeckInput {
   /**
-   * Name is who to greet. Required.
+   * Title is the initial deck title.
    */
-  name: string;
+  title: string;
   /**
-   * Greeting is the salutation to use; defaults to "Hello" when empty.
+   * Author is the initial deck author.
    */
-  greeting?: string;
+  author?: string;
+  /**
+   * SoulID selects the design soul to apply to the deck.
+   */
+  soulId?: string;
 }
 /**
- * GreetOutput is the greet tool's typed output contract — the structured,
- * UI-facing payload.
+ * DeckKind identifies a deck-shaped output payload.
  */
-export interface GreetOutput {
+export type DeckKind = string;
+/**
+ * DeckKindDeck marks a deck payload for future UI dispatch.
+ */
+export const DeckKindDeck: DeckKind = "deck";
+/**
+ * SlideSummary is the small preview payload for one slide.
+ */
+export interface SlideSummary {
   /**
-   * Message is the assembled greeting.
+   * SlideID is the stable slide identifier.
    */
-  message: string;
+  slideId: string;
   /**
-   * Length is the rune length of Message.
+   * Layout is the slide layout kind.
    */
-  length: number /* int */;
+  layout?: LayoutKind;
+  /**
+   * Title is a best-effort headline extracted from the slide content.
+   */
+  title?: string;
+  /**
+   * PreviewText is a short secondary text extracted from the slide content.
+   */
+  previewText?: string;
+  /**
+   * Revision is the deck revision snapshot this slide summary belongs to.
+   */
+  revision?: string;
+}
+/**
+ * DeckChrome is the deck-level header/footer chrome contract.
+ */
+export interface DeckChrome {
+  /**
+   * Header is the header text shown on slides.
+   */
+  header?: string;
+  /**
+   * Footer is the footer text shown on slides.
+   */
+  footer?: string;
+  /**
+   * ShowOnCover controls whether chrome appears on the cover slide.
+   */
+  showOnCover?: boolean;
+}
+/**
+ * DeckSection is one named grouping of slide IDs.
+ */
+export interface DeckSection {
+  /**
+   * Name is the section title.
+   */
+  name?: string;
+  /**
+   * SlideIDs is the ordered set of slide IDs in the section.
+   */
+  slideIds?: string[];
+}
+/**
+ * CreateDeckOutput is the structured result for create_deck.
+ */
+export interface CreateDeckOutput {
+  /**
+   * Kind identifies this payload as a deck result.
+   */
+  kind: DeckKind;
+  /**
+   * DeckID is the stable deck identifier.
+   */
+  deckId: string;
+  /**
+   * Slug is the human-readable unique lookup key.
+   */
+  slug: string;
+  /**
+   * Title is the deck title.
+   */
+  title?: string;
+  /**
+   * SoulID is the design soul applied to the deck.
+   */
+  soulId?: string;
+  /**
+   * Slides is the ordered preview summary of the deck's slides.
+   */
+  slides?: SlideSummary[];
+}
+/**
+ * DeckSummary is the small list payload for one deck.
+ */
+export interface DeckSummary {
+  /**
+   * DeckID is the stable deck identifier.
+   */
+  deckId: string;
+  /**
+   * Slug is the human-readable unique lookup key.
+   */
+  slug: string;
+  /**
+   * Title is the deck title.
+   */
+  title?: string;
+  /**
+   * SoulID is the design soul applied to the deck.
+   */
+  soulId?: string;
+  /**
+   * SlideCount is the number of slides in the deck.
+   */
+  slideCount: number /* int */;
+  /**
+   * UpdatedAt is the last mutation timestamp in ISO-8601 format.
+   */
+  updatedAt?: string;
+}
+/**
+ * ListDecksInput is the typed input for list_decks.
+ */
+export interface ListDecksInput {
+}
+/**
+ * ListDecksOutput is the structured result for list_decks.
+ */
+export interface ListDecksOutput {
+  /**
+   * Decks is every stored deck summary.
+   */
+  decks?: DeckSummary[];
+}
+/**
+ * GetDeckInput is the typed input for get_deck.
+ */
+export interface GetDeckInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+}
+/**
+ * GetDeckOutput is the structured result for get_deck.
+ */
+export interface GetDeckOutput {
+  /**
+   * Kind identifies this payload as a deck result.
+   */
+  kind: DeckKind;
+  /**
+   * DeckID is the stable deck identifier.
+   */
+  deckId: string;
+  /**
+   * Slug is the human-readable unique lookup key.
+   */
+  slug: string;
+  /**
+   * Title is the deck title.
+   */
+  title?: string;
+  /**
+   * SoulID is the design soul applied to the deck.
+   */
+  soulId?: string;
+  /**
+   * Chrome is the deck-level header/footer chrome configuration.
+   */
+  chrome?: DeckChrome;
+  /**
+   * Sections is the deck's named grouping of slide IDs.
+   */
+  sections?: DeckSection[];
+  /**
+   * Slides is the ordered preview summary of the deck's slides.
+   */
+  slides?: SlideSummary[];
+}
+/**
+ * DeleteDeckInput is the typed input for delete_deck.
+ */
+export interface DeleteDeckInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+}
+/**
+ * DeleteDeckOutput is the structured result for delete_deck.
+ */
+export interface DeleteDeckOutput {
+  /**
+   * DeckID is the deleted deck identifier or slug input.
+   */
+  deckId: string;
+  /**
+   * Deleted reports whether the deck was removed.
+   */
+  deleted: boolean;
+}
+/**
+ * SetDeckChromeInput is the typed input for set_deck_chrome.
+ */
+export interface SetDeckChromeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * Chrome is the replacement chrome configuration.
+   */
+  chrome: DeckChrome;
+}
+/**
+ * SetDeckChromeOutput is the structured result for set_deck_chrome.
+ */
+export interface SetDeckChromeOutput {
+  /**
+   * DeckID is the updated deck identifier.
+   */
+  deckId: string;
+  /**
+   * Chrome is the applied deck-level chrome configuration.
+   */
+  chrome?: DeckChrome;
+}
+/**
+ * SetDeckSectionsInput is the typed input for set_deck_sections.
+ */
+export interface SetDeckSectionsInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * Sections is the replacement section grouping.
+   */
+  sections?: DeckSection[];
+}
+/**
+ * SetDeckSectionsOutput is the structured result for set_deck_sections.
+ */
+export interface SetDeckSectionsOutput {
+  /**
+   * DeckID is the updated deck identifier.
+   */
+  deckId: string;
+  /**
+   * Sections is the applied section grouping.
+   */
+  sections?: DeckSection[];
 }
 /**
  * AssetID names caller-supplied bytes resolved by the render-time

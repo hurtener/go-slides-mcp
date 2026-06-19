@@ -1,16 +1,12 @@
 {
   "type": "object",
   "properties": {
-    "message": {
+    "deckId": {
       "type": "string"
-    },
-    "length": {
-      "type": "integer"
     }
   },
   "required": [
-    "message",
-    "length"
+    "deckId"
   ],
   "additionalProperties": false
 }
