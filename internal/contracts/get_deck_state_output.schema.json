@@ -1,0 +1,149 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "deckId": {
+      "type": "string"
+    },
+    "slides": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "previewText": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slideId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selected": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "slideId": {
+          "type": "string"
+        },
+        "layout": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "slideId"
+      ],
+      "additionalProperties": false
+    },
+    "souls": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "soulId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tokenCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "soulId",
+          "name",
+          "tokenCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "perSlide": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "slideId": {
+                "type": "string"
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "issues": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "slideId",
+              "ok"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "blockers": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "deckId",
+    "validation"
+  ],
+  "additionalProperties": false
+}

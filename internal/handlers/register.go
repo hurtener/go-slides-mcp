@@ -257,6 +257,30 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.GetDeckOverviewInput, contracts.GetDeckOverviewOutput]("get_deck_overview").
+		Describe("Get the structure/reorder view of one deck for the overview surface.").
+		Handler(h.getDeckOverview).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.OpenSlideEditorInput, contracts.OpenSlideEditorOutput]("open_slide_editor").
+		Describe("Open one slide's full IR for editing in the slide-editor surface.").
+		Handler(h.openSlideEditor).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetDeckStateInput, contracts.GetDeckStateOutput]("get_deck_state").
+		Describe("Get the rich hydration payload for the deck-overview surfaces on mount.").
+		Handler(h.getDeckState).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.SetActiveWorkspaceInput, contracts.SetActiveWorkspaceOutput]("set_active_workspace").
+		Describe("Set the active workspace deck and soul in the session.").
+		Handler(h.setActiveWorkspace).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

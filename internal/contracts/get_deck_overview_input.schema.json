@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deckId"
+  ],
+  "additionalProperties": false
+}
