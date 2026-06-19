@@ -1,6 +1,6 @@
 ---
 name: styling-with-souls
-description: How to set a deck's look with Deckard "souls" (themes) — use the built-in Deckard White, bootstrap a soul from a brand description or a brand .pptx, and refine specific tokens. Use when the user wants a specific look or to match a brand.
+description: "How to set a deck's look with Deckard \"souls\" (themes) - use the built-in Deckard White, bootstrap a soul from a brand description or a brand .pptx, and refine specific tokens. Use when the user wants a specific look or to match a brand."
 ---
 
 # Styling with souls

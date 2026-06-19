@@ -1,6 +1,6 @@
 ---
 name: design-principles
-description: How to make a Deckard deck look genuinely good — hierarchy, typography, color, spacing, and contrast within Deckard's soul/token model. Use alongside composing-a-slide to lift output from correct to polished.
+description: "How to make a Deckard deck look genuinely good - hierarchy, typography, color, spacing, and contrast within Deckard's soul/token model. Use alongside composing-a-slide to lift output from correct to polished."
 ---
 
 # Design principles for Deckard decks

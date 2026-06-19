@@ -1,6 +1,6 @@
 ---
 name: charts-and-code
-description: How to add data charts and code blocks to a Deckard deck with compile_chart and compile_code (pure-Go rasters, no browser). Use when a slide needs a chart, graph, or a code snippet.
+description: "How to add data charts and code blocks to a Deckard deck with compile_chart and compile_code (pure-Go rasters, no browser). Use when a slide needs a chart, graph, or a code snippet."
 ---
 
 # Charts & code

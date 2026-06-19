@@ -1,6 +1,6 @@
 ---
 name: composing-a-slide
-description: The Deckard slide node vocabulary — what each node is for and how to combine them into a strong slide. Use when deciding how to lay out a slide's content with the Deckard MCP server.
+description: "The Deckard slide node vocabulary - what each node is for and how to combine them into a strong slide. Use when deciding how to lay out a slide's content with the Deckard MCP server."
 ---
 
 # Composing a slide
