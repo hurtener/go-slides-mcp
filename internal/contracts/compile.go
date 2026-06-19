@@ -39,6 +39,28 @@ type CompileChartOutput struct {
 	Warnings []string `json:"warnings,omitempty"`
 }
 
+// CompileCodeInput is the model-facing input for compile_code. The server
+// rasterizes the source to a PNG (pure-Go Go Mono font, no Chromium) and stores
+// it as an asset, returning a ready-to-use code_block IR node.
+type CompileCodeInput struct {
+	// Code is the source text to rasterize.
+	Code string `json:"code"`
+	// Language labels the snippet and is drawn as a small header badge (optional).
+	Language string `json:"language,omitempty"`
+	// Caption overrides the code_block node caption (optional).
+	Caption string `json:"caption,omitempty"`
+}
+
+// CompileCodeOutput returns a ready-to-use code_block IR node plus its asset id.
+type CompileCodeOutput struct {
+	// Node is the code_block IR node referencing the rasterized image by asset id.
+	Node CodeBlock `json:"node"`
+	// AssetID is the stored PNG's id ("asset://...").
+	AssetID string `json:"assetId"`
+	// Warnings are non-fatal rasterization notes.
+	Warnings []string `json:"warnings,omitempty"`
+}
+
 // CompileMarkdownInput is the model-facing input for compile_markdown.
 type CompileMarkdownInput struct {
 	// Markdown is the source text to parse into IR leaf nodes.

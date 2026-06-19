@@ -245,6 +245,11 @@ tools:
     input: internal/contracts.CompileMarkdownInput
     output: internal/contracts.CompileMarkdownOutput
     task_support: forbidden
+  - name: compile_code
+    description: Rasterize source code to a PNG (pure Go, Go Mono), store it as an asset, and return a code_block IR node.
+    input: internal/contracts.CompileCodeInput
+    output: internal/contracts.CompileCodeOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.

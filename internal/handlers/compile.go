@@ -21,6 +21,32 @@ func (h *handlers) compileMarkdown(_ context.Context, in contracts.CompileMarkdo
 	}, nil
 }
 
+// compileCode rasterizes source code to a PNG (pure Go, Go Mono), stores it as
+// an asset, and returns a code_block IR node referencing it by asset id.
+func (h *handlers) compileCode(_ context.Context, in contracts.CompileCodeInput) (tool.Result[contracts.CompileCodeOutput], error) {
+	png, err := raster.RasterizeCode(in.Code, in.Language)
+	if err != nil {
+		return tool.Result[contracts.CompileCodeOutput]{}, fmt.Errorf("compile_code: %w", err)
+	}
+	asset, err := h.deps.Assets.Put("code.png", "image/png", png)
+	if err != nil {
+		return tool.Result[contracts.CompileCodeOutput]{}, fmt.Errorf("compile_code: store asset: %w", err)
+	}
+
+	out := contracts.CompileCodeOutput{
+		Node: contracts.CodeBlock{
+			AssetID:  contracts.AssetID(asset.ID),
+			Language: in.Language,
+			Caption:  in.Caption,
+		},
+		AssetID: asset.ID,
+	}
+	return tool.Result[contracts.CompileCodeOutput]{
+		Text:       fmt.Sprintf("Rasterized %s code -> %s (%d bytes).", in.Language, asset.ID, len(png)),
+		Structured: out,
+	}, nil
+}
+
 // compileChart rasterizes a chart spec to a PNG (pure Go), stores it as an asset,
 // and returns a chart IR node referencing it by asset id.
 func (h *handlers) compileChart(_ context.Context, in contracts.CompileChartInput) (tool.Result[contracts.CompileChartOutput], error) {
