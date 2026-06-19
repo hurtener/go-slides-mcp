@@ -43,3 +43,9 @@ Thumbs.db
 # Built MCP App UI bundles are go:embed inputs — must be committed despite dist/ above
 !web/**/dist/
 !web/**/dist/**
+
+# Vendored pptx-go engine source for the builder to read in-workspace (go ignores _ dirs)
+_engine/
+
+# opencode per-project runtime state (goals/sessions) — not committed
+.opencode/

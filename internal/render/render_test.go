@@ -56,11 +56,11 @@ func TestRenderDeterministicAcrossWorkerCounts(t *testing.T) {
 	doc := testDoc()
 	s := soul.DeckardWhite()
 
-	defaultWorkers, _, err := renderWithWorkers(doc, s, 0)
+	defaultWorkers, _, err := renderWithWorkers(doc, s, 0, nil)
 	if err != nil {
 		t.Fatalf("renderWithWorkers(default) error = %v", err)
 	}
-	oneWorker, _, err := renderWithWorkers(doc, s, 1)
+	oneWorker, _, err := renderWithWorkers(doc, s, 1, nil)
 	if err != nil {
 		t.Fatalf("renderWithWorkers(1) error = %v", err)
 	}

@@ -16,6 +16,9 @@ memory instead of the installed skill is the #1 cause of rejected work. Task →
 - assets / charts / code / icons → `register-an-asset`, `embed-a-chart-raster`,
   `embed-a-code-block-raster`, `extend-the-icon-set`
 If a task mentions a concept a skill covers, READ THE SKILL FIRST. Lean on them heavily.
+ENGINE SOURCE: the pptx-go source is readable in-workspace at `_engine/scene/` and `_engine/pptx/`
+(plus `docs/engine/scene-types.md`). Read those for exact engine types — NEVER the Go module
+cache (`/go/pkg/mod/...`); those reads are auto-rejected and waste the iteration.
 
 STEP 1 — ORIENT (every iteration):
 - Read `.devcontainer/TASK.md` — YOUR TARGET, written by the orchestrator. It is

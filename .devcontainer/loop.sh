@@ -14,9 +14,9 @@ export OPENCODE_CONFIG="/workspace/go-slides-mcp/.devcontainer/opencode.json"
 
 cd /workspace/go-slides-mcp
 
-PRIMARY_MODEL="${MODEL:-openai/gpt-5.4}"          # GPT-5.4 low-effort via OpenAI oauth (opencode.json sets reasoningEffort)
+PRIMARY_MODEL="${MODEL:-nvidia/minimaxai/minimax-m3}"   # MiniMax M3 via NVIDIA NIM (strong, no ChatGPT throttle)
 PRIMARY_VARIANT="${VARIANT-}"   # empty VARIANT omits --variant
-FALLBACK_MODEL="${FALLBACK_MODEL:-openai/gpt-5.4-mini}"   # lighter, same oauth account
+FALLBACK_MODEL="${FALLBACK_MODEL:-nvidia/nemotron-3-ultra-550b-a55b}"   # other NVIDIA NIM model
 FALLBACK_VARIANT="${FALLBACK_VARIANT-}"
 ACTIVE="primary"
 FB_ITERS=0
@@ -63,7 +63,10 @@ while [ "$i" -lt "$MAX_ITERS" ]; do
   if printf '%s' "$out" | grep -q '\[goal:blocked\]'; then
     note "BLOCKED — model reported a blocker at iteration $i"; echo "BLOCKED" > "$STATUS"; break
   fi
-  if printf '%s' "$out" | grep -qiE 'rate.?limit|quota exceeded|usage limit|429|402|insufficient[_ ]?(quota|credit|fund)|payment required|depleted|included credits|out of credits|purchase.*credits'; then
+  # Anchor on opencode's "Error:" prefix so the detector fires on a real API error, NOT on the
+  # phrase appearing in file content the builder echoed (a bare "rate-limit" in a code comment
+  # spuriously triggered a fallback before). Match a rate/quota/credit signal within the error line.
+  if printf '%s' "$out" | grep -qiE 'error:.{0,140}(rate.?limit|429|402|payment required|quota exceeded|usage limit|insufficient[_ ]?(quota|credit|fund)|depleted|included credits|out of credits|too many requests)'; then
     if [ "$ACTIVE" = "primary" ]; then
       note "LIMIT on primary $CUR_MODEL (iter $i) → switching to fallback $FALLBACK_MODEL"
       echo "RATE_LIMITED->fallback (iter $i)" > "$STATUS"; ACTIVE="fallback"; FB_ITERS=0
