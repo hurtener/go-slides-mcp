@@ -1,6 +1,6 @@
 ---
 name: building-a-deck
-description: How to author a complete slide deck with the Deckard MCP server — the create → style → fill → validate → export loop. Use this whenever the user asks to make a presentation, slides, or a PowerPoint.
+description: "How to author a complete slide deck with the Deckard MCP server - the create to style to fill to validate to export loop. Use this whenever the user asks to make a presentation, slides, or a PowerPoint."
 ---
 
 # Building a deck with Deckard

@@ -1,6 +1,6 @@
 ---
 name: editing-a-slide
-description: How to refine an existing slide in a Deckard deck — change text, fix a field, reorder or replace a node — using small, targeted edits instead of resending the whole slide. Use whenever you're tweaking a slide that already exists (e.g. fixing overflow or a typo).
+description: "How to refine an existing slide in a Deckard deck - change text, fix a field, reorder or replace a node - using small, targeted edits instead of resending the whole slide. Use whenever you're tweaking a slide that already exists (e.g. fixing overflow or a typo)."
 ---
 
 # Editing an existing slide

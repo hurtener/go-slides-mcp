@@ -1,6 +1,6 @@
 ---
 name: validating-and-exporting
-description: How to validate a Deckard deck (StyleScore — contrast, overflow, structure) and export it to a downloadable .pptx. Use right before delivering a deck to the user.
+description: "How to validate a Deckard deck (StyleScore - contrast, overflow, structure) and export it to a downloadable .pptx. Use right before delivering a deck to the user."
 ---
 
 # Validating & exporting
