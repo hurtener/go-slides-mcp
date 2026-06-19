@@ -203,6 +203,24 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.ExportDeckInput, contracts.ExportDeckOutput]("export_deck").
+		Describe("Export one deck to a deterministic .pptx path and deck:// resource.").
+		Handler(h.exportDeck).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ListResourcesInput, contracts.ListResourcesOutput]("list_resources").
+		Describe("List every exported deck:// resource currently present on disk.").
+		Handler(h.listResources).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetResourceInput, contracts.GetResourceOutput]("get_resource").
+		Describe("Resolve one deck:// resource URI to its backing export path.").
+		Handler(h.getResource).
+		Register(srv); err != nil {
+		return err
+	}
 	if err := tool.New[contracts.GetSessionInput, contracts.GetSessionOutput]("get_session").
 		Describe("Get the active in-memory workspace session and build info.").
 		Handler(h.getSession).

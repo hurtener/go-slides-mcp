@@ -170,6 +170,21 @@ tools:
     input: internal/contracts.ValidateDeckForExportInput
     output: internal/contracts.ValidateDeckForExportOutput
     task_support: forbidden
+  - name: export_deck
+    description: Export one deck to a deterministic .pptx path and deck:// resource.
+    input: internal/contracts.ExportDeckInput
+    output: internal/contracts.ExportDeckOutput
+    task_support: forbidden
+  - name: list_resources
+    description: List every exported deck:// resource currently present on disk.
+    input: internal/contracts.ListResourcesInput
+    output: internal/contracts.ListResourcesOutput
+    task_support: forbidden
+  - name: get_resource
+    description: Resolve one deck:// resource URI to its backing export path.
+    input: internal/contracts.GetResourceInput
+    output: internal/contracts.GetResourceOutput
+    task_support: forbidden
   - name: get_session
     description: Get the active in-memory workspace session and build info.
     input: internal/contracts.GetSessionInput

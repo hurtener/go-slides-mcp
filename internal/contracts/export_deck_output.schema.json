@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string"
+    },
+    "resourceUri": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "slides": {
+          "type": "integer"
+        },
+        "shapes": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "slides",
+        "shapes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "path",
+    "resourceUri",
+    "stats"
+  ],
+  "additionalProperties": false
+}
