@@ -13,7 +13,7 @@ import (
 func TestEditSlideNodePersistsChange(t *testing.T) {
 	h, deckID, slideID, revision := setupEditableSlide(t)
 
-	raw := mustRawNode(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Updated title"}}})
+	raw := mustNodeMap(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Updated title"}}})
 	got, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 0}, Node: raw, ExpectedRevisionHash: revision})
 	if err != nil {
 		t.Fatalf("editSlideNode: %v", err)
@@ -34,7 +34,7 @@ func TestNodeEditHandlersMutateTree(t *testing.T) {
 	h, deckID, slideID, revision := setupEditableSlide(t)
 	ctx := context.Background()
 
-	inserted, err := h.insertSlideNode(ctx, contracts.InsertSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 1}, Node: mustRawNode(t, &contracts.Callout{Kind: contracts.CalloutTip, Title: "Tip", Body: contracts.RichText{{Text: "Inserted"}}}), ExpectedRevisionHash: revision})
+	inserted, err := h.insertSlideNode(ctx, contracts.InsertSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 1}, Node: mustNodeMap(t, &contracts.Callout{Kind: contracts.CalloutTip, Title: "Tip", Body: contracts.RichText{{Text: "Inserted"}}}), ExpectedRevisionHash: revision})
 	if err != nil {
 		t.Fatalf("insertSlideNode: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestNodeEditHandlersMutateTree(t *testing.T) {
 func TestEditSlideNodeBadPathReturnsError(t *testing.T) {
 	h, deckID, slideID, revision := setupEditableSlide(t)
 
-	_, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 99}, Node: mustRawNode(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Nope"}}}), ExpectedRevisionHash: revision})
+	_, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 99}, Node: mustNodeMap(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Nope"}}}), ExpectedRevisionHash: revision})
 	if err == nil {
 		t.Fatal("editSlideNode error = nil, want error")
 	}
@@ -82,7 +82,7 @@ func TestEditSlideNodeBadPathReturnsError(t *testing.T) {
 func TestEditSlideNodeRevisionConflict(t *testing.T) {
 	h, deckID, slideID, _ := setupEditableSlide(t)
 
-	_, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 0}, Node: mustRawNode(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Conflict"}}}), ExpectedRevisionHash: "stale-revision"})
+	_, err := h.editSlideNode(context.Background(), contracts.EditSlideNodeInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 0}, Node: mustNodeMap(t, &contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Conflict"}}}), ExpectedRevisionHash: "stale-revision"})
 	if !errors.Is(err, deck.ErrRevisionConflict) {
 		t.Fatalf("editSlideNode conflict err = %v, want ErrRevisionConflict", err)
 	}
@@ -111,13 +111,17 @@ func deckRevision(t *testing.T, h *handlers, deckID string) string {
 	return stored.Revision
 }
 
-func mustRawNode(t *testing.T, node contracts.SlideNode) json.RawMessage {
+func mustNodeMap(t *testing.T, node contracts.SlideNode) map[string]any {
 	t.Helper()
 	raw, err := json.Marshal(node)
 	if err != nil {
 		t.Fatalf("json.Marshal node: %v", err)
 	}
-	return raw
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		t.Fatalf("unmarshal node to map: %v", err)
+	}
+	return m
 }
 
 func assertHeadingText(t *testing.T, node contracts.SlideNode, want string) {

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"testing"
 
@@ -10,30 +9,47 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 )
 
+// addCalloutSlide adds a slide whose node[0] is a Callout (it has the string
+// field "title" that edit_slide_field targets).
+func addCalloutSlide(t *testing.T, h *handlers, deckID string) (slideID, revision string) {
+	t.Helper()
+	slide := contracts.Slide{Layout: contracts.LayoutTitleContent, Nodes: []contracts.SlideNode{
+		&contracts.Callout{Kind: contracts.CalloutTip, Title: "Old title", Body: contracts.RichText{{Text: "Body"}}},
+	}}
+	added, err := h.addSlide(context.Background(), contracts.AddSlideInput{DeckID: deckID, Slide: slide})
+	if err != nil {
+		t.Fatalf("addSlide: %v", err)
+	}
+	return added.Structured.SlideID, deckRevision(t, h, deckID)
+}
+
 func TestEditSlideFieldPersistsChange(t *testing.T) {
-	h, deckID, slideID, revision := setupEditableSlide(t)
+	h := testHandlers()
+	created, err := h.createDeck(context.Background(), contracts.CreateDeckInput{Title: "Editable"})
+	if err != nil {
+		t.Fatalf("createDeck: %v", err)
+	}
+	deckID := created.Structured.DeckID
+	slideID, revision := addCalloutSlide(t, h, deckID)
 
 	got, err := h.editSlideField(context.Background(), contracts.EditSlideFieldInput{
 		DeckID:               deckID,
 		SlideID:              slideID,
 		Path:                 contracts.IRPath{"nodes", 0},
-		Field:                "level",
-		Value:                json.RawMessage(`3`),
+		Field:                "title",
+		Value:                "New title",
 		ExpectedRevisionHash: revision,
 	})
 	if err != nil {
 		t.Fatalf("editSlideField: %v", err)
 	}
-	if !got.Structured.Validation.OK {
-		t.Fatalf("editSlideField validation = %+v, want OK", got.Structured.Validation)
-	}
-	assertHeadingLevel(t, got.Structured.Slide.Nodes[0], 3)
+	assertCalloutTitle(t, got.Structured.Slide.Nodes[0], "New title")
 
 	persisted, err := h.deps.Store.GetSlide(deckID, slideID)
 	if err != nil {
 		t.Fatalf("store GetSlide: %v", err)
 	}
-	assertHeadingLevel(t, persisted.Nodes[0], 3)
+	assertCalloutTitle(t, persisted.Nodes[0], "New title")
 }
 
 func TestPatchSlideTextPersistsChange(t *testing.T) {
@@ -63,9 +79,12 @@ func TestPatchSlideTextPersistsChange(t *testing.T) {
 }
 
 func TestEditSlideFieldBadPathReturnsError(t *testing.T) {
-	h, deckID, slideID, revision := setupEditableSlide(t)
+	h := testHandlers()
+	created, _ := h.createDeck(context.Background(), contracts.CreateDeckInput{Title: "Editable"})
+	deckID := created.Structured.DeckID
+	slideID, revision := addCalloutSlide(t, h, deckID)
 
-	_, err := h.editSlideField(context.Background(), contracts.EditSlideFieldInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 99}, Field: "level", Value: json.RawMessage(`2`), ExpectedRevisionHash: revision})
+	_, err := h.editSlideField(context.Background(), contracts.EditSlideFieldInput{DeckID: deckID, SlideID: slideID, Path: contracts.IRPath{"nodes", 99}, Field: "title", Value: "x", ExpectedRevisionHash: revision})
 	if err == nil {
 		t.Fatal("editSlideField error = nil, want error")
 	}
@@ -80,13 +99,13 @@ func TestPatchSlideTextRevisionConflict(t *testing.T) {
 	}
 }
 
-func assertHeadingLevel(t *testing.T, node contracts.SlideNode, want int) {
+func assertCalloutTitle(t *testing.T, node contracts.SlideNode, want string) {
 	t.Helper()
-	heading, ok := node.(*contracts.Heading)
+	callout, ok := node.(*contracts.Callout)
 	if !ok {
-		t.Fatalf("node type = %T, want *contracts.Heading", node)
+		t.Fatalf("node type = %T, want *contracts.Callout", node)
 	}
-	if heading.Level != want {
-		t.Fatalf("heading level = %d, want %d", heading.Level, want)
+	if callout.Title != want {
+		t.Fatalf("callout title = %q, want %q", callout.Title, want)
 	}
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -93,12 +94,20 @@ func (h *handlers) mutateSlide(deckID, slideID, expectedRevision string, apply f
 	return *stored, validation, nil
 }
 
-func decodeSlideNode(raw []byte) (contracts.SlideNode, error) {
-	node, err := contracts.UnmarshalSlideNode(raw)
+// decodeSlideNode turns a JSON-object node (kind + fields) into a typed
+// SlideNode. The input is a map so the tool's schema is a proper object (not the
+// boolean "true" an unconstrained json.RawMessage would emit, which some MCP
+// clients — e.g. opencode's converter — reject).
+func decodeSlideNode(node map[string]any) (contracts.SlideNode, error) {
+	raw, err := json.Marshal(node)
+	if err != nil {
+		return nil, fmt.Errorf("encode slide node: %w", err)
+	}
+	decoded, err := contracts.UnmarshalSlideNode(raw)
 	if err != nil {
 		return nil, fmt.Errorf("invalid slide node: %w", err)
 	}
-	return node, nil
+	return decoded, nil
 }
 
 func mapSlideEditError(deckID, slideID string, err error) error {

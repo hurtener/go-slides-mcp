@@ -1,7 +1,5 @@
 package contracts
 
-import "encoding/json"
-
 // IRPath is a structural path into a slide's node tree.
 type IRPath = []any
 
@@ -13,8 +11,8 @@ type EditSlideNodeInput struct {
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node to replace.
 	Path IRPath `json:"path,omitempty"`
-	// Node is the replacement slide node encoded as raw JSON with a kind discriminator.
-	Node json.RawMessage `json:"node"`
+	// Node is the replacement slide node as a JSON object with a "kind" discriminator.
+	Node map[string]any `json:"node"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }
@@ -37,8 +35,10 @@ type EditSlideFieldInput struct {
 	Path IRPath `json:"path,omitempty"`
 	// Field is the JSON field name to replace on the addressed node.
 	Field string `json:"field"`
-	// Value is the replacement JSON value for the addressed field.
-	Value json.RawMessage `json:"value"`
+	// Value is the replacement value for a string-valued field (e.g. a title,
+	// label, or eyebrow). For rich text use patch_slide_text; for structured
+	// fields (objects/arrays/numbers) replace the whole node via edit_slide_node.
+	Value string `json:"value"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }
@@ -83,8 +83,8 @@ type InsertSlideNodeInput struct {
 	SlideID string `json:"slideId"`
 	// Path addresses the insertion point in a node slice.
 	Path IRPath `json:"path,omitempty"`
-	// Node is the inserted slide node encoded as raw JSON with a kind discriminator.
-	Node json.RawMessage `json:"node"`
+	// Node is the inserted slide node as a JSON object with a "kind" discriminator.
+	Node map[string]any `json:"node"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }
