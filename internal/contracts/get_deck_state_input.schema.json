@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "selectedSlideId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "deckId"
+  ],
+  "additionalProperties": false
+}

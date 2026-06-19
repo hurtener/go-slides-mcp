@@ -215,6 +215,26 @@ tools:
     input: internal/contracts.GetSessionInput
     output: internal/contracts.GetSessionOutput
     task_support: forbidden
+  - name: get_deck_overview
+    description: Get the structure/reorder view of one deck for the overview surface.
+    input: internal/contracts.GetDeckOverviewInput
+    output: internal/contracts.GetDeckOverviewOutput
+    task_support: forbidden
+  - name: open_slide_editor
+    description: Open one slide's full IR for editing in the slide-editor surface.
+    input: internal/contracts.OpenSlideEditorInput
+    output: internal/contracts.OpenSlideEditorOutput
+    task_support: forbidden
+  - name: get_deck_state
+    description: Get the rich hydration payload for the deck-overview surfaces on mount.
+    input: internal/contracts.GetDeckStateInput
+    output: internal/contracts.GetDeckStateOutput
+    task_support: forbidden
+  - name: set_active_workspace
+    description: Set the active workspace deck and soul in the session.
+    input: internal/contracts.SetActiveWorkspaceInput
+    output: internal/contracts.SetActiveWorkspaceOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.

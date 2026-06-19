@@ -2682,6 +2682,204 @@ export interface GetDesignTokensOutput {
   tokens?: TokenEntry[];
 }
 /**
+ * SurfaceKind identifies which UI surface a surface tool's structured output
+ * is shaped for. The discriminator lets a single dispatcher branch on the
+ * payload shape without sniffing its fields.
+ */
+/**
+ * SurfaceKindOverview marks the deck-overview hydration payload.
+ */
+export const SurfaceKindOverview = "overview";
+/**
+ * SurfaceKindEditor marks the single-slide editor payload.
+ */
+export const SurfaceKindEditor = "editor";
+/**
+ * SurfaceKindState marks the aggregate deck-state hydration payload.
+ */
+export const SurfaceKindState = "state";
+/**
+ * SurfaceKindActiveWorkspace marks the active-workspace session payload.
+ */
+export const SurfaceKindActiveWorkspace = "active_workspace";
+export type SurfaceKind = typeof SurfaceKindOverview | typeof SurfaceKindEditor | typeof SurfaceKindState | typeof SurfaceKindActiveWorkspace;
+/**
+ * GetDeckOverviewInput is the typed input for get_deck_overview.
+ */
+export interface GetDeckOverviewInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+}
+/**
+ * DeckOverviewSection is one named section of the deck overview.
+ */
+export interface DeckOverviewSection {
+  /**
+   * Name is the section title.
+   */
+  name?: string;
+  /**
+   * SlideIDs is the ordered set of slide IDs in the section.
+   */
+  slideIds?: string[];
+}
+/**
+ * GetDeckOverviewOutput is the structured result for get_deck_overview.
+ */
+export interface GetDeckOverviewOutput {
+  /**
+   * Kind identifies this payload as the overview surface result.
+   */
+  kind: SurfaceKind;
+  /**
+   * DeckID is the resolved deck identifier.
+   */
+  deckId: string;
+  /**
+   * Title is the deck title at fetch time.
+   */
+  title?: string;
+  /**
+   * Sections is the deck's named section grouping.
+   */
+  sections?: DeckOverviewSection[];
+  /**
+   * Slides is the ordered preview summary of the deck's slides.
+   */
+  slides?: SlideSummary[];
+}
+/**
+ * OpenSlideEditorInput is the typed input for open_slide_editor.
+ */
+export interface OpenSlideEditorInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to open in the editor.
+   */
+  slideId: string;
+}
+/**
+ * OpenSlideEditorOutput is the structured result for open_slide_editor.
+ */
+export interface OpenSlideEditorOutput {
+  /**
+   * Kind identifies this payload as the editor surface result.
+   */
+  kind: SurfaceKind;
+  /**
+   * SlideID is the slide identifier opened in the editor.
+   */
+  slideId: string;
+  /**
+   * IR is the slide's full IR snapshot for the editor.
+   */
+  ir: Slide;
+  /**
+   * SoulID is the design soul the deck is bound to.
+   */
+  soulId?: string;
+  /**
+   * Validation is the structural validation result for the slide IR.
+   */
+  validation: SlideValidation;
+}
+/**
+ * GetDeckStateInput is the typed input for get_deck_state.
+ */
+export interface GetDeckStateInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SelectedSlideID is the optional currently-focused slide identifier
+   * surfaced in the State payload.
+   */
+  selectedSlideId?: string;
+}
+/**
+ * DeckStateSelection is the focused slide descriptor surfaced in the
+ * get_deck_state payload.
+ */
+export interface DeckStateSelection {
+  /**
+   * SlideID is the currently-focused slide identifier.
+   */
+  slideId: string;
+  /**
+   * Layout is the focused slide's layout kind, when known.
+   */
+  layout?: LayoutKind;
+  /**
+   * Title is a best-effort headline extracted from the focused slide.
+   */
+  title?: string;
+}
+/**
+ * GetDeckStateOutput is the structured result for get_deck_state.
+ */
+export interface GetDeckStateOutput {
+  /**
+   * Kind identifies this payload as the aggregate state surface result.
+   */
+  kind: SurfaceKind;
+  /**
+   * DeckID is the resolved deck identifier.
+   */
+  deckId: string;
+  /**
+   * Slides is the ordered preview summary of the deck's slides.
+   */
+  slides?: SlideSummary[];
+  /**
+   * Selected is the focused slide descriptor when one is selected.
+   */
+  selected?: DeckStateSelection;
+  /**
+   * Souls is every stored soul summary available to the deck.
+   */
+  souls?: SoulSummary[];
+  /**
+   * Validation is the aggregated validation result for the deck.
+   */
+  validation: ValidateDeckForExportOutput;
+}
+/**
+ * SetActiveWorkspaceInput is the typed input for set_active_workspace.
+ */
+export interface SetActiveWorkspaceInput {
+  /**
+   * DeckID is the optional deck ID to mark as the active workspace deck.
+   */
+  deckId?: string;
+  /**
+   * SoulID is the optional soul ID to mark as the active workspace soul.
+   */
+  soulId?: string;
+}
+/**
+ * SetActiveWorkspaceOutput is the structured result for set_active_workspace.
+ */
+export interface SetActiveWorkspaceOutput {
+  /**
+   * Kind identifies this payload as the active-workspace write result.
+   */
+  kind: SurfaceKind;
+  /**
+   * ActiveDeckID is the new active deck identifier.
+   */
+  activeDeckId?: string;
+  /**
+   * ActiveSoulID is the new active soul identifier.
+   */
+  activeSoulId?: string;
+}
+/**
  * ValidateSlideIRInput is the typed input for validate_slide_ir.
  */
 export interface ValidateSlideIRInput {

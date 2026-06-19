@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "activeDeckId": {
+      "type": "string"
+    },
+    "activeSoulId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false
+}

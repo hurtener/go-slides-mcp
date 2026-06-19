@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "soulId": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

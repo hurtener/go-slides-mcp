@@ -30,6 +30,17 @@ func (s *SessionState) Snapshot() (activeDeckID, activeSoulID string, openPanels
 	return s.activeDeckID, s.activeSoulID, append([]string{}, s.openPanels...)
 }
 
+// SetActive replaces the active deck and soul identifiers under the write lock.
+func (s *SessionState) SetActive(deckID, soulID string) {
+	if s == nil {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.activeDeckID = deckID
+	s.activeSoulID = soulID
+}
+
 // ToolDeps are the concrete dependencies shared by the tool handlers.
 type ToolDeps struct {
 	// Store persists decks and slides.

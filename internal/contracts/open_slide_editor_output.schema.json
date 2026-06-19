@@ -1,0 +1,136 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "slideId": {
+      "type": "string"
+    },
+    "ir": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "layout": {
+          "type": "string"
+        },
+        "nodes": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": true
+        },
+        "notes": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "Text": {
+                "type": "string"
+              },
+              "Style": {
+                "type": "object",
+                "properties": {
+                  "TypeRole": {
+                    "type": "string"
+                  },
+                  "Bold": {
+                    "type": "boolean"
+                  },
+                  "Italic": {
+                    "type": "boolean"
+                  },
+                  "Underline": {
+                    "type": "boolean"
+                  },
+                  "Strike": {
+                    "type": "boolean"
+                  },
+                  "Code": {
+                    "type": "boolean"
+                  },
+                  "Link": {
+                    "type": "boolean"
+                  },
+                  "Href": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "TypeRole",
+                  "Bold",
+                  "Italic",
+                  "Underline",
+                  "Strike",
+                  "Code",
+                  "Link",
+                  "Href"
+                ],
+                "additionalProperties": false
+              },
+              "Color": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "literal": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "Text",
+              "Style",
+              "Color"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "soulId": {
+      "type": "string"
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "issues": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "slideId",
+    "ir",
+    "validation"
+  ],
+  "additionalProperties": false
+}
