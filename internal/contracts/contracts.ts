@@ -6,6 +6,135 @@
 // with `dockyard generate` and never edit this file by hand.
 
 /**
+ * UploadAssetInput is the typed input for upload_asset.
+ */
+export interface UploadAssetInput {
+  /**
+   * Filename is the original client-facing filename for the uploaded asset.
+   */
+  filename: string;
+  /**
+   * MIME is the asset media type, such as image/png.
+   */
+  mime: string;
+  /**
+   * DataBase64 is the raw asset content encoded as base64.
+   */
+  dataBase64: string;
+  /**
+   * Origin is the optional caller surface identifier.
+   */
+  origin?: string;
+}
+/**
+ * UploadAssetOutput is the structured result for upload_asset.
+ */
+export interface UploadAssetOutput {
+  /**
+   * AssetID is the opaque stored asset URI.
+   */
+  assetId: string;
+  /**
+   * Filename is the stored filename metadata.
+   */
+  filename?: string;
+  /**
+   * MIME is the stored asset media type.
+   */
+  mime?: string;
+  /**
+   * Bytes is the stored asset size in bytes.
+   */
+  bytes: number /* int */;
+}
+/**
+ * ListAssetsInput is the typed input for list_assets.
+ */
+export interface ListAssetsInput {
+}
+/**
+ * AssetMetadata is the metadata summary for one stored asset.
+ */
+export interface AssetMetadata {
+  /**
+   * AssetID is the opaque stored asset URI.
+   */
+  assetId: string;
+  /**
+   * Filename is the original client-facing filename.
+   */
+  filename?: string;
+  /**
+   * MIME is the stored asset media type.
+   */
+  mime?: string;
+  /**
+   * Bytes is the stored asset size in bytes.
+   */
+  bytes: number /* int */;
+}
+/**
+ * ListAssetsOutput is the structured result for list_assets.
+ */
+export interface ListAssetsOutput {
+  /**
+   * Assets is every stored asset metadata summary.
+   */
+  assets?: AssetMetadata[];
+}
+/**
+ * GetAssetInput is the typed input for get_asset.
+ */
+export interface GetAssetInput {
+  /**
+   * AssetID addresses one stored asset by opaque asset URI.
+   */
+  assetId: string;
+}
+/**
+ * GetAssetOutput is the structured result for get_asset.
+ */
+export interface GetAssetOutput {
+  /**
+   * AssetID is the opaque stored asset URI.
+   */
+  assetId: string;
+  /**
+   * Filename is the original client-facing filename.
+   */
+  filename?: string;
+  /**
+   * MIME is the stored asset media type.
+   */
+  mime?: string;
+  /**
+   * Bytes is the stored asset size in bytes.
+   */
+  bytes: number /* int */;
+}
+/**
+ * DeleteAssetInput is the typed input for delete_asset.
+ */
+export interface DeleteAssetInput {
+  /**
+   * AssetID addresses one stored asset by opaque asset URI.
+   */
+  assetId: string;
+}
+/**
+ * DeleteAssetOutput is the structured result for delete_asset.
+ */
+export interface DeleteAssetOutput {
+  /**
+   * AssetID is the deleted stored asset URI.
+   */
+  assetId: string;
+  /**
+   * Deleted reports whether the asset was removed.
+   */
+  deleted: boolean;
+}
+/**
  * CreateDeckInput is the typed input for create_deck.
  */
 export interface CreateDeckInput {

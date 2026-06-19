@@ -143,6 +143,30 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.UploadAssetInput, contracts.UploadAssetOutput]("upload_asset").
+		Describe("Upload one binary asset and return its stored metadata.").
+		Handler(h.uploadAsset).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ListAssetsInput, contracts.ListAssetsOutput]("list_assets").
+		Describe("List every stored asset metadata summary.").
+		Handler(h.listAssets).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetAssetInput, contracts.GetAssetOutput]("get_asset").
+		Describe("Get one stored asset metadata summary by asset ID.").
+		Handler(h.getAsset).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.DeleteAssetInput, contracts.DeleteAssetOutput]("delete_asset").
+		Describe("Delete one stored asset by asset ID.").
+		Handler(h.deleteAsset).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

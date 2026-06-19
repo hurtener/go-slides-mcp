@@ -3,6 +3,7 @@ package handlers
 import (
 	"log/slog"
 
+	"github.com/hurtener/go-slides-mcp/internal/asset"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
@@ -13,6 +14,8 @@ type ToolDeps struct {
 	Store *deck.MemoryStore
 	// Souls resolves design souls by ID.
 	Souls *soul.MemoryRegistry
+	// Assets persists uploaded binary assets in memory.
+	Assets *asset.MemoryStore
 	// Workspace is the server workspace root for file-backed operations.
 	Workspace string
 	// Logger is the process logger.

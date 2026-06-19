@@ -120,6 +120,26 @@ tools:
     input: internal/contracts.GetDesignTokensInput
     output: internal/contracts.GetDesignTokensOutput
     task_support: forbidden
+  - name: upload_asset
+    description: Upload one binary asset and return its stored metadata.
+    input: internal/contracts.UploadAssetInput
+    output: internal/contracts.UploadAssetOutput
+    task_support: forbidden
+  - name: list_assets
+    description: List every stored asset metadata summary.
+    input: internal/contracts.ListAssetsInput
+    output: internal/contracts.ListAssetsOutput
+    task_support: forbidden
+  - name: get_asset
+    description: Get one stored asset metadata summary by asset ID.
+    input: internal/contracts.GetAssetInput
+    output: internal/contracts.GetAssetOutput
+    task_support: forbidden
+  - name: delete_asset
+    description: Delete one stored asset by asset ID.
+    input: internal/contracts.DeleteAssetInput
+    output: internal/contracts.DeleteAssetOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.

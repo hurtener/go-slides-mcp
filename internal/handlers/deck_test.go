@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/hurtener/go-slides-mcp/internal/asset"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -95,6 +96,7 @@ func testHandlers() *handlers {
 	return &handlers{deps: ToolDeps{
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
+		Assets:    asset.NewMemoryStore(),
 		Workspace: "/tmp/deckard-test",
 		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}}

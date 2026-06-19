@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "assetId": {
+      "type": "string"
+    },
+    "deleted": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "assetId",
+    "deleted"
+  ],
+  "additionalProperties": false
+}
