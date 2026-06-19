@@ -1,10 +1,13 @@
 <!--
-  slide-editor — opt-in single-slide editor (ui://app, tight PiP/phone widths).
-  Lists the slide's nodes; text-bearing nodes get inline fields wired to the
-  IR-path edit tools (patch_slide_text for RichText, edit_slide_field for string
-  fields). Nodes reorder (move_slide_node), duplicate (duplicate_slide_node),
-  and remove behind an ImpactModal (remove_slide_node). "← Back to deck" returns
-  to the overview. Every edit calls the SAME agent tool. White-label themed.
+  slide-editor — single-slide editor with TWO views sharing one bridge + tools:
+   • Form (default, inline-safe): per-node fields, tight/phone-friendly.
+   • Canvas (opt-in fullscreen): a semantic visual canvas painting the SERVER
+     layout snapshot in the deck palette; click a node to select, edit it in the
+     side inspector. Honest semantic preview — not pixel-WYSIWYG (text wrap is
+     deferred to PowerPoint; flagged via the overflow badge).
+  Every edit routes through the SAME IR-path agent tools (patch_slide_text /
+  edit_slide_field / move·duplicate·remove_slide_node). Fullscreen is requested
+  only on the explicit "Canvas" action and degrades to inline when the host denies.
 -->
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
@@ -14,6 +17,7 @@
 
   import ImpactModal from '../../../design-system/ImpactModal.svelte';
   import ThemeSelector from '../../../design-system/ThemeSelector.svelte';
+  import Canvas from './Canvas.svelte';
   import {
     applyTheme, applyBrandTokens, applyHostVariables, themeById, type AppThemeId,
   } from '../../../design-system/theme';
@@ -24,9 +28,13 @@
   type Node = Record<string, unknown> & { kind: string };
   interface Slide { id?: string; layout?: string; nodes?: Node[] }
   interface Validation { ok: boolean; issues?: string[] }
+  interface Palette { canvas: string; surface: string; surfaceAlt: string; accent: string; accentText: string; textPrimary: string; textSecondary: string; textInverse: string; border: string; headingFont: string; bodyFont: string; monoFont: string }
+  interface Placement { path: unknown[]; kind: string; box: { x: number; y: number; w: number; h: number } }
+  interface Layout { canvasWidth: number; canvasHeight: number; placements?: Placement[]; overflow?: boolean }
   interface Payload {
     state?: string; message?: string; brand: Brand;
     deckId: string; slideId: string; ir: Slide; soulId?: string; validation?: Validation;
+    layout?: Layout; palette?: Palette;
   }
   interface Field { label: string; field: string; path: unknown[]; rich: boolean; value: string }
 
@@ -40,12 +48,19 @@
   let userPicked = $state(false);
   let hostVars: Record<string, string> | undefined;
   let toast = $state('');
-  let pendingRemove = $state<number | null>(null);
+  let pendingRemove = $state<unknown[] | null>(null);
+  let view = $state<'form' | 'canvas'>('form');
+  let selectedPath = $state<unknown[] | null>(null);
 
-  const bridge = createBridge({ displayModes: ['inline'] });
+  const bridge = createBridge({ displayModes: ['inline', 'fullscreen'] });
   const allowSwitch = $derived(payload?.brand?.allowThemeSwitch !== false);
   const deckId = $derived(payload?.deckId ?? '');
   const slideId = $derived(payload?.slideId ?? '');
+  const layout = $derived(payload?.layout ?? { canvasWidth: 12192000, canvasHeight: 6858000, placements: [] });
+  const palette = $derived(payload?.palette);
+  const selectedKey = $derived(selectedPath ? selectedPath.join('/') : '');
+  const selectedNode = $derived(selectedPath ? nodeAt(selectedPath) : undefined);
+  const selectedTop = $derived(selectedPath !== null && selectedPath.length === 2);
 
   function applyChain() {
     if (!rootEl) return;
@@ -82,13 +97,22 @@
     return Array.isArray(v) ? v.map((r) => (r && typeof r === 'object' ? String((r as { text?: string }).text ?? '') : '')).join('') : '';
   }
   function kindLabel(k: string): string { return k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()); }
+  function nodeAt(path: unknown[]): Node | undefined {
+    let cur: unknown = nodes;
+    for (let i = 1; i < path.length; i++) {
+      const leg = path[i];
+      cur = typeof leg === 'number' ? (Array.isArray(cur) ? cur[leg] : undefined)
+        : (cur && typeof cur === 'object' ? (cur as Record<string, unknown>)[leg as string] : undefined);
+      if (cur === undefined) return undefined;
+    }
+    return cur as Node | undefined;
+  }
 
-  // editable fields for a node at top-level index i (supported kinds only).
-  function fieldsFor(n: Node, i: number): Field[] {
+  // editable fields for a node addressed by its IR path (path is "nodes"-prefixed).
+  function fieldsFor(n: Node, path: unknown[]): Field[] {
     const f: Field[] = [];
-    // IR paths are "nodes"-prefixed (what the edit tools resolve): ["nodes", i, ...].
-    const str = (label: string, field: string) => f.push({ label, field, path: ['nodes', i], rich: false, value: String((n[field] as string) ?? '') });
-    const rich = (label: string, field: string) => f.push({ label, field, path: ['nodes', i], rich: true, value: rtText(n[field]) });
+    const str = (label: string, field: string) => f.push({ label, field, path, rich: false, value: String((n[field] as string) ?? '') });
+    const rich = (label: string, field: string) => f.push({ label, field, path, rich: true, value: rtText(n[field]) });
     switch (n.kind) {
       case 'hero': str('Eyebrow', 'eyebrow'); str('Title', 'title'); str('Subtitle', 'subtitle'); break;
       case 'heading': rich('Heading', 'text'); break;
@@ -99,7 +123,7 @@
       case 'arrow': str('Label', 'label'); break;
       case 'list': {
         const items = (n.items as Array<{ text?: unknown }>) ?? [];
-        items.forEach((it, j) => f.push({ label: `Item ${j + 1}`, field: 'text', path: ['nodes', i, 'items', j], rich: true, value: rtText(it.text) }));
+        items.forEach((it, j) => f.push({ label: `Item ${j + 1}`, field: 'text', path: [...path, 'items', j], rich: true, value: rtText(it.text) }));
         break;
       }
     }
@@ -110,12 +134,8 @@
       case 'prose': { const p = (n.paragraphs as unknown[]) ?? []; return p.length ? rtText(p[0]) : 'Paragraph text'; }
       case 'chart': return 'Chart image (edit via the agent)';
       case 'code_block': return `Code${n.language ? ` · ${n.language}` : ''}`;
-      case 'image': return 'Image';
-      case 'table': return 'Table';
-      case 'divider': return 'Divider';
-      case 'flow': return 'Process flow';
-      case 'two_column': return 'Two-column layout';
-      case 'grid': return 'Card grid';
+      case 'image': return 'Image'; case 'table': return 'Table'; case 'divider': return 'Divider';
+      case 'flow': return 'Process flow'; case 'two_column': return 'Two-column layout'; case 'grid': return 'Card grid';
       case 'card': case 'card_section': return String((n.header as string) ?? 'Card');
       default: return '';
     }
@@ -125,41 +145,51 @@
     if (value === fl.value) return;
     fl.value = value;
     const base = { deckId, slideId, path: fl.path, field: fl.field };
-    const call = fl.rich
-      ? bridge.callTool('patch_slide_text', { ...base, text: value })
-      : bridge.callTool('edit_slide_field', { ...base, value });
+    const call = fl.rich ? bridge.callTool('patch_slide_text', { ...base, text: value }) : bridge.callTool('edit_slide_field', { ...base, value });
     void call
       .then((r: unknown) => { const v = (r as { structuredContent?: { validation?: Validation } })?.structuredContent?.validation; if (v) validation = v; })
       .catch((e: unknown) => flash(`Edit failed: ${(e as Error)?.message ?? e}`));
   }
 
-  function moveNode(i: number, dir: -1 | 1) {
+  function moveTop(i: number, dir: -1 | 1) {
     const j = i + dir;
     if (j < 0 || j >= nodes.length) return;
     const next = [...nodes];
     [next[i], next[j]] = [next[j], next[i]];
     nodes = next;
+    if (selectedPath && selectedPath[1] === i) selectedPath = ['nodes', j];
     void bridge.callTool('move_slide_node', { deckId, slideId, from: ['nodes', j], to: ['nodes', i] })
       .catch((e: unknown) => flash(`Move failed: ${(e as Error)?.message ?? e}`));
   }
-  function duplicateNode(i: number) {
-    void bridge.callTool('duplicate_slide_node', { deckId, slideId, path: ['nodes', i] })
+  function duplicate(path: unknown[]) {
+    void bridge.callTool('duplicate_slide_node', { deckId, slideId, path })
       .then(() => bridge.callTool('open_slide_editor', { deckId, slideId }))
       .catch((e: unknown) => flash(`Duplicate failed: ${(e as Error)?.message ?? e}`));
   }
   function confirmRemove() {
-    const i = pendingRemove; pendingRemove = null;
-    if (i === null) return;
-    nodes = nodes.filter((_, idx) => idx !== i);
-    void bridge.callTool('remove_slide_node', { deckId, slideId, path: ['nodes', i] })
+    const path = pendingRemove; pendingRemove = null;
+    if (!path) return;
+    if (path.length === 2 && typeof path[1] === 'number') nodes = nodes.filter((_, idx) => idx !== path[1]);
+    if (selectedKey === path.join('/')) selectedPath = null;
+    void bridge.callTool('remove_slide_node', { deckId, slideId, path })
       .catch((e: unknown) => flash(`Remove failed: ${(e as Error)?.message ?? e}`));
   }
-  function back() {
-    void bridge.callTool('get_deck_overview', { deckId }).catch(() => flash('Couldn’t return to the deck.'));
+  function back() { void bridge.callTool('get_deck_overview', { deckId }).catch(() => flash('Couldn’t return to the deck.')); }
+  async function openExport() {
+    try { await bridge.callTool('export_deck', { deckId }); flash('Export ready — open the deck:// resource in PowerPoint.'); }
+    catch (e) { flash(`Export failed: ${(e as Error)?.message ?? e}`); }
+  }
+  async function enterCanvas() {
+    view = 'canvas';
+    try { await bridge.requestDisplayMode?.('fullscreen'); } catch { /* host denied — canvas still renders inline */ }
+  }
+  async function exitCanvas() {
+    view = 'form';
+    try { await bridge.requestDisplayMode?.('inline'); } catch { /* ignore */ }
   }
 </script>
 
-<div bind:this={rootEl} class="dy-root editor" data-app-theme={theme}>
+<div bind:this={rootEl} class="dy-root editor" class:canvasview={view === 'canvas'} data-app-theme={theme}>
   <PageState
     state={pageState}
     loadingMessage="Loading slide…"
@@ -173,7 +203,14 @@
       <header class="head">
         <button type="button" class="back" onclick={back} aria-label="Back to deck">‹ Deck</button>
         <span class="title">Edit slide</span>
-        {#if allowSwitch}<ThemeSelector current={theme} onchange={pickTheme} />{/if}
+        <span class="tools">
+          {#if view === 'form'}
+            <button type="button" class="modebtn" onclick={enterCanvas} data-tip="Visual canvas (fullscreen)" aria-label="Open visual canvas">⤢ Canvas</button>
+          {:else}
+            <button type="button" class="modebtn" onclick={exitCanvas} data-tip="Back to the field editor" aria-label="Back to form">⊟ Form</button>
+          {/if}
+          {#if allowSwitch}<ThemeSelector current={theme} onchange={pickTheme} />{/if}
+        </span>
       </header>
 
       {#if validation && !validation.ok}
@@ -183,41 +220,68 @@
         </div>
       {/if}
 
-      <div class="nodes">
-        {#each nodes as n, i (i)}
-          {@const fields = fieldsFor(n, i)}
-          <section class="node">
-            <div class="nhead">
-              <span class="chip">{kindLabel(n.kind)}</span>
-              <span class="nacts">
-                <button type="button" class="mini" data-tip="Move up" aria-label="Move up" disabled={i === 0} onclick={() => moveNode(i, -1)}>↑</button>
-                <button type="button" class="mini" data-tip="Move down" aria-label="Move down" disabled={i === nodes.length - 1} onclick={() => moveNode(i, 1)}>↓</button>
-                <button type="button" class="mini" data-tip="Duplicate" aria-label="Duplicate node" onclick={() => duplicateNode(i)}>⧉</button>
-                <button type="button" class="mini danger" data-tip="Remove" aria-label="Remove node" onclick={() => (pendingRemove = i)}>🗑</button>
-              </span>
-            </div>
-            {#if fields.length}
-              <div class="fields">
-                {#each fields as fl (fl.field + fl.path.join('.'))}
-                  <label class="field">
-                    <span class="flabel">{fl.label}</span>
-                    {#if fl.rich}
-                      <textarea rows="2" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
-                    {:else}
-                      <input type="text" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLInputElement).value)} />
-                    {/if}
-                  </label>
-                {/each}
+      {#if view === 'canvas'}
+        <div class="canvasgrid">
+          <Canvas {layout} palette={palette ?? defaultPalette()} {nodes} {selectedKey} onselect={(p) => (selectedPath = p)} />
+          <aside class="inspector">
+            {#if selectedNode}
+              {@const fields = fieldsFor(selectedNode, selectedPath ?? [])}
+              <div class="ihead"><span class="chip">{kindLabel(selectedNode.kind)}</span>
+                <span class="nacts">
+                  {#if selectedTop}
+                    <button type="button" class="mini" data-tip="Move up" aria-label="Move up" onclick={() => moveTop(selectedPath![1] as number, -1)}>↑</button>
+                    <button type="button" class="mini" data-tip="Move down" aria-label="Move down" onclick={() => moveTop(selectedPath![1] as number, 1)}>↓</button>
+                  {/if}
+                  <button type="button" class="mini" data-tip="Duplicate" aria-label="Duplicate" onclick={() => duplicate(selectedPath!)}>⧉</button>
+                  <button type="button" class="mini danger" data-tip="Remove" aria-label="Remove" onclick={() => (pendingRemove = selectedPath)}>🗑</button>
+                </span>
               </div>
+              {#if fields.length}
+                <div class="fields">
+                  {#each fields as fl (fl.field + fl.path.join('.'))}
+                    <label class="field"><span class="flabel">{fl.label}</span>
+                      {#if fl.rich}<textarea rows="2" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
+                      {:else}<input type="text" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLInputElement).value)} />{/if}
+                    </label>
+                  {/each}
+                </div>
+              {:else}<p class="hint">{previewFor(selectedNode)} — edit via the agent.</p>{/if}
             {:else}
-              <p class="preview">{previewFor(n)}</p>
+              <p class="hint">Click a node on the canvas to edit it.</p>
             {/if}
-          </section>
-        {/each}
-        {#if nodes.length === 0}
-          <p class="preview empty">This slide has no nodes.</p>
-        {/if}
-      </div>
+            <button type="button" class="export" onclick={openExport}>↧ Open in PowerPoint (ground truth)</button>
+          </aside>
+        </div>
+      {:else}
+        <div class="nodes">
+          {#each nodes as n, i (i)}
+            {@const path = ['nodes', i]}
+            {@const fields = fieldsFor(n, path)}
+            <section class="node">
+              <div class="nhead">
+                <span class="chip">{kindLabel(n.kind)}</span>
+                <span class="nacts">
+                  <button type="button" class="mini" data-tip="Move up" aria-label="Move up" disabled={i === 0} onclick={() => moveTop(i, -1)}>↑</button>
+                  <button type="button" class="mini" data-tip="Move down" aria-label="Move down" disabled={i === nodes.length - 1} onclick={() => moveTop(i, 1)}>↓</button>
+                  <button type="button" class="mini" data-tip="Duplicate" aria-label="Duplicate node" onclick={() => duplicate(path)}>⧉</button>
+                  <button type="button" class="mini danger" data-tip="Remove" aria-label="Remove node" onclick={() => (pendingRemove = path)}>🗑</button>
+                </span>
+              </div>
+              {#if fields.length}
+                <div class="fields">
+                  {#each fields as fl (fl.field + fl.path.join('.'))}
+                    <label class="field"><span class="flabel">{fl.label}</span>
+                      {#if fl.rich}<textarea rows="2" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLTextAreaElement).value)}></textarea>
+                      {:else}<input type="text" value={fl.value} onblur={(e) => save(fl, (e.currentTarget as HTMLInputElement).value)} />{/if}
+                    </label>
+                  {/each}
+                </div>
+              {:else}<p class="preview">{previewFor(n)}</p>{/if}
+            </section>
+          {/each}
+          {#if nodes.length === 0}<p class="preview empty">This slide has no nodes.</p>{/if}
+        </div>
+      {/if}
 
       {#if toast}<p class="toast">{toast}</p>{/if}
     {/if}
@@ -234,24 +298,33 @@
   />
 </div>
 
+<script module lang="ts">
+  // a neutral palette so the canvas paints even if the payload omits one.
+  export function defaultPalette() {
+    return { canvas: '#FAF7F2', surface: '#FFFFFF', surfaceAlt: '#F4EFE6', accent: '#3B9C94', accentText: '#2B7A73', textPrimary: '#2B2723', textSecondary: '#6A625B', textInverse: '#FAF7F2', border: '#E0D5CA', headingFont: 'Georgia, serif', bodyFont: 'system-ui, sans-serif', monoFont: 'monospace' };
+  }
+</script>
+
 <style>
   .editor { padding: var(--app-space-3) var(--app-space-4); display: flex; flex-direction: column; gap: var(--app-space-3); }
   .head { display: flex; align-items: center; justify-content: space-between; gap: var(--app-space-2); }
-  .back {
-    border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-text);
-    border-radius: var(--app-radius-md); padding: 5px 10px; font-size: var(--app-text-sm); cursor: pointer; flex: 0 0 auto;
-  }
+  .back { border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-text); border-radius: var(--app-radius-md); padding: 5px 10px; font-size: var(--app-text-sm); cursor: pointer; flex: 0 0 auto; }
   .back:hover { border-color: var(--app-accent); color: var(--app-accent-text); }
-  .back:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 2px; }
   .title { flex: 1; min-width: 0; font-family: var(--app-font-serif); font-weight: var(--app-weight-medium); font-size: var(--app-text-md); color: var(--app-text); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tools { display: flex; align-items: center; gap: var(--app-space-2); flex: 0 0 auto; }
+  .modebtn { position: relative; border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-text); border-radius: var(--app-radius-md); padding: 5px 10px; font-size: var(--app-text-sm); cursor: pointer; }
+  .modebtn:hover { border-color: var(--app-accent); color: var(--app-accent-text); }
 
-  .banner {
-    font-size: var(--app-text-xs); color: var(--app-warning);
-    background: color-mix(in srgb, var(--app-warning) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--app-warning) 35%, transparent);
-    border-radius: var(--app-radius-sm); padding: 6px 10px;
-  }
+  .banner { font-size: var(--app-text-xs); color: var(--app-warning); background: color-mix(in srgb, var(--app-warning) 12%, transparent); border: 1px solid color-mix(in srgb, var(--app-warning) 35%, transparent); border-radius: var(--app-radius-sm); padding: 6px 10px; }
   .banner span { color: var(--app-text-muted); }
+
+  .canvasgrid { display: grid; grid-template-columns: 1fr; gap: var(--app-space-3); }
+  .canvasview .canvasgrid { grid-template-columns: minmax(0, 1fr) 280px; align-items: start; }
+  .inspector { display: flex; flex-direction: column; gap: var(--app-space-2); border: 1px solid var(--app-border); border-radius: var(--app-radius-md); background: var(--app-surface); padding: var(--app-space-3); }
+  .ihead { display: flex; align-items: center; justify-content: space-between; }
+  .hint { margin: 0; font-size: var(--app-text-sm); color: var(--app-text-muted); }
+  .export { margin-top: var(--app-space-2); border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-text); border-radius: var(--app-radius-md); padding: 7px 10px; font-size: var(--app-text-xs); cursor: pointer; }
+  .export:hover { border-color: var(--app-accent); color: var(--app-accent-text); }
 
   .nodes { display: flex; flex-direction: column; gap: var(--app-space-2); }
   .node { border: 1px solid var(--app-border); border-radius: var(--app-radius-md); background: var(--app-surface); padding: var(--app-space-2) var(--app-space-3) var(--app-space-3); }
@@ -262,20 +335,19 @@
   .mini:hover:not(:disabled) { background: var(--app-surface-raised); color: var(--app-text); }
   .mini.danger:hover:not(:disabled) { color: var(--app-danger); }
   .mini:disabled { opacity: 0.3; cursor: default; }
-  .mini:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 1px; }
-  .mini[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); background: var(--app-text); color: var(--app-bg); font-size: var(--app-text-xs); white-space: nowrap; padding: 3px 6px; border-radius: var(--app-radius-sm); opacity: 0; pointer-events: none; transition: opacity var(--app-dur-fast) var(--app-ease); z-index: 30; }
-  .mini[data-tip]:hover::after { opacity: 1; }
+  .mini[data-tip]::after, .modebtn[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); background: var(--app-text); color: var(--app-bg); font-size: var(--app-text-xs); white-space: nowrap; padding: 3px 6px; border-radius: var(--app-radius-sm); opacity: 0; pointer-events: none; transition: opacity var(--app-dur-fast) var(--app-ease); z-index: 40; }
+  .mini[data-tip]:hover::after, .modebtn[data-tip]:hover::after { opacity: 1; }
 
   .fields { display: flex; flex-direction: column; gap: var(--app-space-2); margin-top: var(--app-space-2); }
   .field { display: flex; flex-direction: column; gap: 3px; }
   .flabel { font-size: var(--app-text-xs); color: var(--app-text-muted); }
-  input, textarea {
-    font: inherit; font-size: var(--app-text-sm); color: var(--app-text);
-    background: var(--app-bg); border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
-    padding: 6px 8px; width: 100%; resize: vertical;
-  }
+  input, textarea { font: inherit; font-size: var(--app-text-sm); color: var(--app-text); background: var(--app-bg); border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); padding: 6px 8px; width: 100%; resize: vertical; }
   input:focus, textarea:focus { outline: none; border-color: var(--app-accent); box-shadow: 0 0 0 2px var(--app-accent-soft); }
   .preview { margin: var(--app-space-2) 0 0; font-size: var(--app-text-sm); color: var(--app-text-muted); }
   .preview.empty { text-align: center; }
   .toast { margin: 0; font-size: var(--app-text-xs); color: var(--app-text-muted); text-align: center; }
+
+  @media (max-width: 640px) {
+    .canvasview .canvasgrid { grid-template-columns: 1fr; }
+  }
 </style>
