@@ -434,6 +434,27 @@ Below, "gate" = the universal gate above plus the phase-specific checks named.
 - **Gate:** full §11 gate green per commit. E2/E3 (engine repo `pptx-go`) are HELD for
   explicit go-ahead; A–D + E1 are in-repo and unblocked.
 
+### Phase 13 — Engine richness (pptx-go) **[ORCH] API design, [BUILD] fan-out**
+- **Goal:** make agent-authored decks look *designed* — vertical + horizontal alignment,
+  dark full-bleed variants, slide chrome, rich card chrome, composition primitives
+  (VS badge, inter-column connectors, bento grid), and stat/pricing treatments. North
+  star: an agency-grade investor deck. Scope: **full push** (owner-approved 2026-06-19).
+- **Files:** the engine `~/Repos/pptx-go` (`scene/render.go` + nodes/scene API), then
+  per unit: bump the dep, mirror `internal/layout/layout.go`, add `internal/contracts`
+  fields + `dockyard generate` + fixtures, refresh the Deckard White soul, teach `skills/`.
+  See **`docs/PHASE-13-ENGINE-RICHNESS.md`** (the binding plan: the one-way-door layout
+  model + workstreams A–G + the multi-repo flow).
+- **Clone:** workstream **A (alignment + content-aware text metrics)** is the reference
+  unit; its API is designed for the whole phase so it does not churn. Land + tag +
+  integrate end-to-end on ONE deck before fanning out to B–F (§8).
+- **Acceptance:** rebuild a Deckard deck approaching the reference — centered cover, a dark
+  full-bleed section slide, a rich card grid, a two-column compare with a center badge, a
+  stat/pricing row, consistent footer chrome. Each workstream's own acceptance criterion in
+  `docs/PHASE-13-ENGINE-RICHNESS.md` is binding.
+- **Gate:** engine units green in `~/Repos/pptx-go` (`go test -race`, golden determinism —
+  byte-identical regardless of worker count); integration units green on the full §11 gate.
+  Zero-value alignment/variant/background ⇒ byte-identical to today (backward compatible).
+
 ---
 
 ## 5. Ownership summary
