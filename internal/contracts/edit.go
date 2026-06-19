@@ -10,7 +10,7 @@ type EditSlideNodeInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node to replace.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// Node is the replacement slide node as a JSON object with a "kind" discriminator.
 	Node map[string]any `json:"node"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
@@ -32,7 +32,7 @@ type EditSlideFieldInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node whose field will be replaced.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// Field is the JSON field name to replace on the addressed node.
 	Field string `json:"field"`
 	// Value is the replacement value for a string-valued field (e.g. a title,
@@ -58,7 +58,7 @@ type PatchSlideTextInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node whose text field will be replaced.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// Field is the RichText JSON field name to replace on the addressed node.
 	Field string `json:"field"`
 	// Text is the plain text to encode as a single RichText run.
@@ -82,7 +82,7 @@ type InsertSlideNodeInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the insertion point in a node slice.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// Node is the inserted slide node as a JSON object with a "kind" discriminator.
 	Node map[string]any `json:"node"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
@@ -104,7 +104,7 @@ type RemoveSlideNodeInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node to remove.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }
@@ -124,7 +124,7 @@ type DuplicateSlideNodeInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// Path addresses the existing node to duplicate.
-	Path IRPath `json:"path,omitempty"`
+	Path IRPath `json:"path,omitempty" jsonschema:"path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }
@@ -144,9 +144,9 @@ type MoveSlideNodeInput struct {
 	// SlideID is the stable slide identifier to edit.
 	SlideID string `json:"slideId"`
 	// From addresses the existing node to move.
-	From IRPath `json:"from,omitempty"`
+	From IRPath `json:"from,omitempty" jsonschema:"source path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// To addresses the destination insertion point.
-	To IRPath `json:"to,omitempty"`
+	To IRPath `json:"to,omitempty" jsonschema:"destination path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"`
 	// ExpectedRevisionHash enforces optimistic concurrency when set.
 	ExpectedRevisionHash string `json:"expectedRevisionHash,omitempty"`
 }

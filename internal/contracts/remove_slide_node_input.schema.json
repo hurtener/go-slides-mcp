@@ -12,7 +12,8 @@
         "null",
         "array"
       ],
-      "items": true
+      "items": true,
+      "description": "path to the node as legs from the slide root: the first leg is always nodes, then an integer node index; nested container legs are left/right (two_column), cells (grid), or body (card). NOTE: list items and prose paragraphs are node fields, NOT legs — to change them, replace the whole list/prose node with edit_slide_node. examples: [nodes, 2] or [nodes, 0, left, 1]"
     },
     "expectedRevisionHash": {
       "type": "string"

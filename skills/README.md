@@ -9,6 +9,7 @@ to call when) and the *taste* (how to make slides that look designed).
 |---|---|
 | [`building-a-deck`](building-a-deck/SKILL.md) | The end-to-end loop: create → style → fill → validate → export. Start here. |
 | [`composing-a-slide`](composing-a-slide/SKILL.md) | The slide node vocabulary and when to use each (hero, list, callout, two-column, grid, chart…). |
+| [`editing-a-slide`](editing-a-slide/SKILL.md) | Refining an existing slide with small targeted edits + the IR path format (don't resend the whole slide). |
 | [`design-principles`](design-principles/SKILL.md) | Hierarchy, typography, color, spacing, contrast — making output look designed. |
 | [`styling-with-souls`](styling-with-souls/SKILL.md) | Themes: the built-in Deckard White, bootstrapping a soul from a brand, refining tokens. |
 | [`charts-and-code`](charts-and-code/SKILL.md) | Adding data charts (`compile_chart`) and code blocks (`compile_code`). |
