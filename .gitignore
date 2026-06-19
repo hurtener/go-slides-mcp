@@ -49,3 +49,6 @@ _engine/
 
 # opencode per-project runtime state (goals/sessions) — not committed
 .opencode/
+
+# stray screenshots / scratch images at repo root
+/*.png
