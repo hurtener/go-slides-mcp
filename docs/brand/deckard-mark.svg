@@ -1,0 +1,30 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deckard">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#332E29"/>
+      <stop offset="1" stop-color="#221E1A"/>
+    </linearGradient>
+    <filter id="card" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- badge -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+
+  <!-- a stacked deck of slides, fanned to suggest depth -->
+  <g filter="url(#card)">
+    <rect x="78" y="70" width="118" height="116" rx="16" fill="#2B7A73" transform="rotate(-11 137 128)"/>
+    <rect x="74" y="66" width="118" height="116" rx="16" fill="#3B9C94" transform="rotate(-5 133 124)"/>
+    <!-- front slide -->
+    <g transform="rotate(2 128 122)">
+      <rect x="70" y="62" width="118" height="116" rx="16" fill="#FAF7F2"/>
+      <!-- the accent + content lines that read as a slide -->
+      <rect x="84" y="80" width="34" height="10" rx="5" fill="#3B9C94"/>
+      <rect x="84" y="102" width="90" height="9" rx="4.5" fill="#2B2723" opacity="0.82"/>
+      <rect x="84" y="120" width="78" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+      <rect x="84" y="134" width="86" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+      <rect x="84" y="148" width="54" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+    </g>
+  </g>
+</svg>
