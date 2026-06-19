@@ -78,6 +78,12 @@ type OpenSlideEditorOutput struct {
 	Validation SlideValidation `json:"validation"`
 	// Brand is the white-label brand config for the surface chrome/theme.
 	Brand AppBrand `json:"brand"`
+	// Layout is the server-computed node geometry for the canvas (EMU boxes,
+	// mirroring the renderer) — the editor paints this, never re-computes layout.
+	Layout SlideLayout `json:"layout"`
+	// Palette is the deck soul's resolved colors + fonts so the canvas paints in
+	// the deck's visual language (matching the export).
+	Palette SoulPalette `json:"palette"`
 }
 
 // GetDeckStateInput is the typed input for get_deck_state.
