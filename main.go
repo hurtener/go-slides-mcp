@@ -11,6 +11,7 @@ import (
 
 	"github.com/hurtener/dockyard/runtime/server"
 
+	"github.com/hurtener/go-slides-mcp/internal/asset"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -47,6 +48,7 @@ func main() {
 	deps := handlers.ToolDeps{
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
+		Assets:    asset.NewMemoryStore(),
 		Workspace: workspace,
 		Logger:    logger,
 	}

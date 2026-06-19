@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "filename": {
+      "type": "string"
+    },
+    "mime": {
+      "type": "string"
+    },
+    "dataBase64": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "filename",
+    "mime",
+    "dataBase64"
+  ],
+  "additionalProperties": false
+}

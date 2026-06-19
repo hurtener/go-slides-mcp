@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "assetId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "assetId"
+  ],
+  "additionalProperties": false
+}

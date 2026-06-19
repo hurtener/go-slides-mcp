@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "assetId": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    },
+    "mime": {
+      "type": "string"
+    },
+    "bytes": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "assetId",
+    "bytes"
+  ],
+  "additionalProperties": false
+}
