@@ -1,0 +1,1 @@
+{"slide":{"layout":"two_column","nodes":[{"kind":"two_column","left":[{"kind":"heading","level":2,"text":[{"text":"Left"}]},{"kind":"prose","paragraphs":[[{"text":"A"}],[{"text":"B"}]]}],"right":[{"kind":"heading","level":2,"text":[{"text":"Right"}]},{"kind":"list","items":[{"text":[{"text":"One"}]},{"text":[{"text":"Two"}]}]}]}]}}

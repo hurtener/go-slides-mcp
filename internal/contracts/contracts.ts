@@ -1729,6 +1729,45 @@ export const TypeMono: TypeRole = "mono";
  */
 export const TypeCode: TypeRole = "code";
 /**
+ * GetSessionInput is the typed input for get_session.
+ */
+export interface GetSessionInput {
+}
+/**
+ * BuildInfo describes the running server build.
+ */
+export interface BuildInfo {
+  /**
+   * Name is the server binary name.
+   */
+  name: string;
+  /**
+   * Version is the server build version.
+   */
+  version: string;
+}
+/**
+ * GetSessionOutput is the structured result for get_session.
+ */
+export interface GetSessionOutput {
+  /**
+   * ActiveDeckID is the currently active deck, if one is selected.
+   */
+  activeDeckId?: string;
+  /**
+   * ActiveSoulID is the currently active soul, if one is selected.
+   */
+  activeSoulId?: string;
+  /**
+   * OpenPanels is the ordered list of currently open panel identifiers.
+   */
+  openPanels: string[];
+  /**
+   * BuildInfo identifies the running Deckard build.
+   */
+  buildInfo: BuildInfo;
+}
+/**
  * SlideValidation is the structural validation result for one slide.
  */
 export interface SlideValidation {
@@ -2202,4 +2241,103 @@ export interface GetDesignTokensOutput {
    * Tokens is the flattened token list for the soul theme.
    */
   tokens?: TokenEntry[];
+}
+/**
+ * ValidateSlideIRInput is the typed input for validate_slide_ir.
+ */
+export interface ValidateSlideIRInput {
+  /**
+   * Slide is the slide snapshot to validate without storage.
+   */
+  slide: Slide;
+  /**
+   * SoulID is the optional soul context for future validation expansion.
+   */
+  soulId?: string;
+}
+/**
+ * ValidateSlideIROutput is the structured result for validate_slide_ir.
+ */
+export interface ValidateSlideIROutput {
+  /**
+   * OK reports whether the slide passed structural validation.
+   */
+  ok: boolean;
+  /**
+   * Issues is the flattened list of validation issue messages.
+   */
+  issues?: string[];
+}
+/**
+ * ValidateSlideInput is the typed input for validate_slide.
+ */
+export interface ValidateSlideInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to validate.
+   */
+  slideId: string;
+}
+/**
+ * ValidateSlideOutput is the structured result for validate_slide.
+ */
+export interface ValidateSlideOutput {
+  /**
+   * SlideID is the validated slide identifier.
+   */
+  slideId: string;
+  /**
+   * OK reports whether the slide passed structural validation.
+   */
+  ok: boolean;
+  /**
+   * Issues is the flattened list of validation issue messages.
+   */
+  issues?: string[];
+}
+/**
+ * ValidateDeckForExportInput is the typed input for validate_deck_for_export.
+ */
+export interface ValidateDeckForExportInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+}
+/**
+ * DeckSlideValidation is the per-slide validation result for deck export checks.
+ */
+export interface DeckSlideValidation {
+  /**
+   * SlideID is the validated slide identifier.
+   */
+  slideId: string;
+  /**
+   * OK reports whether the slide passed structural validation.
+   */
+  ok: boolean;
+  /**
+   * Issues is the flattened list of validation issue messages.
+   */
+  issues?: string[];
+}
+/**
+ * ValidateDeckForExportOutput is the structured result for validate_deck_for_export.
+ */
+export interface ValidateDeckForExportOutput {
+  /**
+   * OK reports whether every slide in the deck passed validation.
+   */
+  ok: boolean;
+  /**
+   * PerSlide is the validation result for each slide in deck order.
+   */
+  perSlide?: DeckSlideValidation[];
+  /**
+   * Blockers is the flattened list of slide-scoped export blockers.
+   */
+  blockers?: string[];
 }

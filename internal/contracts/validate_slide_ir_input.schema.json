@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "properties": {
+    "slide": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "layout": {
+          "type": "string"
+        },
+        "nodes": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": true
+        },
+        "notes": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "Text": {
+                "type": "string"
+              },
+              "Style": {
+                "type": "object",
+                "properties": {
+                  "TypeRole": {
+                    "type": "string"
+                  },
+                  "Bold": {
+                    "type": "boolean"
+                  },
+                  "Italic": {
+                    "type": "boolean"
+                  },
+                  "Underline": {
+                    "type": "boolean"
+                  },
+                  "Strike": {
+                    "type": "boolean"
+                  },
+                  "Code": {
+                    "type": "boolean"
+                  },
+                  "Link": {
+                    "type": "boolean"
+                  },
+                  "Href": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "TypeRole",
+                  "Bold",
+                  "Italic",
+                  "Underline",
+                  "Strike",
+                  "Code",
+                  "Link",
+                  "Href"
+                ],
+                "additionalProperties": false
+              },
+              "Color": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "literal": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "Text",
+              "Style",
+              "Color"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "soulId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "slide"
+  ],
+  "additionalProperties": false
+}

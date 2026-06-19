@@ -97,6 +97,8 @@ func testHandlers() *handlers {
 		Store:     deck.NewMemoryStore(),
 		Souls:     soul.NewMemoryRegistry(),
 		Assets:    asset.NewMemoryStore(),
+		Session:   &SessionState{},
+		BuildInfo: contracts.BuildInfo{Name: "go-slides-mcp", Version: "test"},
 		Workspace: "/tmp/deckard-test",
 		Logger:    slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}}

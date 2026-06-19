@@ -167,6 +167,30 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.ValidateSlideIRInput, contracts.ValidateSlideIROutput]("validate_slide_ir").
+		Describe("Validate one slide IR snapshot without storage.").
+		Handler(h.validateSlideIR).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ValidateSlideInput, contracts.ValidateSlideOutput]("validate_slide").
+		Describe("Validate one stored slide by deck and slide ID.").
+		Handler(h.validateSlide).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ValidateDeckForExportInput, contracts.ValidateDeckForExportOutput]("validate_deck_for_export").
+		Describe("Validate every slide in one deck and report export blockers.").
+		Handler(h.validateDeckForExport).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetSessionInput, contracts.GetSessionOutput]("get_session").
+		Describe("Get the active in-memory workspace session and build info.").
+		Handler(h.getSession).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

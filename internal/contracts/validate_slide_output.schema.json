@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "slideId": {
+      "type": "string"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "issues": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "slideId",
+    "ok"
+  ],
+  "additionalProperties": false
+}
