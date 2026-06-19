@@ -1801,6 +1801,117 @@ export interface SlideDoc {
   slides?: Slide[];
 }
 /**
+ * SaveAsTemplateInput is the typed input for save_as_template.
+ */
+export interface SaveAsTemplateInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * SlideID is the stable slide identifier to save as a recipe.
+   */
+  slideId: string;
+  /**
+   * Name is the caller-facing recipe name.
+   */
+  name: string;
+  /**
+   * Description is the optional recipe summary.
+   */
+  description?: string;
+  /**
+   * Tags are the optional recipe labels used for filtering.
+   */
+  tags?: string[];
+}
+/**
+ * SaveAsTemplateOutput is the structured result for save_as_template.
+ */
+export interface SaveAsTemplateOutput {
+  /**
+   * RecipeID is the stored recipe identifier.
+   */
+  recipeId: string;
+  /**
+   * Name is the stored recipe name.
+   */
+  name: string;
+}
+/**
+ * ListRecipesInput is the typed input for list_recipes.
+ */
+export interface ListRecipesInput {
+  /**
+   * Tag filters the returned recipes to one tag when set.
+   */
+  tag?: string;
+  /**
+   * SoulID is reserved for future soul-aware recipe selection.
+   */
+  soulId?: string;
+}
+/**
+ * RecipeSummary is one list_recipes result item.
+ */
+export interface RecipeSummary {
+  /**
+   * RecipeID is the stable recipe identifier.
+   */
+  recipeId: string;
+  /**
+   * Name is the caller-facing recipe name.
+   */
+  name: string;
+  /**
+   * Tags are the recipe labels used for filtering.
+   */
+  tags?: string[];
+  /**
+   * Source reports whether the recipe is builtin or user-saved.
+   */
+  source?: string;
+}
+/**
+ * ListRecipesOutput is the structured result for list_recipes.
+ */
+export interface ListRecipesOutput {
+  /**
+   * Recipes is the ordered recipe list, built-ins first then user recipes.
+   */
+  recipes?: RecipeSummary[];
+}
+/**
+ * ApplyRecipeInput is the typed input for apply_recipe.
+ */
+export interface ApplyRecipeInput {
+  /**
+   * DeckID addresses the deck by stable ID or slug.
+   */
+  deckId: string;
+  /**
+   * RecipeID is the stable recipe identifier to instantiate.
+   */
+  recipeId: string;
+  /**
+   * Position is the optional zero-based insertion index.
+   */
+  position?: number /* int */;
+}
+/**
+ * ApplyRecipeOutput is the structured result for apply_recipe.
+ */
+export interface ApplyRecipeOutput {
+  /**
+   * SlideID is the inserted slide identifier assigned by the deck store.
+   */
+  slideId: string;
+  /**
+   * Slide is the stored slide snapshot created from the recipe.
+   */
+  slide: Slide;
+}
+/**
  * RichText is an ordered list of styled runs — the inline-text content type
  * used across the slide IR (CONVENTIONS §4). It marshals as a JSON array of
  * TextRun objects; each run is a flat { text, typeRole?, bold?, ... , color? }.

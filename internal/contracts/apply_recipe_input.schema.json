@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "deckId": {
+      "type": "string"
+    },
+    "recipeId": {
+      "type": "string"
+    },
+    "position": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "required": [
+    "deckId",
+    "recipeId"
+  ],
+  "additionalProperties": false
+}

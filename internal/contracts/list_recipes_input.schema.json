@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "tag": {
+      "type": "string"
+    },
+    "soulId": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

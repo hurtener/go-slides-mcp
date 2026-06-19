@@ -143,6 +143,24 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.SaveAsTemplateInput, contracts.SaveAsTemplateOutput]("save_as_template").
+		Describe("Save one stored slide as a reusable recipe template.").
+		Handler(h.saveAsTemplate).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ListRecipesInput, contracts.ListRecipesOutput]("list_recipes").
+		Describe("List every stored recipe summary, built-ins first.").
+		Handler(h.listRecipes).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ApplyRecipeInput, contracts.ApplyRecipeOutput]("apply_recipe").
+		Describe("Apply one stored recipe as a new slide in a deck.").
+		Handler(h.applyRecipe).
+		Register(srv); err != nil {
+		return err
+	}
 	if err := tool.New[contracts.UploadAssetInput, contracts.UploadAssetOutput]("upload_asset").
 		Describe("Upload one binary asset and return its stored metadata.").
 		Handler(h.uploadAsset).

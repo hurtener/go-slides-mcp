@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "recipeId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "recipeId",
+    "name"
+  ],
+  "additionalProperties": false
+}

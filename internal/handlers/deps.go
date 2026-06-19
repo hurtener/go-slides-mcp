@@ -8,6 +8,7 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/comment"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/deck"
+	"github.com/hurtener/go-slides-mcp/internal/recipe"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
@@ -39,6 +40,8 @@ type ToolDeps struct {
 	Assets *asset.MemoryStore
 	// Comments persists collaboration comments in memory.
 	Comments *comment.MemoryStore
+	// Recipes persists reusable slide templates in memory.
+	Recipes *recipe.MemoryStore
 	// Session is the small in-memory workspace session state.
 	Session *SessionState
 	// BuildInfo identifies the running Deckard build.

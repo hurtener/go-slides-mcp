@@ -120,6 +120,21 @@ tools:
     input: internal/contracts.GetDesignTokensInput
     output: internal/contracts.GetDesignTokensOutput
     task_support: forbidden
+  - name: save_as_template
+    description: Save one stored slide as a reusable recipe template.
+    input: internal/contracts.SaveAsTemplateInput
+    output: internal/contracts.SaveAsTemplateOutput
+    task_support: forbidden
+  - name: list_recipes
+    description: List every stored recipe summary, built-ins first.
+    input: internal/contracts.ListRecipesInput
+    output: internal/contracts.ListRecipesOutput
+    task_support: forbidden
+  - name: apply_recipe
+    description: Apply one stored recipe as a new slide in a deck.
+    input: internal/contracts.ApplyRecipeInput
+    output: internal/contracts.ApplyRecipeOutput
+    task_support: forbidden
   - name: upload_asset
     description: Upload one binary asset and return its stored metadata.
     input: internal/contracts.UploadAssetInput
