@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	"github.com/hurtener/dockyard/runtime/tool"
+	"github.com/hurtener/pptx-go/pptx"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/go-slides-mcp/internal/layout"
 )
 
 func (h *handlers) getDeckOverview(_ context.Context, in contracts.GetDeckOverviewInput) (tool.Result[contracts.GetDeckOverviewOutput], error) {
@@ -44,6 +46,7 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 		deckID = stored.ID
 		soulID = stored.SoulID
 	}
+	soulCtx := h.resolveSoul(soulID)
 	out := contracts.OpenSlideEditorOutput{
 		Kind:       contracts.SurfaceKindEditor,
 		State:      "ready",
@@ -53,6 +56,8 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 		SoulID:     soulID,
 		Validation: validation,
 		Brand:      h.resolveBrand(),
+		Layout:     layout.Compute(*slide, soulCtx.Theme),
+		Palette:    soulPalette(soulCtx.Theme),
 	}
 	return tool.Result[contracts.OpenSlideEditorOutput]{Text: fmt.Sprintf("Opened editor for slide %q in deck %q.", slide.ID, deckID), Structured: out}, nil
 }
@@ -135,4 +140,27 @@ func (h *handlers) setActiveWorkspace(_ context.Context, in contracts.SetActiveW
 		ActiveSoulID: activeSoulID,
 	}
 	return tool.Result[contracts.SetActiveWorkspaceOutput]{Text: fmt.Sprintf("Set active workspace: deck=%q soul=%q.", activeDeckID, activeSoulID), Structured: out}, nil
+}
+
+// soulPalette resolves a soul theme's colors + fonts into CSS-ready hex/family
+// strings so the editor canvas paints in the deck's visual language.
+func soulPalette(t *pptx.Theme) contracts.SoulPalette {
+	if t == nil {
+		t = pptx.DefaultTheme()
+	}
+	hex := func(s pptx.RGB) string { return "#" + string(s) }
+	return contracts.SoulPalette{
+		Canvas:        hex(t.ResolveColor(pptx.ColorCanvas)),
+		Surface:       hex(t.ResolveColor(pptx.ColorSurface)),
+		SurfaceAlt:    hex(t.ResolveColor(pptx.ColorSurfaceAlt)),
+		Accent:        hex(t.ResolveColor(pptx.ColorAccent)),
+		AccentText:    hex(t.ResolveTextColor(pptx.TextAccent)),
+		TextPrimary:   hex(t.ResolveTextColor(pptx.TextPrimary)),
+		TextSecondary: hex(t.ResolveTextColor(pptx.TextSecondary)),
+		TextInverse:   hex(t.ResolveTextColor(pptx.TextInverse)),
+		Border:        hex(t.ResolveColor(pptx.ColorSurfaceAlt)),
+		HeadingFont:   t.ResolveType(pptx.TypeH1).Family,
+		BodyFont:      t.ResolveType(pptx.TypeBody).Family,
+		MonoFont:      t.ResolveType(pptx.TypeMono).Family,
+	}
 }

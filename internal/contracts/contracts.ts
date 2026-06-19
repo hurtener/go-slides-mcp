@@ -135,6 +135,79 @@ export interface DeleteAssetOutput {
   deleted: boolean;
 }
 /**
+ * EMUBox is a rectangle in EMU (English Metric Units; 914400 per inch) — the
+ * coordinate space pptx-go lays out in. The canvas surface scales it to pixels.
+ */
+export interface EMUBox {
+  x: number /* int64 */;
+  y: number /* int64 */;
+  w: number /* int64 */;
+  h: number /* int64 */;
+}
+/**
+ * NodePlacement is one node's resolved geometry on the slide canvas. Computed
+ * server-side by mirroring pptx-go's deterministic box-stack layout, so the
+ * editor canvas paints the SAME geometry the export uses (no second layout
+ * authority re-coded in the browser). Path is the IR path to the node (for
+ * click-to-select and the edit tools).
+ */
+export interface NodePlacement {
+  /**
+   * Path is the structural IR path to the node ([] = top level, e.g. [2] or [2,"left",0]).
+   */
+  path: IRPath;
+  /**
+   * Kind is the node kind discriminator.
+   */
+  kind: string;
+  /**
+   * Box is the node's resolved rectangle in EMU.
+   */
+  box: EMUBox;
+}
+/**
+ * SlideLayout is the full canvas geometry for one slide: the canvas size plus
+ * every node's placement, in deck (soul) coordinates.
+ */
+export interface SlideLayout {
+  /**
+   * CanvasWidth / CanvasHeight are the slide dimensions in EMU (16:9 by default).
+   */
+  canvasWidth: number /* int64 */;
+  canvasHeight: number /* int64 */;
+  /**
+   * Placements are the per-node boxes in render order (containers before children).
+   */
+  placements?: NodePlacement[];
+  /**
+   * Overflow is true when the stacked content exceeds the body region (the one
+   * irreducible divergence — surfaced honestly on-canvas).
+   */
+  overflow: boolean;
+}
+/**
+ * SoulPalette is the deck soul's resolved colors + fonts, so the canvas paints
+ * in the deck's actual visual language (matching the export) rather than the
+ * app-chrome theme.
+ */
+export interface SoulPalette {
+  canvas: string;
+  surface: string;
+  surfaceAlt: string;
+  accent: string;
+  accentText: string;
+  textPrimary: string;
+  textSecondary: string;
+  textInverse: string;
+  border: string;
+  /**
+   * HeadingFont / BodyFont / MonoFont are CSS font-family hints from the soul.
+   */
+  headingFont: string;
+  bodyFont: string;
+  monoFont: string;
+}
+/**
  * CommentTarget is the typed comment target address.
  */
 export interface CommentTarget {
@@ -3053,6 +3126,16 @@ export interface OpenSlideEditorOutput {
    * Brand is the white-label brand config for the surface chrome/theme.
    */
   brand: AppBrand;
+  /**
+   * Layout is the server-computed node geometry for the canvas (EMU boxes,
+   * mirroring the renderer) — the editor paints this, never re-computes layout.
+   */
+  layout: SlideLayout;
+  /**
+   * Palette is the deck soul's resolved colors + fonts so the canvas paints in
+   * the deck's visual language (matching the export).
+   */
+  palette: SoulPalette;
 }
 /**
  * GetDeckStateInput is the typed input for get_deck_state.

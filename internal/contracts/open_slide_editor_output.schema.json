@@ -157,6 +157,133 @@
         "allowThemeSwitch"
       ],
       "additionalProperties": false
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "canvasWidth": {
+          "type": "integer"
+        },
+        "canvasHeight": {
+          "type": "integer"
+        },
+        "placements": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": true
+              },
+              "kind": {
+                "type": "string"
+              },
+              "box": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "integer"
+                  },
+                  "y": {
+                    "type": "integer"
+                  },
+                  "w": {
+                    "type": "integer"
+                  },
+                  "h": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "box"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "overflow": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "canvasWidth",
+        "canvasHeight",
+        "overflow"
+      ],
+      "additionalProperties": false
+    },
+    "palette": {
+      "type": "object",
+      "properties": {
+        "canvas": {
+          "type": "string"
+        },
+        "surface": {
+          "type": "string"
+        },
+        "surfaceAlt": {
+          "type": "string"
+        },
+        "accent": {
+          "type": "string"
+        },
+        "accentText": {
+          "type": "string"
+        },
+        "textPrimary": {
+          "type": "string"
+        },
+        "textSecondary": {
+          "type": "string"
+        },
+        "textInverse": {
+          "type": "string"
+        },
+        "border": {
+          "type": "string"
+        },
+        "headingFont": {
+          "type": "string"
+        },
+        "bodyFont": {
+          "type": "string"
+        },
+        "monoFont": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "canvas",
+        "surface",
+        "surfaceAlt",
+        "accent",
+        "accentText",
+        "textPrimary",
+        "textSecondary",
+        "textInverse",
+        "border",
+        "headingFont",
+        "bodyFont",
+        "monoFont"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -165,7 +292,9 @@
     "slideId",
     "ir",
     "validation",
-    "brand"
+    "brand",
+    "layout",
+    "palette"
   ],
   "additionalProperties": false
 }

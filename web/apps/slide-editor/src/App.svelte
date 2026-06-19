@@ -86,8 +86,9 @@
   // editable fields for a node at top-level index i (supported kinds only).
   function fieldsFor(n: Node, i: number): Field[] {
     const f: Field[] = [];
-    const str = (label: string, field: string) => f.push({ label, field, path: [i], rich: false, value: String((n[field] as string) ?? '') });
-    const rich = (label: string, field: string) => f.push({ label, field, path: [i], rich: true, value: rtText(n[field]) });
+    // IR paths are "nodes"-prefixed (what the edit tools resolve): ["nodes", i, ...].
+    const str = (label: string, field: string) => f.push({ label, field, path: ['nodes', i], rich: false, value: String((n[field] as string) ?? '') });
+    const rich = (label: string, field: string) => f.push({ label, field, path: ['nodes', i], rich: true, value: rtText(n[field]) });
     switch (n.kind) {
       case 'hero': str('Eyebrow', 'eyebrow'); str('Title', 'title'); str('Subtitle', 'subtitle'); break;
       case 'heading': rich('Heading', 'text'); break;
@@ -98,7 +99,7 @@
       case 'arrow': str('Label', 'label'); break;
       case 'list': {
         const items = (n.items as Array<{ text?: unknown }>) ?? [];
-        items.forEach((it, j) => f.push({ label: `Item ${j + 1}`, field: 'text', path: [i, 'items', j], rich: true, value: rtText(it.text) }));
+        items.forEach((it, j) => f.push({ label: `Item ${j + 1}`, field: 'text', path: ['nodes', i, 'items', j], rich: true, value: rtText(it.text) }));
         break;
       }
     }
@@ -138,11 +139,11 @@
     const next = [...nodes];
     [next[i], next[j]] = [next[j], next[i]];
     nodes = next;
-    void bridge.callTool('move_slide_node', { deckId, slideId, from: [j], to: [i] })
+    void bridge.callTool('move_slide_node', { deckId, slideId, from: ['nodes', j], to: ['nodes', i] })
       .catch((e: unknown) => flash(`Move failed: ${(e as Error)?.message ?? e}`));
   }
   function duplicateNode(i: number) {
-    void bridge.callTool('duplicate_slide_node', { deckId, slideId, path: [i] })
+    void bridge.callTool('duplicate_slide_node', { deckId, slideId, path: ['nodes', i] })
       .then(() => bridge.callTool('open_slide_editor', { deckId, slideId }))
       .catch((e: unknown) => flash(`Duplicate failed: ${(e as Error)?.message ?? e}`));
   }
@@ -150,7 +151,7 @@
     const i = pendingRemove; pendingRemove = null;
     if (i === null) return;
     nodes = nodes.filter((_, idx) => idx !== i);
-    void bridge.callTool('remove_slide_node', { deckId, slideId, path: [i] })
+    void bridge.callTool('remove_slide_node', { deckId, slideId, path: ['nodes', i] })
       .catch((e: unknown) => flash(`Remove failed: ${(e as Error)?.message ?? e}`));
   }
   function back() {
