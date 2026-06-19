@@ -275,6 +275,71 @@ export interface ResolveCommentOutput {
   resolved: boolean;
 }
 /**
+ * ChartSeries is one named data series for compile_chart.
+ */
+export interface ChartSeries {
+  /**
+   * Name labels the series (shown for line charts).
+   */
+  name?: string;
+  /**
+   * Values are the numeric data points.
+   */
+  values: number /* float64 */[];
+}
+/**
+ * ChartSpec is the declarative chart description for compile_chart. The server
+ * rasterizes it to a PNG (pure Go, no Chromium) and stores it as an asset.
+ */
+export interface ChartSpec {
+  /**
+   * Type selects the chart family: "bar", "line", or "pie".
+   */
+  type: string;
+  /**
+   * Title is the chart title (optional).
+   */
+  title?: string;
+  /**
+   * Labels are per-point category labels (required for bar and pie).
+   */
+  labels?: string[];
+  /**
+   * Series are the data series (bar/pie use the first; line plots each).
+   */
+  series: ChartSeries[];
+}
+/**
+ * CompileChartInput is the model-facing input for compile_chart.
+ */
+export interface CompileChartInput {
+  /**
+   * Spec is the chart to rasterize.
+   */
+  spec: ChartSpec;
+  /**
+   * Caption overrides the chart node caption (defaults to the spec title).
+   */
+  caption?: string;
+}
+/**
+ * CompileChartOutput returns a ready-to-use chart IR node plus its asset id.
+ */
+export interface CompileChartOutput {
+  /**
+   * Node is the chart IR node referencing the rasterized image by asset id.
+   */
+  node: Chart;
+  /**
+   * AssetID is the stored PNG's id ("asset://...").
+   */
+  assetId: string;
+  /**
+   * Warnings are non-fatal rasterization notes.
+   */
+  warnings?: string[];
+}
+/**
  * CreateDeckInput is the typed input for create_deck.
  */
 export interface CreateDeckInput {

@@ -235,6 +235,11 @@ tools:
     input: internal/contracts.SetActiveWorkspaceInput
     output: internal/contracts.SetActiveWorkspaceOutput
     task_support: forbidden
+  - name: compile_chart
+    description: Rasterize a chart spec to a PNG (pure Go), store it as an asset, and return a chart IR node.
+    input: internal/contracts.CompileChartInput
+    output: internal/contracts.CompileChartOutput
+    task_support: forbidden
 
 # A no-template server ships no UI, so there is no apps[] block. Attach a
 # Svelte UI later with 'dockyard new --template' or by adding an apps[] entry.
