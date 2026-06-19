@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "tokens": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "layer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "styleGuide": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "northStar": {
+          "type": "string"
+        },
+        "do": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "dont": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "soulId",
+    "name"
+  ],
+  "additionalProperties": false
+}

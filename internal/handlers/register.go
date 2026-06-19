@@ -113,6 +113,36 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.BootstrapSoulInput, contracts.BootstrapSoulOutput]("bootstrap_soul").
+		Describe("Bootstrap one design soul from a small set of token overrides.").
+		Handler(h.bootstrapSoul).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.RefineSoulInput, contracts.RefineSoulOutput]("refine_soul").
+		Describe("Refine one stored soul with targeted token overrides.").
+		Handler(h.refineSoul).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.ListSoulsInput, contracts.ListSoulsOutput]("list_souls").
+		Describe("List every stored soul summary.").
+		Handler(h.listSouls).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetSoulInput, contracts.GetSoulOutput]("get_soul").
+		Describe("Get one stored soul, optionally including its style guide.").
+		Handler(h.getSoul).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.GetDesignTokensInput, contracts.GetDesignTokensOutput]("get_design_tokens").
+		Describe("Get the flattened design token list for one stored soul.").
+		Handler(h.getDesignTokens).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

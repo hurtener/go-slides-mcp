@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    },
+    "includeStyleGuide": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "soulId"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "tokens": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "layer"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

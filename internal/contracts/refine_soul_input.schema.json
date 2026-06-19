@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    },
+    "overrides": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "token",
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "soulId"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "soulId"
+  ],
+  "additionalProperties": false
+}
