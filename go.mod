@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/hurtener/dockyard v1.7.3
-	github.com/hurtener/pptx-go v0.0.0-20260618194806-6c3728428ce1
+	github.com/hurtener/pptx-go v0.0.0-20260619223519-34a87dc29124
 	github.com/wcharczuk/go-chart/v2 v2.1.2
 	golang.org/x/image v0.43.0
 )

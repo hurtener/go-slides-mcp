@@ -48,6 +48,10 @@ you never need them. Decks render to a real `.pptx` in pure Go.
 - **Lead with the point.** Heading states the takeaway; the body supports it.
 - **Vary the rhythm.** Alternate text slides with a chart, a two-column compare,
   a card grid, a quote — don't stack ten bullet lists.
+- **Let it breathe — center sparse slides** via the slide `align` field. A
+  cover or a single-stat slide with `{ "align": { "vertical": "center", "horizontal": "center" } }`
+  uses whitespace as part of the design. See `composing-a-slide` for the full
+  alignment syntax.
 - **Let the soul carry the style.** Don't hand-set colors per node; pick/refine a
   soul and author with semantic nodes. Consistency comes for free.
 - **Validate, then export.** A clean StyleScore is the signal the deck is ready.

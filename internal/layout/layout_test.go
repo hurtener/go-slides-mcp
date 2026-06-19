@@ -75,6 +75,77 @@ func TestComputeRecursesTwoColumn(t *testing.T) {
 	}
 }
 
+// TestComputeCenteredSlideY asserts that a slide with Align.Vertical = center
+// places the first node's Y strictly below the body top edge (slack > 0 because
+// a single Hero is much shorter than the body height).
+func TestComputeCenteredSlideY(t *testing.T) {
+	slide := contracts.Slide{
+		Align: contracts.Alignment{Vertical: contracts.VAlignCenter},
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{Title: "Cover"},
+		},
+	}
+	lay := Compute(slide, pptx.DefaultTheme())
+
+	if len(lay.Placements) != 1 {
+		t.Fatalf("got %d placements, want 1", len(lay.Placements))
+	}
+	bodyTop := int64(pptx.In(0.5))
+	heroY := lay.Placements[0].Box.Y
+	if heroY <= bodyTop {
+		t.Fatalf("centered hero Y = %d, want strictly > body top %d", heroY, bodyTop)
+	}
+}
+
+// TestComputeZeroAlignIdenticalToDefault asserts that a slide with the zero
+// Alignment{} produces placements byte-identical to the same slide without an
+// explicit Align field. This is the backward-compat regression guard.
+func TestComputeZeroAlignIdenticalToDefault(t *testing.T) {
+	nodes := []contracts.SlideNode{
+		&contracts.Heading{Level: 2, Text: rt("Title")},
+		&contracts.List{Items: []contracts.ListItem{{Text: rt("a")}, {Text: rt("b")}}},
+	}
+	theme := pptx.DefaultTheme()
+
+	withZero := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{}}, theme)
+	withNone := Compute(contracts.Slide{Nodes: nodes}, theme)
+
+	if len(withZero.Placements) != len(withNone.Placements) {
+		t.Fatalf("placement count differs: zero=%d none=%d", len(withZero.Placements), len(withNone.Placements))
+	}
+	for i, a := range withZero.Placements {
+		b := withNone.Placements[i]
+		if a.Box != b.Box {
+			t.Errorf("placement[%d] box differs: zero=%+v none=%+v", i, a.Box, b.Box)
+		}
+	}
+}
+
+// TestComputeBottomAlign asserts that a slide with Align.Vertical = bottom
+// places the last node flush with (or near) the body bottom edge.
+func TestComputeBottomAlign(t *testing.T) {
+	slide := contracts.Slide{
+		Align: contracts.Alignment{Vertical: contracts.VAlignBottom},
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{Title: "Cover"},
+		},
+	}
+	lay := Compute(slide, pptx.DefaultTheme())
+
+	if len(lay.Placements) != 1 {
+		t.Fatalf("got %d placements, want 1", len(lay.Placements))
+	}
+	// The hero's bottom should equal the body bottom
+	// (body bottom = slide height - margin = Slide16x9Height - In(0.5)).
+	margin := int64(pptx.In(0.5))
+	bodyBottom := int64(pptx.Slide16x9Height) - margin
+	p := lay.Placements[0]
+	heroBottom := p.Box.Y + p.Box.H
+	if heroBottom != bodyBottom {
+		t.Errorf("bottom-aligned hero bottom = %d, want %d (body bottom)", heroBottom, bodyBottom)
+	}
+}
+
 func TestComputeDetectsOverflow(t *testing.T) {
 	// many tall nodes overflow the 6.5" body region.
 	var nodes []contracts.SlideNode

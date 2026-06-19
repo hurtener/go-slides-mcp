@@ -6,6 +6,81 @@
 // with `dockyard generate` and never edit this file by hand.
 
 /**
+ * VAlign selects vertical alignment of the slide's body stack within the body
+ * region. Wire value is a JSON string; the zero value (empty string) is treated
+ * as "top" by the renderer — backward-compatible with pre-alignment slides.
+ */
+/**
+ * VAlignTop (default) starts the body stack at the top of the body region.
+ * This is the backward-compatible default when the field is absent.
+ */
+export const VAlignTop = "top";
+/**
+ * VAlignCenter distributes the remaining vertical space equally above and
+ * below the body stack; the stack never starts above the top edge.
+ */
+export const VAlignCenter = "center";
+/**
+ * VAlignBottom places the body stack flush with the body region's bottom
+ * edge; the stack never starts above the top edge.
+ */
+export const VAlignBottom = "bottom";
+/**
+ * VAlignJustify distributes vertical slack evenly into the inter-node gaps.
+ * Equivalent to VAlignTop for a single node or when there is no slack.
+ */
+export const VAlignJustify = "justify";
+/**
+ * Vertical alignment wire values. Empty string == "top" (the default).
+ */
+export type VAlign = typeof VAlignTop | typeof VAlignCenter | typeof VAlignBottom | typeof VAlignJustify;
+/**
+ * HAlign selects horizontal alignment of leaf nodes within the body region.
+ * Wire value is a JSON string; the zero value (empty string) is treated as
+ * "left" by the renderer — backward-compatible with pre-alignment slides.
+ * Containers (grid, two_column, table, card, card_section, flow, callout,
+ * image, chart, code_block, divider, arrow) always use left alignment
+ * regardless of this field and are always full-width.
+ */
+/**
+ * HAlignLeft (default) spans each leaf node across the full body width,
+ * left-flush. This is the backward-compatible default when the field is absent.
+ */
+export const HAlignLeft = "left";
+/**
+ * HAlignCenter narrows each affected leaf node to its estimated natural text
+ * width and centers it within the body region.
+ */
+export const HAlignCenter = "center";
+/**
+ * HAlignRight narrows each affected leaf node to its estimated natural text
+ * width and places it flush with the body right edge.
+ */
+export const HAlignRight = "right";
+/**
+ * Horizontal alignment wire values. Empty string == "left" (the default).
+ */
+export type HAlign = typeof HAlignLeft | typeof HAlignCenter | typeof HAlignRight;
+/**
+ * Alignment sets how the slide's body content sits within the body frame.
+ * Both axes are optional; omitting a field (or using an empty string) defaults
+ * to top/left, reproducing the pre-alignment layout unchanged.
+ */
+export interface Alignment {
+  /**
+   * Vertical sets the body stack's vertical position within the body region:
+   * "top" (default), "center", "bottom", or "justify". Empty = top.
+   */
+  vertical?: VAlign;
+  /**
+   * Horizontal sets the default horizontal alignment for leaf nodes in the
+   * body stack: "left" (default), "center", or "right". Empty = left.
+   * Per-node align fields (on hero, heading, prose, quote, chip,
+   * section_divider) override this for individual blocks.
+   */
+  horizontal?: HAlign;
+}
+/**
  * UploadAssetInput is the typed input for upload_asset.
  */
 export interface UploadAssetInput {
@@ -1656,6 +1731,11 @@ export interface Hero {
    * Subtitle is the supporting line under the title.
    */
   subtitle?: string;
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * Heading is a typed heading line at a 1..6 depth. Mirror of scene.Heading.
@@ -1669,6 +1749,11 @@ export interface Heading {
    * Level is the heading depth, 1..6.
    */
   level?: number /* int */;
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * Prose is body text: an ordered list of paragraphs, each a RichText. Mirror
@@ -1679,6 +1764,11 @@ export interface Prose {
    * Paragraphs is the ordered body text, one RichText per paragraph.
    */
   paragraphs?: RichText[];
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * ListKind selects a list style (mirrors pptx-go's scene.ListKind).
@@ -1832,6 +1922,11 @@ export interface Chip {
    * Color is the chip color role.
    */
   color?: ColorRole;
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * ArrowDirection selects an arrow's direction (mirrors pptx-go's
@@ -1881,6 +1976,11 @@ export interface SectionDivider {
    * Label is the section heading.
    */
   label?: string;
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * Quote is a block quotation with an optional attribution. Renders as native
@@ -1895,6 +1995,11 @@ export interface Quote {
    * Attribution is the optional source/author line.
    */
   attribution?: string;
+  /**
+   * Align overrides the slide's horizontal alignment for this block:
+   * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+   */
+  align?: HAlign;
 }
 /**
  * Table is a grid of cells with a header row and a caption. Renders as native
@@ -2058,6 +2163,12 @@ export interface Slide {
    * Layout is the structural intent, mapping to a master layout.
    */
   layout?: LayoutKind;
+  /**
+   * Align sets how the slide's body content sits in the frame: vertical
+   * top|center|bottom|justify, horizontal left|center|right. Empty = top-left.
+   * Per-node align fields override the horizontal axis for individual blocks.
+   */
+  align?: Alignment;
   /**
    * Nodes is the slide's top-level node tree.
    */

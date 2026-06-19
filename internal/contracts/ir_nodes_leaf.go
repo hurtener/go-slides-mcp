@@ -9,6 +9,9 @@ type Hero struct {
 	Title string `json:"title,omitempty"`
 	// Subtitle is the supporting line under the title.
 	Subtitle string `json:"subtitle,omitempty"`
+	// Align overrides the slide's horizontal alignment for this block:
+	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+	Align HAlign `json:"align,omitempty"`
 }
 
 func (Hero) slideNodeKind() Kind { return KindHero }
@@ -24,6 +27,9 @@ type Heading struct {
 	Text RichText `json:"text,omitempty"`
 	// Level is the heading depth, 1..6.
 	Level int `json:"level,omitempty"`
+	// Align overrides the slide's horizontal alignment for this block:
+	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+	Align HAlign `json:"align,omitempty"`
 }
 
 func (Heading) slideNodeKind() Kind { return KindHeading }
@@ -38,6 +44,9 @@ func init() { registerNodeKind(KindHeading, func() SlideNode { return &Heading{}
 type Prose struct {
 	// Paragraphs is the ordered body text, one RichText per paragraph.
 	Paragraphs []RichText `json:"paragraphs,omitempty"`
+	// Align overrides the slide's horizontal alignment for this block:
+	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
+	Align HAlign `json:"align,omitempty"`
 }
 
 func (Prose) slideNodeKind() Kind { return KindProse }
