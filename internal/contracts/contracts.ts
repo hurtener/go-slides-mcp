@@ -3003,6 +3003,27 @@ export interface SetActiveWorkspaceOutput {
   activeSoulId?: string;
 }
 /**
+ * StyleFinding is one structured validation finding behind a StyleScore.
+ */
+export interface StyleFinding {
+  /**
+   * Category groups the finding: structural, contrast, typography, spacing, token.
+   */
+  category: string;
+  /**
+   * Severity is "error" (blocks export) or "warning" (advisory).
+   */
+  severity: string;
+  /**
+   * Message is the human-readable description.
+   */
+  message: string;
+  /**
+   * Path is the optional IR node path the finding refers to.
+   */
+  path?: string;
+}
+/**
  * ValidateSlideIRInput is the typed input for validate_slide_ir.
  */
 export interface ValidateSlideIRInput {
@@ -3011,7 +3032,8 @@ export interface ValidateSlideIRInput {
    */
   slide: Slide;
   /**
-   * SoulID is the optional soul context for future validation expansion.
+   * SoulID is the optional soul context; when set, contrast and overflow run
+   * against that soul's theme (otherwise only structural checks run).
    */
   soulId?: string;
 }
@@ -3020,13 +3042,21 @@ export interface ValidateSlideIRInput {
  */
 export interface ValidateSlideIROutput {
   /**
-   * OK reports whether the slide passed structural validation.
+   * OK reports whether the slide passed (no errors).
    */
   ok: boolean;
+  /**
+   * Score is the weighted StyleScore in [0,1].
+   */
+  score: number /* float64 */;
   /**
    * Issues is the flattened list of validation issue messages.
    */
   issues?: string[];
+  /**
+   * Findings is the structured list of issues with category and severity.
+   */
+  findings?: StyleFinding[];
 }
 /**
  * ValidateSlideInput is the typed input for validate_slide.
@@ -3050,13 +3080,21 @@ export interface ValidateSlideOutput {
    */
   slideId: string;
   /**
-   * OK reports whether the slide passed structural validation.
+   * OK reports whether the slide passed (no errors).
    */
   ok: boolean;
+  /**
+   * Score is the weighted StyleScore in [0,1].
+   */
+  score: number /* float64 */;
   /**
    * Issues is the flattened list of validation issue messages.
    */
   issues?: string[];
+  /**
+   * Findings is the structured list of issues with category and severity.
+   */
+  findings?: StyleFinding[];
 }
 /**
  * ValidateDeckForExportInput is the typed input for validate_deck_for_export.
@@ -3076,9 +3114,13 @@ export interface DeckSlideValidation {
    */
   slideId: string;
   /**
-   * OK reports whether the slide passed structural validation.
+   * OK reports whether the slide passed (no errors).
    */
   ok: boolean;
+  /**
+   * Score is the per-slide weighted StyleScore in [0,1].
+   */
+  score: number /* float64 */;
   /**
    * Issues is the flattened list of validation issue messages.
    */
@@ -3089,9 +3131,13 @@ export interface DeckSlideValidation {
  */
 export interface ValidateDeckForExportOutput {
   /**
-   * OK reports whether every slide in the deck passed validation.
+   * OK reports whether the deck passed (no errors anywhere).
    */
   ok: boolean;
+  /**
+   * Score is the deck-wide weighted StyleScore in [0,1].
+   */
+  score: number /* float64 */;
   /**
    * PerSlide is the validation result for each slide in deck order.
    */
@@ -3100,4 +3146,8 @@ export interface ValidateDeckForExportOutput {
    * Blockers is the flattened list of slide-scoped export blockers.
    */
   blockers?: string[];
+  /**
+   * Findings is the structured list of deck-wide issues (incl. contrast/overflow).
+   */
+  findings?: StyleFinding[];
 }
