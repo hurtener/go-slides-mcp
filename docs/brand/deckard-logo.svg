@@ -1,0 +1,33 @@
+<svg width="600" height="150" viewBox="0 0 600 150" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deckard — agent-first slides">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#332E29"/>
+      <stop offset="1" stop-color="#221E1A"/>
+    </linearGradient>
+    <filter id="card" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.26"/>
+    </filter>
+  </defs>
+
+  <!-- mark (scaled from the 256 grid) -->
+  <g transform="translate(15 15) scale(0.47)">
+    <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+    <g filter="url(#card)">
+      <rect x="78" y="70" width="118" height="116" rx="16" fill="#2B7A73" transform="rotate(-11 137 128)"/>
+      <rect x="74" y="66" width="118" height="116" rx="16" fill="#3B9C94" transform="rotate(-5 133 124)"/>
+      <g transform="rotate(2 128 122)">
+        <rect x="70" y="62" width="118" height="116" rx="16" fill="#FAF7F2"/>
+        <rect x="84" y="80" width="34" height="10" rx="5" fill="#3B9C94"/>
+        <rect x="84" y="102" width="90" height="9" rx="4.5" fill="#2B2723" opacity="0.82"/>
+        <rect x="84" y="120" width="78" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+        <rect x="84" y="134" width="86" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+        <rect x="84" y="148" width="54" height="7" rx="3.5" fill="#2B2723" opacity="0.32"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- wordmark + tagline -->
+  <text x="148" y="74" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="56" font-weight="600" fill="#2B2723" letter-spacing="-0.5">Deckard</text>
+  <text x="150" y="104" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" fill="#6A625B" letter-spacing="0.2">Agent-first slides, rendered in pure Go.</text>
+  <rect x="151" y="84" width="40" height="3" rx="1.5" fill="#3B9C94"/>
+</svg>
