@@ -48,6 +48,17 @@ object with a `kind` discriminator.
 - **Sequences are `flow`, not a numbered list**, when the order is the message.
 - **Cover = `hero` only.** Let it breathe.
 
+## Getting the node encoding right
+
+- **Rich-text fields** (a heading's `text`, a callout `body`, a quote `text`, a
+  list item's `text`) are JSON arrays of runs: `[{"text":"…"}]` — not a bare
+  string and not `{"item":…}`. **Plain string fields** (a hero's `title`/`eyebrow`/
+  `subtitle`, a chip `label`) are just strings.
+- **Easiest path: don't hand-encode.** Build text via `compile_markdown` (it
+  returns correctly-shaped nodes) and only hand-write the simple nodes (hero,
+  chip, callout). To see the exact shape of any node, read a `get_slide` result —
+  its text includes the slide's real IR you can copy.
+
 ## Anti-patterns
 
 - A slide with 4+ stacked nodes — it will feel cramped and may overflow.
