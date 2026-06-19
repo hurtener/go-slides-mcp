@@ -1,0 +1,132 @@
+{
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "defaultTheme": {
+          "type": "string"
+        },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "allowThemeSwitch": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowThemeSwitch"
+      ],
+      "additionalProperties": false
+    },
+    "deck": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "soulId": {
+          "type": "string"
+        },
+        "slideCount": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deckId",
+        "slug",
+        "slideCount"
+      ],
+      "additionalProperties": false
+    },
+    "slides": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "nodes": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "detail": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "accent": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "index",
+          "layout"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resourceUri": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "state",
+    "brand",
+    "deck"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+{
+  "name": "slow",
+  "description": "White-label demo — a client brand pushes custom tokens + a locked theme at startup (Acme Corp: purple accent, theme selector hidden).",
+  "state": "ready",
+  "input": { "deckId": "deck_acme" },
+  "output_override": {
+    "state": "ready",
+    "brand": {
+      "title": "Acme Corp",
+      "defaultTheme": "slate",
+      "allowThemeSwitch": false,
+      "tokens": { "app-accent": "#7c3aed", "app-accent-text": "#6d28d9", "app-accent-hover": "#6d28d9", "app-accent-soft": "rgba(124,58,237,0.12)" }
+    },
+    "deck": { "deckId": "deck_acme", "title": "Acme Quarterly", "slideCount": 3, "soulId": "deckard-white" },
+    "resourceUri": "deck://export/deck_acme.pptx",
+    "slides": [
+      { "id": "a1", "index": 0, "layout": "cover", "title": "Acme Quarterly", "nodes": [ { "kind": "hero", "text": "Acme Quarterly", "detail": "Confidential" } ] },
+      { "id": "a2", "index": 1, "layout": "title_content", "title": "Results", "nodes": [ { "kind": "heading", "text": "Results" }, { "kind": "list", "count": 4 } ] },
+      { "id": "a3", "index": 2, "layout": "card_grid", "title": "Segments", "nodes": [ { "kind": "heading", "text": "Segments" }, { "kind": "grid", "count": 4 } ] }
+    ]
+  }
+}

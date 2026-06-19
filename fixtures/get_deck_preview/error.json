@@ -1,0 +1,12 @@
+{
+  "name": "error",
+  "description": "The requested deck does not exist — the error state offers a retry.",
+  "state": "error",
+  "input": { "deckId": "deck_missing" },
+  "output_override": {
+    "state": "error",
+    "message": "Deck \"deck_missing\" not found.",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "deck": { "deckId": "deck_missing", "title": "", "slideCount": 0 }
+  }
+}

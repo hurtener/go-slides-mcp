@@ -1,0 +1,26 @@
+{
+  "name": "happy",
+  "description": "A populated 6-slide deck previewed on the Deckard White soul.",
+  "state": "ready",
+  "input": { "deckId": "deck_platform_review" },
+  "output_override": {
+    "state": "ready",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "deck": { "deckId": "deck_platform_review", "title": "Platform Review", "slideCount": 6, "soulId": "deckard-white" },
+    "resourceUri": "deck://export/deck_platform_review.pptx",
+    "slides": [
+      { "id": "s1", "index": 0, "layout": "cover", "title": "Platform Review",
+        "nodes": [ { "kind": "hero", "text": "Platform Review", "detail": "2026 · H1" } ] },
+      { "id": "s2", "index": 1, "layout": "title_content", "title": "Agenda",
+        "nodes": [ { "kind": "heading", "text": "Agenda" }, { "kind": "list", "count": 3 }, { "kind": "divider" }, { "kind": "chip", "text": "internal" } ] },
+      { "id": "s3", "index": 2, "layout": "two_column", "title": "Before / After",
+        "nodes": [ { "kind": "heading", "text": "Before / After" }, { "kind": "two_column" } ] },
+      { "id": "s4", "index": 3, "layout": "title_content", "title": "Highlight",
+        "nodes": [ { "kind": "callout", "text": "38% lower p99 latency", "accent": true }, { "kind": "quote", "text": "Everything enters through the eyes.", "detail": "Design principle" } ] },
+      { "id": "s5", "index": 4, "layout": "title_content", "title": "Latency",
+        "nodes": [ { "kind": "heading", "text": "Latency trend" }, { "kind": "chart", "text": "p99 by quarter" }, { "kind": "table", "count": 4 } ] },
+      { "id": "s6", "index": 5, "layout": "title_content", "title": "The render call",
+        "nodes": [ { "kind": "heading", "text": "The render call" }, { "kind": "code_block", "text": "render.go" } ] }
+    ]
+  }
+}

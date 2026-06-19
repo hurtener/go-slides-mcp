@@ -7,6 +7,19 @@ import "encoding/json"
 // TextRun objects; each run is a flat { text, typeRole?, bold?, ... , color? }.
 type RichText []TextRun
 
+// PlainText returns the concatenated run text, with no styling — used for
+// thumbnails, labels, and previews.
+func (rt RichText) PlainText() string {
+	if len(rt) == 0 {
+		return ""
+	}
+	var b []byte
+	for _, run := range rt {
+		b = append(b, run.Text...)
+	}
+	return string(b)
+}
+
 // TextRun is one styled run of text. Its JSON shape is flat (CONVENTIONS §4):
 // the Style fields are inlined into the run object and Color is omitted when
 // unset (meaning the token "primary").

@@ -1,0 +1,12 @@
+{
+  "name": "empty",
+  "description": "A deck with no slides yet — the empty state invites adding one.",
+  "state": "empty",
+  "input": { "deckId": "deck_blank" },
+  "output_override": {
+    "state": "empty",
+    "message": "This deck has no slides yet.",
+    "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
+    "deck": { "deckId": "deck_blank", "title": "Untitled deck", "slideCount": 0, "soulId": "deckard-white" }
+  }
+}

@@ -59,6 +59,9 @@ type ToolDeps struct {
 	BuildInfo contracts.BuildInfo
 	// Workspace is the server workspace root for file-backed operations.
 	Workspace string
+	// Brand is the white-label brand config delivered to the UI surfaces
+	// (resolved at startup from the brand-token JSON, or the Deckard default).
+	Brand contracts.AppBrand
 	// Logger is the process logger.
 	Logger *slog.Logger
 }

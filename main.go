@@ -3,12 +3,16 @@ package main
 
 import (
 	"context"
+	"embed"
+	"encoding/json"
 	"errors"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 
+	"github.com/hurtener/dockyard/runtime/apps"
 	"github.com/hurtener/dockyard/runtime/server"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
@@ -19,6 +23,19 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/handlers"
 	"github.com/hurtener/go-slides-mcp/internal/recipe"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
+)
+
+// uiBundles embeds the built single-file Svelte surfaces. `dockyard build` runs
+// Vite first so each dist/index.html exists at compile time. The all: prefix is
+// required so the embed includes the bundle (RFC §14).
+//
+//go:embed all:web/apps/deck-preview/dist
+var uiBundles embed.FS
+
+// The three UI surfaces. URIs are honored verbatim (CLAUDE.md §7).
+const (
+	deckPreviewName = "deck-preview"
+	deckPreviewURI  = "ui://go-slides-mcp/deck-preview/index.html"
 )
 
 // httpAddr is the address the HTTP transport listens on when
@@ -60,11 +77,18 @@ func main() {
 		Session:   &handlers.SessionState{},
 		BuildInfo: buildInfo,
 		Workspace: workspace,
+		Brand:     loadBrand(logger),
 		Logger:    logger,
 	}
 
 	if err := exportstore.RegisterResources(srv, deps.Workspace); err != nil {
 		logger.Error("register resources", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	// Apps register BEFORE tools so each tool's .UI(name) resolves (CLAUDE.md §7).
+	if err := registerApps(srv); err != nil {
+		logger.Error("register apps", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -77,6 +101,65 @@ func main() {
 		logger.Error("serve", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+}
+
+// registerApps installs the embedded single-file Svelte surfaces as MCP Apps.
+// Each surface's tools attach via .UI(name); the deny-by-default CSP just works
+// because the bundles are single-file (no external origins).
+func registerApps(srv *server.Server) error {
+	html, err := fs.ReadFile(uiBundles, "web/apps/deck-preview/dist/index.html")
+	if err != nil {
+		return err
+	}
+	return apps.Register(srv, apps.App{
+		URI:   deckPreviewURI,
+		Name:  deckPreviewName,
+		Title: "Deckard — Deck preview",
+		HTML:  html,
+	})
+}
+
+// loadBrand resolves the white-label brand config at startup. DECKARD_BRAND_TOKENS
+// points at a JSON file ({title, defaultTheme, tokens, allowThemeSwitch}); unset
+// or unreadable falls back to the built-in Deckard White brand (a warning, never
+// a failure — a bad brand file must not take the server down).
+func loadBrand(logger *slog.Logger) contracts.AppBrand {
+	def := contracts.AppBrand{Title: "Deckard Slides", DefaultTheme: "deckard-white", AllowThemeSwitch: true}
+	path := os.Getenv("DECKARD_BRAND_TOKENS")
+	if path == "" {
+		return def
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		logger.Warn("brand tokens unreadable; using Deckard White", slog.String("path", path), slog.String("error", err.Error()))
+		return def
+	}
+	// Parse with a *bool for allowThemeSwitch so an omitted key means "shown"
+	// (the contract field is a plain bool for clean codegen).
+	var raw struct {
+		Title            string            `json:"title"`
+		DefaultTheme     string            `json:"defaultTheme"`
+		Tokens           map[string]string `json:"tokens"`
+		AllowThemeSwitch *bool             `json:"allowThemeSwitch"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		logger.Warn("brand tokens invalid JSON; using Deckard White", slog.String("path", path), slog.String("error", err.Error()))
+		return def
+	}
+	b := contracts.AppBrand{
+		Title:            raw.Title,
+		DefaultTheme:     raw.DefaultTheme,
+		Tokens:           raw.Tokens,
+		AllowThemeSwitch: raw.AllowThemeSwitch == nil || *raw.AllowThemeSwitch,
+	}
+	if b.Title == "" {
+		b.Title = def.Title
+	}
+	if b.DefaultTheme == "" {
+		b.DefaultTheme = def.DefaultTheme
+	}
+	logger.Info("loaded white-label brand", slog.String("path", path), slog.String("title", b.Title), slog.String("theme", b.DefaultTheme))
+	return b
 }
 
 func workspaceDir() (string, error) {
