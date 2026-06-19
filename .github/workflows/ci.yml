@@ -36,6 +36,11 @@ jobs:
       - name: Mirror check (AGENTS.md == CLAUDE.md)
         run: diff -q AGENTS.md CLAUDE.md
 
+      - name: Forbidden-name scan (legacy product name)
+        run: |
+          hits=$(git ls-files | grep -vE '^_ref/' | xargs grep -il 'pengui' 2>/dev/null || true)
+          [ -z "$hits" ] || { echo "forbidden legacy name found in:"; echo "$hits"; exit 1; }
+
       - name: Generate + no stale codegen
         run: |
           GOFLAGS="" dockyard generate
