@@ -48,12 +48,22 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.Prose{Paragraphs: mapParagraphs(n.Paragraphs)}
 	case *contracts.List:
 		return scene.List{Kind: mapListKind(n.Kind), Items: mapListItems(n.Items)}
+	case *contracts.Divider:
+		return scene.Divider{Spacing: mapSpaceRole(n.Spacing)}
 	case *contracts.Quote:
 		return scene.Quote{Text: mapRichText(n.Text), Attribution: n.Attribution}
 	case *contracts.Callout:
 		return scene.Callout{Kind: mapCalloutKind(n.Kind), Title: n.Title, Body: mapRichText(n.Body)}
+	case *contracts.Chip:
+		return scene.Chip{Label: n.Label, Tone: mapChipTone(n.Tone), Color: mapColorRole(n.Color)}
+	case *contracts.Arrow:
+		return scene.Arrow{Direction: mapArrowDirection(n.Direction), Label: n.Label}
 	case *contracts.Table:
 		return scene.Table{Headers: mapParagraphs(n.Headers), Rows: mapTableRows(n.Rows), Caption: n.Caption}
+	case *contracts.Flow:
+		return scene.Flow{Orientation: mapFlowOrientation(n.Orientation), Steps: mapFlowSteps(n.Steps), Connector: mapConnectorKind(n.Connector)}
+	case *contracts.SectionDivider:
+		return scene.SectionDivider{Eyebrow: n.Eyebrow, Label: n.Label}
 	case *contracts.TwoColumn:
 		return scene.TwoColumn{Ratio: mapColumnRatio(n.Ratio), Left: mapNodes(n.Left), Right: mapNodes(n.Right)}
 	case *contracts.Grid:
@@ -109,6 +119,17 @@ func mapTableRows(rows [][]contracts.RichText) [][]scene.RichText {
 	mapped := make([][]scene.RichText, len(rows))
 	for i, row := range rows {
 		mapped[i] = mapParagraphs(row)
+	}
+	return mapped
+}
+
+func mapFlowSteps(steps []contracts.FlowStep) []scene.FlowStep {
+	if steps == nil {
+		return nil
+	}
+	mapped := make([]scene.FlowStep, len(steps))
+	for i, step := range steps {
+		mapped[i] = scene.FlowStep{Label: mapRichText(step.Label), Detail: mapRichText(step.Detail), Icon: step.Icon}
 	}
 	return mapped
 }

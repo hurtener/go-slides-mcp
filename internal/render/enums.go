@@ -53,6 +53,34 @@ func mapCalloutKind(kind contracts.CalloutKind) scene.CalloutKind {
 	}
 }
 
+func mapChipTone(tone contracts.ChipTone) scene.ChipTone {
+	switch tone {
+	case contracts.ChipSolid:
+		return scene.ChipSolid
+	case contracts.ChipOutline:
+		return scene.ChipOutline
+	case contracts.ChipTint:
+		fallthrough
+	default:
+		return scene.ChipTint
+	}
+}
+
+func mapArrowDirection(direction contracts.ArrowDirection) scene.ArrowDirection {
+	switch direction {
+	case contracts.ArrowLeft:
+		return scene.ArrowLeft
+	case contracts.ArrowUp:
+		return scene.ArrowUp
+	case contracts.ArrowDown:
+		return scene.ArrowDown
+	case contracts.ArrowRight:
+		fallthrough
+	default:
+		return scene.ArrowRight
+	}
+}
+
 func mapColumnRatio(ratio contracts.ColumnRatio) scene.ColumnRatio {
 	switch ratio {
 	case contracts.Ratio12:
@@ -132,6 +160,28 @@ func mapColorRole(role contracts.ColorRole) pptx.ColorRole {
 		fallthrough
 	default:
 		return scene.ColorSurface
+	}
+}
+
+func mapFlowOrientation(orientation contracts.FlowOrientation) scene.FlowOrientation {
+	if orientation == contracts.FlowVertical {
+		return scene.FlowVertical
+	}
+	return scene.FlowHorizontal
+}
+
+func mapConnectorKind(kind contracts.ConnectorKind) scene.ConnectorKind {
+	switch kind {
+	case contracts.ConnectorArrowDashed:
+		return scene.ConnectorArrowDashed
+	case contracts.ConnectorCycle:
+		return scene.ConnectorCycle
+	case contracts.ConnectorPlus:
+		return scene.ConnectorPlus
+	case contracts.ConnectorArrow:
+		fallthrough
+	default:
+		return scene.ConnectorArrow
 	}
 }
 
