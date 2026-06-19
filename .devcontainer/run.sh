@@ -60,6 +60,7 @@ docker run -d --name "$NAME" \
 # (the entrypoint bootstrap delays loop.sh ~30-60s; without this, a monitor would catch the
 # previous run's COMPLETE/BLOCKED in the bind-mounted var/ and false-fire).
 mkdir -p "$DC/var"; echo "STARTING" > "$DC/var/status.txt"
+: > "$DC/var/run.log"   # truncate the append-only log so per-run monitoring isn't polluted by a prior run's terminal/depletion lines
 
 # Inject the pptx-go engine skills + the Svelte/bridge study skill into the container's
 # opencode skill dir (they live in host ~/.claude/skills, not the Go module cache).
