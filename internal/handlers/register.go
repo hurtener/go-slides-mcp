@@ -89,6 +89,18 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.EditSlideFieldInput, contracts.EditSlideFieldOutput]("edit_slide_field").
+		Describe("Replace one field on a slide node at a structural path.").
+		Handler(h.editSlideField).
+		Register(srv); err != nil {
+		return err
+	}
+	if err := tool.New[contracts.PatchSlideTextInput, contracts.PatchSlideTextOutput]("patch_slide_text").
+		Describe("Replace one RichText field on a slide node with plain text.").
+		Handler(h.patchSlideText).
+		Register(srv); err != nil {
+		return err
+	}
 	if err := tool.New[contracts.InsertSlideNodeInput, contracts.InsertSlideNodeOutput]("insert_slide_node").
 		Describe("Insert one slide node at a structural path.").
 		Handler(h.insertSlideNode).
