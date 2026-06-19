@@ -1,0 +1,5 @@
+{
+  "name": "permission", "description": "Not authorized to view this deck's structure.", "state": "permission",
+  "input": { "deckId": "deck_restricted" },
+  "output_override": { "kind": "overview", "state": "permission", "message": "You do not have permission to view this deck.", "deckId": "deck_restricted", "title": "Restricted deck", "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true }, "slides": [] }
+}

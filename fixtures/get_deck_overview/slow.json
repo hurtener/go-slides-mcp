@@ -1,0 +1,13 @@
+{
+  "name": "slow", "description": "White-label demo — Acme brand (purple accent, locked theme).", "state": "ready",
+  "input": { "deckId": "deck_acme" },
+  "output_override": {
+    "kind": "overview", "state": "ready", "deckId": "deck_acme", "title": "Acme Quarterly",
+    "brand": { "title": "Acme Corp", "defaultTheme": "slate", "allowThemeSwitch": false, "tokens": { "app-accent": "#7c3aed", "app-accent-text": "#6d28d9" } },
+    "slides": [
+      { "slideId": "a1", "layout": "cover", "title": "Acme Quarterly", "previewText": "Confidential" },
+      { "slideId": "a2", "layout": "title_content", "title": "Results", "previewText": "Q4 highlights" },
+      { "slideId": "a3", "layout": "card_grid", "title": "Segments", "previewText": "Four segments" }
+    ]
+  }
+}

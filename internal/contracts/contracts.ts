@@ -2972,6 +2972,14 @@ export interface GetDeckOverviewOutput {
    */
   kind: SurfaceKind;
   /**
+   * State is the four-state page state (ready | empty | error | permission | loading).
+   */
+  state?: string;
+  /**
+   * Message is the human-readable note for empty/error/permission states.
+   */
+  message?: string;
+  /**
    * DeckID is the resolved deck identifier.
    */
   deckId: string;
@@ -2987,6 +2995,10 @@ export interface GetDeckOverviewOutput {
    * Slides is the ordered preview summary of the deck's slides.
    */
   slides?: SlideSummary[];
+  /**
+   * Brand is the white-label brand config for the surface chrome/theme.
+   */
+  brand: AppBrand;
 }
 /**
  * OpenSlideEditorInput is the typed input for open_slide_editor.
@@ -3010,6 +3022,14 @@ export interface OpenSlideEditorOutput {
    */
   kind: SurfaceKind;
   /**
+   * State is the four-state page state (ready | empty | error | permission | loading).
+   */
+  state?: string;
+  /**
+   * Message is the human-readable note for empty/error/permission states.
+   */
+  message?: string;
+  /**
    * SlideID is the slide identifier opened in the editor.
    */
   slideId: string;
@@ -3025,6 +3045,10 @@ export interface OpenSlideEditorOutput {
    * Validation is the structural validation result for the slide IR.
    */
   validation: SlideValidation;
+  /**
+   * Brand is the white-label brand config for the surface chrome/theme.
+   */
+  brand: AppBrand;
 }
 /**
  * GetDeckStateInput is the typed input for get_deck_state.

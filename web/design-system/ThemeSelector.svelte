@@ -4,7 +4,7 @@
   when the brand locks the theme (allowThemeSwitch=false).
 -->
 <script lang="ts">
-  import { THEMES, type AppThemeId } from '../../../design-system/theme';
+  import { THEMES, type AppThemeId } from './theme';
 
   let {
     current,

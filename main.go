@@ -30,12 +30,15 @@ import (
 // required so the embed includes the bundle (RFC §14).
 //
 //go:embed all:web/apps/deck-preview/dist
+//go:embed all:web/apps/deck-overview/dist
 var uiBundles embed.FS
 
 // The three UI surfaces. URIs are honored verbatim (CLAUDE.md §7).
 const (
-	deckPreviewName = "deck-preview"
-	deckPreviewURI  = "ui://go-slides-mcp/deck-preview/index.html"
+	deckPreviewName  = "deck-preview"
+	deckPreviewURI   = "ui://go-slides-mcp/deck-preview/index.html"
+	deckOverviewName = "deck-overview"
+	deckOverviewURI  = "ui://go-slides-mcp/deck-overview/index.html"
 )
 
 // httpAddr is the address the HTTP transport listens on when
@@ -107,16 +110,20 @@ func main() {
 // Each surface's tools attach via .UI(name); the deny-by-default CSP just works
 // because the bundles are single-file (no external origins).
 func registerApps(srv *server.Server) error {
-	html, err := fs.ReadFile(uiBundles, "web/apps/deck-preview/dist/index.html")
-	if err != nil {
-		return err
+	type uiApp struct{ name, uri, title, path string }
+	for _, a := range []uiApp{
+		{deckPreviewName, deckPreviewURI, "Deckard — Deck preview", "web/apps/deck-preview/dist/index.html"},
+		{deckOverviewName, deckOverviewURI, "Deckard — Deck overview", "web/apps/deck-overview/dist/index.html"},
+	} {
+		html, err := fs.ReadFile(uiBundles, a.path)
+		if err != nil {
+			return err
+		}
+		if err := apps.Register(srv, apps.App{URI: a.uri, Name: a.name, Title: a.title, HTML: html}); err != nil {
+			return err
+		}
 	}
-	return apps.Register(srv, apps.App{
-		URI:   deckPreviewURI,
-		Name:  deckPreviewName,
-		Title: "Deckard — Deck preview",
-		HTML:  html,
-	})
+	return nil
 }
 
 // loadBrand resolves the white-label brand config at startup. DECKARD_BRAND_TOKENS

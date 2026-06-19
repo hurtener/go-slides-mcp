@@ -1,0 +1,93 @@
+{
+  "name": "large",
+  "description": "A 12-slide deck exercising the scrollable reorder list.",
+  "state": "ready",
+  "input": {
+    "deckId": "deck_big"
+  },
+  "output_override": {
+    "kind": "overview",
+    "state": "ready",
+    "deckId": "deck_big",
+    "title": "Annual Review",
+    "brand": {
+      "title": "Deckard Slides",
+      "defaultTheme": "deckard-white",
+      "allowThemeSwitch": true
+    },
+    "slides": [
+      {
+        "slideId": "b1",
+        "layout": "cover",
+        "title": "Slide 1",
+        "previewText": "Section 1 \u00b7 point 1"
+      },
+      {
+        "slideId": "b2",
+        "layout": "title_content",
+        "title": "Slide 2",
+        "previewText": "Section 1 \u00b7 point 2"
+      },
+      {
+        "slideId": "b3",
+        "layout": "title_content",
+        "title": "Slide 3",
+        "previewText": "Section 1 \u00b7 point 3"
+      },
+      {
+        "slideId": "b4",
+        "layout": "title_content",
+        "title": "Slide 4",
+        "previewText": "Section 1 \u00b7 point 4"
+      },
+      {
+        "slideId": "b5",
+        "layout": "title_content",
+        "title": "Slide 5",
+        "previewText": "Section 2 \u00b7 point 5"
+      },
+      {
+        "slideId": "b6",
+        "layout": "title_content",
+        "title": "Slide 6",
+        "previewText": "Section 2 \u00b7 point 6"
+      },
+      {
+        "slideId": "b7",
+        "layout": "title_content",
+        "title": "Slide 7",
+        "previewText": "Section 2 \u00b7 point 7"
+      },
+      {
+        "slideId": "b8",
+        "layout": "title_content",
+        "title": "Slide 8",
+        "previewText": "Section 2 \u00b7 point 8"
+      },
+      {
+        "slideId": "b9",
+        "layout": "title_content",
+        "title": "Slide 9",
+        "previewText": "Section 3 \u00b7 point 9"
+      },
+      {
+        "slideId": "b10",
+        "layout": "title_content",
+        "title": "Slide 10",
+        "previewText": "Section 3 \u00b7 point 10"
+      },
+      {
+        "slideId": "b11",
+        "layout": "title_content",
+        "title": "Slide 11",
+        "previewText": "Section 3 \u00b7 point 11"
+      },
+      {
+        "slideId": "b12",
+        "layout": "cover",
+        "title": "Slide 12",
+        "previewText": "Section 3 \u00b7 point 12"
+      }
+    ]
+  }
+}

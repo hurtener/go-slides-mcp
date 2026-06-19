@@ -11,7 +11,7 @@
   import type { PageStateValue } from 'dockyard-ui';
 
   import SlideThumb, { type SlidePreview } from './SlideThumb.svelte';
-  import ThemeSelector from './ThemeSelector.svelte';
+  import ThemeSelector from '../../../design-system/ThemeSelector.svelte';
   import {
     applyTheme,
     applyBrandTokens,

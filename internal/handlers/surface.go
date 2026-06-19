@@ -22,10 +22,12 @@ func (h *handlers) getDeckOverview(_ context.Context, in contracts.GetDeckOvervi
 	}
 	out := contracts.GetDeckOverviewOutput{
 		Kind:     contracts.SurfaceKindOverview,
+		State:    "ready",
 		DeckID:   stored.ID,
 		Title:    stored.Title,
 		Sections: sections,
 		Slides:   slideSummaries(stored),
+		Brand:    h.resolveBrand(),
 	}
 	return tool.Result[contracts.GetDeckOverviewOutput]{Text: fmt.Sprintf("Loaded overview for deck %q with %d slide(s).", deckLabel(stored), len(out.Slides)), Structured: out}, nil
 }
@@ -44,10 +46,12 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 	}
 	out := contracts.OpenSlideEditorOutput{
 		Kind:       contracts.SurfaceKindEditor,
+		State:      "ready",
 		SlideID:    slide.ID,
 		IR:         *slide,
 		SoulID:     soulID,
 		Validation: validation,
+		Brand:      h.resolveBrand(),
 	}
 	return tool.Result[contracts.OpenSlideEditorOutput]{Text: fmt.Sprintf("Opened editor for slide %q in deck %q.", slide.ID, deckID), Structured: out}, nil
 }
