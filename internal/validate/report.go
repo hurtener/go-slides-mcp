@@ -20,20 +20,22 @@ func (r Report) Messages() []string {
 	return out
 }
 
-// Slide scores a single slide: structural IR checks, soul-theme contrast, and
-// layout-overflow warnings (renderWarnings comes from a render of that slide;
-// pass nil to skip the render-truth pass). theme may be nil (contrast skipped).
+// Slide scores a single slide: structural IR checks, soul-theme contrast,
+// content-fidelity (empty RichText leaves), and layout-overflow warnings
+// (renderWarnings comes from a render of that slide; pass nil to skip the
+// render-truth pass). theme may be nil (contrast skipped).
 func Slide(slide contracts.Slide, theme *pptx.Theme, renderWarnings []string) Report {
 	var issues []Issue
 	issues = append(issues, Structural(slide)...)
+	issues = append(issues, Fidelity(slide)...)
 	issues = append(issues, AuditTheme(theme)...)
 	issues = append(issues, OverflowIssues(renderWarnings)...)
 	return Report{Score: Score(issues), Issues: issues}
 }
 
 // Deck scores a whole deck for export. Contrast is a soul-level audit run once;
-// structural and overflow are per-slide. perSlideWarnings is keyed by slide
-// index in doc order (pass nil to skip the render-truth pass).
+// structural, fidelity, and overflow are per-slide. perSlideWarnings is keyed
+// by slide index in doc order (pass nil to skip the render-truth pass).
 func Deck(doc contracts.SlideDoc, theme *pptx.Theme, perSlideWarnings [][]string) (Report, []Report) {
 	var deckIssues []Issue
 	deckIssues = append(deckIssues, StructuralDoc(doc)...)
@@ -47,6 +49,7 @@ func Deck(doc contracts.SlideDoc, theme *pptx.Theme, perSlideWarnings [][]string
 		}
 		var slideIssues []Issue
 		slideIssues = append(slideIssues, Structural(slide)...)
+		slideIssues = append(slideIssues, Fidelity(slide)...)
 		slideIssues = append(slideIssues, OverflowIssues(warnings)...)
 		perSlide[i] = Report{Score: Score(slideIssues), Issues: slideIssues}
 		deckIssues = append(deckIssues, slideIssues...)
