@@ -102,6 +102,22 @@
                 },
                 "accent": {
                   "type": "boolean"
+                },
+                "children": {
+                  "type": [
+                    "null",
+                    "array"
+                  ],
+                  "items": true
+                },
+                "items": {
+                  "type": [
+                    "null",
+                    "array"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
                 }
               },
               "required": [

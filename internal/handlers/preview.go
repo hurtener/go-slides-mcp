@@ -125,8 +125,15 @@ func nodeToThumb(n contracts.SlideNode) contracts.ThumbNode {
 		t.Count = len(v.Paragraphs)
 	case *contracts.List:
 		t.Count = len(v.Items)
+		for _, it := range v.Items {
+			if len(t.Items) >= thumbItemCap {
+				break
+			}
+			t.Items = append(t.Items, it.Text.PlainText())
+		}
 	case *contracts.Callout:
 		t.Text, t.Accent = v.Title, true
+		t.Detail = v.Body.PlainText()
 	case *contracts.Quote:
 		t.Text, t.Detail = v.Text.PlainText(), v.Attribution
 	case *contracts.Chip:
@@ -135,16 +142,47 @@ func nodeToThumb(n contracts.SlideNode) contracts.ThumbNode {
 		t.Count = len(v.Rows)
 	case *contracts.Flow:
 		t.Count = len(v.Steps)
+		for _, s := range v.Steps {
+			if len(t.Items) >= thumbItemCap {
+				break
+			}
+			t.Items = append(t.Items, s.Label.PlainText())
+		}
 	case *contracts.Grid:
 		t.Count = len(v.Cells)
+		t.Children = nodesToThumbs(v.Cells)
+	case *contracts.TwoColumn:
+		t.Children = nodesToThumbs(append(append([]contracts.SlideNode{}, v.Left...), v.Right...))
 	case *contracts.Card:
 		t.Text = v.Header
+		t.Detail = v.Eyebrow
+		t.Children = nodesToThumbs(v.Body)
 	case *contracts.CardSection:
 		t.Text = v.Header
+		t.Children = nodesToThumbs(v.Body)
 	case *contracts.SectionDivider:
 		t.Text = v.Label
 	case *contracts.Arrow:
 		t.Text = v.Label
 	}
 	return t
+}
+
+// thumbItemCap bounds the leaf text snippets carried into a thumbnail so the
+// preview stays glanceable.
+const thumbItemCap = 4
+
+// nodesToThumbs maps a slice of IR nodes to their thumbnail descriptors,
+// recursing through nodeToThumb so containers compose their children. The
+// result is []any (each element a contracts.ThumbNode) to match ThumbNode.Children,
+// whose type sidesteps the V1 self-referential-schema limitation (D-052).
+func nodesToThumbs(nodes []contracts.SlideNode) []any {
+	if len(nodes) == 0 {
+		return nil
+	}
+	out := make([]any, 0, len(nodes))
+	for _, n := range nodes {
+		out = append(out, nodeToThumb(n))
+	}
+	return out
 }

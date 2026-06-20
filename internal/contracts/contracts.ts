@@ -2362,6 +2362,20 @@ export interface ThumbNode {
    * Accent marks a node that renders in the accent color (callout, chip, accent card).
    */
   accent?: boolean;
+  /**
+   * Children are nested node descriptors for container kinds (grid cells, card
+   * body, card-section body, two-column children) so the preview composes them
+   * recursively instead of painting empty frames. Every element is a ThumbNode;
+   * the field is typed `any` so the V1 JSON-Schema generator does not reject the
+   * otherwise self-referential ThumbNode type (D-052), rendering it as an
+   * unconstrained child-node array.
+   */
+  children?: any[];
+  /**
+   * Items are short text snippets for repeating leaf content (list item text,
+   * flow step labels), capped to keep the thumbnail glanceable.
+   */
+  items?: string[];
 }
 /**
  * SlidePreview is one slide reduced to a thumbnail-renderable form.

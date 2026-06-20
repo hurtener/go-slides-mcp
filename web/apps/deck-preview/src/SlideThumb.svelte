@@ -11,6 +11,8 @@
     detail?: string;
     count?: number;
     accent?: boolean;
+    children?: ThumbNode[];
+    items?: string[];
   }
   export interface SlidePreview {
     id: string;
@@ -34,7 +36,101 @@
 
   const isCover = $derived(slide.layout === 'cover');
   const nodes = $derived(slide.nodes ?? []);
+
+  const cap = (n: number, max: number) => Math.min(n || 0, max);
 </script>
+
+{#snippet nodeBlock(node: ThumbNode)}
+  {#if node.kind === 'hero'}
+    <div class="n-hero">
+      {#if node.detail}<span class="eyebrow">{node.detail}</span>{/if}
+      <span class="hero-title">{node.text}</span>
+    </div>
+  {:else if node.kind === 'heading' || node.kind === 'section_divider'}
+    <span class="n-heading">{node.text}</span>
+  {:else if node.kind === 'prose'}
+    {#if node.text}
+      <span class="n-text">{node.text}</span>
+    {:else}
+      <span class="n-line"></span><span class="n-line short"></span>
+    {/if}
+  {:else if node.kind === 'list'}
+    {#if node.items && node.items.length}
+      {#each node.items.slice(0, 4) as item, i (i)}
+        <span class="n-bullet"><i></i>{#if item}<span class="n-bullet-text">{item}</span>{:else}<b></b>{/if}</span>
+      {/each}
+    {:else}
+      {#each Array(cap(node.count ?? 3, 4) || 3) as _, i (i)}
+        <span class="n-bullet"><i></i><b></b></span>
+      {/each}
+    {/if}
+  {:else if node.kind === 'callout'}
+    <div class="n-callout" class:accent={node.accent}>
+      <span class="n-callout-title">{node.text || 'Callout'}</span>
+      {#if node.detail}<span class="n-callout-body">{node.detail}</span>{/if}
+    </div>
+  {:else if node.kind === 'quote'}
+    <div class="n-quote">{node.text}</div>
+  {:else if node.kind === 'chart'}
+    <div class="n-chart"><i style="height:40%"></i><i style="height:75%"></i><i style="height:55%"></i><i style="height:90%"></i></div>
+  {:else if node.kind === 'code_block'}
+    <div class="n-code"><i></i><i class="ind"></i><i class="ind"></i><i></i></div>
+  {:else if node.kind === 'table'}
+    <div class="n-table"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  {:else if node.kind === 'image'}
+    <div class="n-image"></div>
+  {:else if node.kind === 'divider'}
+    <span class="n-divider"></span>
+  {:else if node.kind === 'chip'}
+    <span class="n-chip" class:accent={node.accent}>{node.text || ''}</span>
+  {:else if node.kind === 'flow'}
+    <div class="n-flow">
+      {#if node.items && node.items.length}
+        {#each node.items.slice(0, 4) as label, i (i)}
+          <span class="n-flow-step">{label}</span>{#if i < cap(node.items.length, 4) - 1}<em>›</em>{/if}
+        {/each}
+      {:else}
+        {#each Array(cap(node.count ?? 3, 4) || 3) as _, i (i)}
+          <span class="n-flow-step"></span>{#if i < (cap(node.count ?? 3, 4) || 3) - 1}<em>›</em>{/if}
+        {/each}
+      {/if}
+    </div>
+  {:else if node.kind === 'two_column'}
+    {#if node.children && node.children.length}
+      <div class="n-cols">
+        {#each node.children as child, i (i)}
+          <div class="n-col">{@render nodeBlock(child)}</div>
+        {/each}
+      </div>
+    {:else}
+      <div class="n-cols"><div></div><div></div></div>
+    {/if}
+  {:else if node.kind === 'grid'}
+    {#if node.children && node.children.length}
+      <div class="n-grid">
+        {#each node.children as child, i (i)}
+          <div class="n-cell">{@render nodeBlock(child)}</div>
+        {/each}
+      </div>
+    {:else}
+      <div class="n-grid">
+        {#each Array(cap(node.count ?? 4, 6) || 4) as _, i (i)}<div></div>{/each}
+      </div>
+    {/if}
+  {:else if node.kind === 'card' || node.kind === 'card_section'}
+    <div class="n-card">
+      {#if node.detail}<span class="n-card-eyebrow">{node.detail}</span>{/if}
+      {#if node.text}<span class="n-card-header">{node.text}</span>{/if}
+      {#if node.children && node.children.length}
+        {#each node.children as child, i (i)}{@render nodeBlock(child)}{/each}
+      {:else if !node.text}
+        <span class="n-line"></span>
+      {/if}
+    </div>
+  {:else}
+    <span class="n-line"></span>
+  {/if}
+{/snippet}
 
 <button
   type="button"
@@ -45,53 +141,8 @@
 >
   <div class="frame" class:selected>
     <div class="paper" class:cover={isCover}>
-      {#each nodes as node (node.kind + (node.text ?? '') + node.count)}
-        {#if node.kind === 'hero'}
-          <div class="n-hero">
-            {#if node.detail}<span class="eyebrow">{node.detail}</span>{/if}
-            <span class="hero-title">{node.text}</span>
-          </div>
-        {:else if node.kind === 'heading' || node.kind === 'section_divider'}
-          <span class="n-heading">{node.text}</span>
-        {:else if node.kind === 'prose'}
-          <span class="n-line"></span><span class="n-line short"></span>
-        {:else if node.kind === 'list'}
-          {#each Array(Math.min(node.count || 3, 4)) as _, i (i)}
-            <span class="n-bullet"><i></i><b></b></span>
-          {/each}
-        {:else if node.kind === 'callout'}
-          <div class="n-callout" class:accent={node.accent}>{node.text || 'Callout'}</div>
-        {:else if node.kind === 'quote'}
-          <div class="n-quote">{node.text}</div>
-        {:else if node.kind === 'chart'}
-          <div class="n-chart"><i style="height:40%"></i><i style="height:75%"></i><i style="height:55%"></i><i style="height:90%"></i></div>
-        {:else if node.kind === 'code_block'}
-          <div class="n-code"><i></i><i class="ind"></i><i class="ind"></i><i></i></div>
-        {:else if node.kind === 'table'}
-          <div class="n-table"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        {:else if node.kind === 'image'}
-          <div class="n-image"></div>
-        {:else if node.kind === 'divider'}
-          <span class="n-divider"></span>
-        {:else if node.kind === 'chip'}
-          <span class="n-chip" class:accent={node.accent}>{node.text || ''}</span>
-        {:else if node.kind === 'flow'}
-          <div class="n-flow">
-            {#each Array(Math.min(node.count || 3, 4)) as _, i (i)}
-              <span></span>{#if i < Math.min(node.count || 3, 4) - 1}<em>›</em>{/if}
-            {/each}
-          </div>
-        {:else if node.kind === 'two_column'}
-          <div class="n-cols"><div></div><div></div></div>
-        {:else if node.kind === 'grid'}
-          <div class="n-grid">
-            {#each Array(Math.min(node.count || 4, 6)) as _, i (i)}<div></div>{/each}
-          </div>
-        {:else if node.kind === 'card' || node.kind === 'card_section'}
-          <div class="n-card">{node.text || ''}</div>
-        {:else}
-          <span class="n-line"></span>
-        {/if}
+      {#each nodes as node, i (node.kind + (node.text ?? '') + i)}
+        {@render nodeBlock(node)}
       {/each}
       {#if nodes.length === 0}
         <span class="n-heading muted">{slide.title || 'Empty slide'}</span>
@@ -169,17 +220,46 @@
   .n-heading.muted { color: var(--app-text-subtle); }
   .n-line { height: 0.5em; border-radius: 2px; background: color-mix(in srgb, var(--app-paper-ink) 22%, transparent); }
   .n-line.short { width: 62%; }
+  .n-text {
+    line-height: 1.3;
+    color: color-mix(in srgb, var(--app-paper-ink) 78%, transparent);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
   .n-bullet { display: flex; align-items: center; gap: 5px; }
   .n-bullet i { width: 5px; height: 5px; border-radius: 50%; background: var(--app-accent); flex: 0 0 auto; }
   .n-bullet b { height: 0.42em; flex: 1; border-radius: 2px; background: color-mix(in srgb, var(--app-paper-ink) 20%, transparent); }
+  .n-bullet-text {
+    flex: 1; min-width: 0;
+    color: color-mix(in srgb, var(--app-paper-ink) 78%, transparent);
+    line-height: 1.2;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
   .n-callout {
+    display: flex; flex-direction: column; gap: 2px;
     border-left: 3px solid var(--app-accent);
     background: var(--app-accent-soft);
     border-radius: var(--app-radius-sm);
     padding: 4% 5%;
     font-size: var(--app-text-xs);
     color: var(--app-paper-ink);
+    overflow: hidden;
+  }
+  .n-callout-title {
+    font-weight: var(--app-weight-medium);
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .n-callout-body {
+    color: color-mix(in srgb, var(--app-paper-ink) 72%, transparent);
+    line-height: 1.25;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
   .n-quote {
     font-family: var(--app-font-serif);
@@ -208,13 +288,39 @@
   }
   .n-chip.accent { background: var(--app-accent); color: #fff; border-color: transparent; }
   .n-flow { display: flex; align-items: center; gap: 4px; }
-  .n-flow span { flex: 1; height: 1.4em; border-radius: var(--app-radius-sm); background: var(--app-accent-soft); border: 1px solid var(--app-border); }
-  .n-flow em { color: var(--app-text-subtle); font-style: normal; }
+  .n-flow-step {
+    flex: 1; min-width: 0; min-height: 1.4em;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2px 4px;
+    border-radius: var(--app-radius-sm); background: var(--app-accent-soft); border: 1px solid var(--app-border);
+    color: var(--app-paper-ink); text-align: center; line-height: 1.1;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .n-flow em { color: var(--app-text-subtle); font-style: normal; flex: 0 0 auto; }
   .n-cols { display: flex; gap: 6%; flex: 1; }
-  .n-cols div { flex: 1; border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); background: var(--app-surface-raised); }
+  .n-cols > div:empty { flex: 1; border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); background: var(--app-surface-raised); }
+  .n-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4%; }
   .n-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5%; flex: 1; }
-  .n-grid div { border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); background: var(--app-surface-raised); }
-  .n-card { border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); background: var(--app-surface); padding: 4%; font-size: var(--app-text-xs); color: var(--app-text-muted); }
+  .n-grid > div:empty { border: 1px solid var(--app-border); border-radius: var(--app-radius-sm); background: var(--app-surface-raised); }
+  .n-cell { min-width: 0; display: flex; flex-direction: column; gap: 4%; }
+  .n-card {
+    display: flex; flex-direction: column; gap: 3%;
+    border: 1px solid var(--app-border); border-radius: var(--app-radius-sm);
+    background: var(--app-surface); padding: 5%;
+    font-size: var(--app-text-xs); color: var(--app-text-muted);
+    overflow: hidden;
+  }
+  .n-card-eyebrow {
+    font-size: var(--app-text-xs);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--app-accent-text); opacity: 0.85;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .n-card-header {
+    font-weight: var(--app-weight-medium); color: var(--app-paper-ink);
+    line-height: 1.15;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
 
   .thumb.strip .paper { font-size: 5px; }
   .thumb.strip .hero-title { font-size: 9px; }
