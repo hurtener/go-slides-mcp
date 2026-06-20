@@ -17,13 +17,18 @@ func mapSlides(slides []contracts.Slide) []scene.SceneSlide {
 }
 
 func mapSlide(slide contracts.Slide) scene.SceneSlide {
-	return scene.SceneSlide{
+	ss := scene.SceneSlide{
 		ID:      slide.ID,
 		Layout:  mapLayoutKind(slide.Layout),
 		Content: mapAlignment(slide.Align),
+		Variant: mapVariant(slide.Variant),
 		Nodes:   mapNodes(slide.Nodes),
 		Notes:   mapRichText(slide.Notes),
 	}
+	if slide.Background != nil {
+		ss.Background = mapBackground(*slide.Background)
+	}
+	return ss
 }
 
 func mapNodes(nodes []contracts.SlideNode) []scene.SlideNode {

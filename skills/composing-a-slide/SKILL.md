@@ -108,6 +108,62 @@ the rest of the slide defaults to left:
 Note: slide `align` is an object (`{ "vertical": "…", "horizontal": "…" }`);
 node `align` is a string (`"left"` | `"center"` | `"right"`).
 
+## Dark & full-bleed slides
+
+Two optional slide-level fields let you flip a slide to dark or paint a
+full-bleed background behind the content:
+
+**Dark section slide** — set `"variant": "dark"` on the slide. The engine
+derives a legible dark palette (dark canvas, light text) from the active soul
+automatically. Accent and semantic colors are preserved, so brand identity
+survives. Use for section-divider slides to create a visual rhythm break
+between content sections.
+
+```json
+{
+  "layout": "title_content",
+  "variant": "dark",
+  "nodes": [{ "kind": "hero", "title": "Part II — Execution" }]
+}
+```
+
+**Full-bleed gradient** — set `"background"` with `"kind": "gradient"`, a
+`"gradient"` array of two soul color roles, and an `"angle"` in degrees. The
+gradient is drawn behind all nodes (lowest layer, z-order 0). Color roles
+resolve through the active soul, so a theme swap re-paints the background.
+
+```json
+{
+  "layout": "title_content",
+  "variant": "dark",
+  "background": {
+    "kind": "gradient",
+    "gradient": ["accent", "accentAlt"],
+    "angle": 135
+  },
+  "nodes": [{ "kind": "hero", "title": "Brand Section" }]
+}
+```
+
+**Solid-color background** — set `"kind": "color"` and a single `"color"` role:
+
+```json
+{ "background": { "kind": "color", "color": "canvas" } }
+```
+
+**Full-bleed asset background** — set `"kind": "asset"` and an `"assetId"`
+from `upload_asset`. The image fills the slide canvas; content nodes render on
+top:
+
+```json
+{ "background": { "kind": "asset", "assetId": "brand-photo" } }
+```
+
+Background and variant are independent — you can have a dark variant without a
+background (the engine fills the canvas automatically) or a light variant with
+a background. Omitting both leaves the slide unchanged from before (backward
+compatible, byte-identical output).
+
 ## Anti-patterns
 
 - A slide with 4+ stacked nodes — it will feel cramped and may overflow.

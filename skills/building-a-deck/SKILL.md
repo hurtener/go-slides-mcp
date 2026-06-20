@@ -47,7 +47,9 @@ you never need them. Decks render to a real `.pptx` in pure Go.
 - **One idea per slide.** If a slide has two arguments, it's two slides.
 - **Lead with the point.** Heading states the takeaway; the body supports it.
 - **Vary the rhythm.** Alternate text slides with a chart, a two-column compare,
-  a card grid, a quote — don't stack ten bullet lists.
+  a card grid, a quote — don't stack ten bullet lists. A dark `variant` section
+  divider between light content slides reads as designed; see `composing-a-slide`
+  for the `variant` and `background` syntax.
 - **Let it breathe — center sparse slides** via the slide `align` field. A
   cover or a single-stat slide with `{ "align": { "vertical": "center", "horizontal": "center" } }`
   uses whitespace as part of the design. See `composing-a-slide` for the full
