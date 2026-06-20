@@ -48,6 +48,43 @@ object with a `kind` discriminator.
 - **Sequences are `flow`, not a numbered list**, when the order is the message.
 - **Cover = `hero` only.** Let it breathe.
 
+## Make cards look designed (don't ship bare cards)
+
+A `card` with only `header` + `body` renders as a thin accent bar — functional but
+plain. The card already supports a full design vocabulary; **use it**. These fields
+are what turn a card grid from "a list in boxes" into something that looks built:
+
+- `fill` — a surface color role (`"surface"`, `"surfaceAlt"`, `"accent"`, …). Gives the
+  card a filled background instead of a bare rule. `"surfaceAlt"` reads as a clean
+  panel on a light slide; `"accent"` makes one card pop.
+- `elevation` — `"raised"` or `"elevated"` adds a soft drop shadow so the card lifts
+  off the page.
+- `eyebrow` — a small kicker label above the header (e.g. `"FOUNDATION"`).
+- `headerPill` — a short badge to the right of the header (e.g. `"01"`, `"NEW"`).
+- `icon` — a curated icon name; `layout: "iconTop"` stacks it above the header.
+
+```json
+{ "kind": "card", "fill": "surfaceAlt", "elevation": "raised",
+  "eyebrow": "FOUNDATION", "header": "Contract-first", "headerPill": "P3",
+  "body": [ { "kind": "prose", "paragraphs": [[ { "text": "One clear sentence." } ]] } ] }
+```
+
+**Default to filled + raised + eyebrow** for any card grid or two-column-of-cards —
+it is the single biggest lift from "correct" to "designed."
+
+## Fill the frame — don't leave content top-heavy
+
+By default the body stacks from the top, so a slide with a heading + one block leaves
+the bottom half empty and reads thin. Unless a slide is genuinely meant to hug the top,
+**set the slide `align` to center the content vertically**:
+
+```json
+{ "layout": "card_grid", "align": { "vertical": "center" }, "nodes": [ … ] }
+```
+
+For a heading-plus-content slide, `"justify"` pushes the heading toward the top and the
+block toward the bottom, using the whole frame. Centered or justified beats top-heavy.
+
 ## Getting the node encoding right
 
 - **Rich-text fields** (a heading's `text`, a callout `body`, a quote `text`, a

@@ -56,6 +56,11 @@ you never need them. Decks render to a real `.pptx` in pure Go.
   alignment syntax.
 - **Let the soul carry the style.** Don't hand-set colors per node; pick/refine a
   soul and author with semantic nodes. Consistency comes for free.
+- **Dress your cards.** A bare `card` (header + body only) looks plain. Give cards
+  a `fill` + `elevation` + `eyebrow` (+ `headerPill`/`icon`) — see `composing-a-slide`
+  → "Make cards look designed." This is the biggest lift from correct to designed.
+- **Fill the frame.** Center content vertically (`align:{vertical:center}`) so slides
+  aren't top-heavy with an empty bottom.
 - **Validate, then export.** A clean StyleScore is the signal the deck is ready.
 
 ## Anti-patterns
