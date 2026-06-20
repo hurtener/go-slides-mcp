@@ -2170,6 +2170,20 @@ export interface Slide {
    */
   align?: Alignment;
   /**
+   * Variant selects a theme variant for this slide: "light" (default) or
+   * "dark". VariantDark renders a dark canvas with light text — the engine
+   * derives a legible dark palette from the active soul automatically.
+   * Omitting the field is identical to "light".
+   */
+  variant?: Variant;
+  /**
+   * Background is an optional full-bleed fill drawn behind all content.
+   * Set kind to "color" (solid soul color role), "gradient" (two-stop
+   * linear gradient of soul color roles), or "asset" (full-bleed picture).
+   * Nil (the default) draws nothing — byte-identical to pre-existing slides.
+   */
+  background?: Background;
+  /**
    * Nodes is the slide's top-level node tree.
    */
   nodes?: SlideNode[];
@@ -3448,4 +3462,89 @@ export interface ValidateDeckForExportOutput {
    * Findings is the structured list of deck-wide issues (incl. contrast/overflow).
    */
   findings?: StyleFinding[];
+}
+/**
+ * Variant selects a named theme variant for a slide. VariantDark renders the
+ * slide with a dark canvas and light text — the engine derives a legible dark
+ * palette from the active soul automatically. Omitting the field (or using the
+ * empty string) is identical to "light"; byte-identical output is guaranteed
+ * for all pre-existing slides.
+ */
+/**
+ * VariantLight (default) renders the slide with the soul's base palette.
+ * This is the backward-compatible default when the field is absent.
+ */
+export const VariantLight = "light";
+/**
+ * VariantDark renders the slide with a dark canvas and light text. The
+ * engine derives a deterministic dark palette from the active soul —
+ * accent and semantic roles (error, warning, success, info, accent*) are
+ * preserved so brand identity survives the swap. Use for section-divider
+ * slides that need a visual break between content sections.
+ */
+export const VariantDark = "dark";
+export type Variant = typeof VariantLight | typeof VariantDark;
+/**
+ * BackgroundKind selects the fill type for a slide's full-bleed background.
+ * The zero value (empty string) draws nothing — preserving byte-identical
+ * output for all slides that do not explicitly set a background.
+ */
+export type BackgroundKind = string;
+/**
+ * BackgroundNone draws no explicit background; the slide inherits the
+ * presentation's default. This is the zero/default value.
+ */
+export const BackgroundNone: BackgroundKind = "";
+/**
+ * BackgroundColor fills the entire slide canvas with a solid color
+ * resolved from the active soul via Background.Color.
+ */
+export const BackgroundColor: BackgroundKind = "color";
+/**
+ * BackgroundGradient fills the slide canvas with a two-stop linear
+ * gradient between the color roles in Background.Gradient at
+ * Background.Angle degrees.
+ */
+export const BackgroundGradient: BackgroundKind = "gradient";
+/**
+ * BackgroundAsset fills the slide canvas with a full-bleed picture
+ * resolved via Background.AssetID from the registered asset store.
+ */
+export const BackgroundAsset: BackgroundKind = "asset";
+/**
+ * Background is a slide's full-bleed background specification. It is drawn
+ * behind all body content — the lowest layer in z-order. The zero value
+ * (nil pointer, or Kind == "") draws nothing; all existing slides are
+ * byte-identical after this field is added to Slide.
+ */
+export interface Background {
+  /**
+   * Kind selects the fill type: "" (no background), "color" (solid),
+   * "gradient" (two-stop linear), or "asset" (full-bleed picture).
+   */
+  kind?: BackgroundKind;
+  /**
+   * Color is the surface color role for a solid-color background
+   * (kind == "color"). Resolves against the active soul/theme.
+   */
+  color?: ColorRole;
+  /**
+   * Gradient is an ordered list of 0–2 surface color roles for a linear
+   * gradient (kind == "gradient"). The first role is the start stop; the
+   * second is the end stop. If only one role is given, both stops use it.
+   * If empty, both stops resolve to the zero role. All roles resolve
+   * against the active soul/theme.
+   */
+  gradient?: ColorRole[];
+  /**
+   * Angle is the linear gradient angle in degrees clockwise from the
+   * positive x-axis (kind == "gradient"). 0° = left-to-right,
+   * 90° = top-to-bottom. Common values: 45, 90, 135, 180.
+   */
+  angle?: number /* int */;
+  /**
+   * AssetID is the asset reference for a full-bleed picture background
+   * (kind == "asset"). Resolved via the registered asset store.
+   */
+  assetId?: string;
 }

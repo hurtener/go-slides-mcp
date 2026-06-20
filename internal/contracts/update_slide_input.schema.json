@@ -28,6 +28,39 @@
           },
           "additionalProperties": false
         },
+        "variant": {
+          "type": "string"
+        },
+        "background": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string"
+            },
+            "color": {
+              "type": "string"
+            },
+            "gradient": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "angle": {
+              "type": "integer"
+            },
+            "assetId": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
         "nodes": {
           "type": [
             "null",

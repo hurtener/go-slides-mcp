@@ -401,3 +401,54 @@ func mapPosition(p contracts.Position) scene.Position {
 func mapSize(s contracts.Size) scene.Size {
 	return scene.Size{W: pptx.Pt(s.W), H: pptx.Pt(s.H)}
 }
+
+// mapVariant converts the wire-level Variant string to the scene enum.
+// The empty string and "light" both map to VariantLight (the zero value).
+func mapVariant(v contracts.Variant) scene.Variant {
+	if v == contracts.VariantDark {
+		return scene.VariantDark
+	}
+	return scene.VariantLight
+}
+
+// mapBackgroundKind converts the wire-level BackgroundKind string to the
+// scene integer enum. The empty string maps to BackgroundNone (zero value).
+func mapBackgroundKind(k contracts.BackgroundKind) scene.BackgroundKind {
+	switch k {
+	case contracts.BackgroundColor:
+		return scene.BackgroundColor
+	case contracts.BackgroundGradient:
+		return scene.BackgroundGradient
+	case contracts.BackgroundAsset:
+		return scene.BackgroundAsset
+	default:
+		// BackgroundNone ("") and any unknown value map to BackgroundNone.
+		return scene.BackgroundNone
+	}
+}
+
+// mapBackground converts a contracts.Background to scene.Background.
+// The gradient slice is mapped to the engine's [2]pptx.ColorRole:
+//   - 0 roles → both stops are the zero ColorRole
+//   - 1 role  → both stops use the same role
+//   - 2+ roles → first two roles are used as start and end stops
+func mapBackground(b contracts.Background) scene.Background {
+	var grad [2]pptx.ColorRole
+	switch len(b.Gradient) {
+	case 0:
+		// both stops remain zero
+	case 1:
+		grad[0] = mapColorRole(b.Gradient[0])
+		grad[1] = mapColorRole(b.Gradient[0])
+	default:
+		grad[0] = mapColorRole(b.Gradient[0])
+		grad[1] = mapColorRole(b.Gradient[1])
+	}
+	return scene.Background{
+		Kind:     mapBackgroundKind(b.Kind),
+		Color:    mapColorRole(b.Color),
+		Gradient: grad,
+		Angle:    b.Angle,
+		AssetID:  scene.AssetID(b.AssetID),
+	}
+}

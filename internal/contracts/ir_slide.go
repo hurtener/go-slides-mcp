@@ -16,6 +16,16 @@ type Slide struct {
 	// top|center|bottom|justify, horizontal left|center|right. Empty = top-left.
 	// Per-node align fields override the horizontal axis for individual blocks.
 	Align Alignment `json:"align,omitempty"`
+	// Variant selects a theme variant for this slide: "light" (default) or
+	// "dark". VariantDark renders a dark canvas with light text — the engine
+	// derives a legible dark palette from the active soul automatically.
+	// Omitting the field is identical to "light".
+	Variant Variant `json:"variant,omitempty"`
+	// Background is an optional full-bleed fill drawn behind all content.
+	// Set kind to "color" (solid soul color role), "gradient" (two-stop
+	// linear gradient of soul color roles), or "asset" (full-bleed picture).
+	// Nil (the default) draws nothing — byte-identical to pre-existing slides.
+	Background *Background `json:"background,omitempty"`
 	// Nodes is the slide's top-level node tree.
 	Nodes []SlideNode `json:"nodes,omitempty"`
 	// Notes is the speaker notes.
@@ -27,18 +37,22 @@ type Slide struct {
 // never recurses.
 func (s *Slide) MarshalJSON() ([]byte, error) {
 	type plain struct {
-		ID     string      `json:"id"`
-		Layout LayoutKind  `json:"layout,omitempty"`
-		Align  Alignment   `json:"align,omitempty"`
-		Nodes  []SlideNode `json:"nodes,omitempty"`
-		Notes  RichText    `json:"notes,omitempty"`
+		ID         string      `json:"id"`
+		Layout     LayoutKind  `json:"layout,omitempty"`
+		Align      Alignment   `json:"align,omitempty"`
+		Variant    Variant     `json:"variant,omitempty"`
+		Background *Background `json:"background,omitempty"`
+		Nodes      []SlideNode `json:"nodes,omitempty"`
+		Notes      RichText    `json:"notes,omitempty"`
 	}
 	return json.Marshal(plain{
-		ID:     s.ID,
-		Layout: s.Layout,
-		Align:  s.Align,
-		Nodes:  s.Nodes,
-		Notes:  s.Notes,
+		ID:         s.ID,
+		Layout:     s.Layout,
+		Align:      s.Align,
+		Variant:    s.Variant,
+		Background: s.Background,
+		Nodes:      s.Nodes,
+		Notes:      s.Notes,
 	})
 }
 
@@ -46,11 +60,13 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 // Notes through TextRun's unmarshaler.
 func (s *Slide) UnmarshalJSON(data []byte) error {
 	type raw struct {
-		ID     string            `json:"id"`
-		Layout LayoutKind        `json:"layout,omitempty"`
-		Align  Alignment         `json:"align,omitempty"`
-		Nodes  []json.RawMessage `json:"nodes,omitempty"`
-		Notes  RichText          `json:"notes,omitempty"`
+		ID         string            `json:"id"`
+		Layout     LayoutKind        `json:"layout,omitempty"`
+		Align      Alignment         `json:"align,omitempty"`
+		Variant    Variant           `json:"variant,omitempty"`
+		Background *Background       `json:"background,omitempty"`
+		Nodes      []json.RawMessage `json:"nodes,omitempty"`
+		Notes      RichText          `json:"notes,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -59,6 +75,8 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	s.ID = r.ID
 	s.Layout = r.Layout
 	s.Align = r.Align
+	s.Variant = r.Variant
+	s.Background = r.Background
 	nodes, err := unmarshalNodes(r.Nodes)
 	if err != nil {
 		return err
