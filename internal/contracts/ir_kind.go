@@ -46,3 +46,7 @@ const (
 	LayoutFullBleed    LayoutKind = "full_bleed"
 	LayoutBlank        LayoutKind = "blank"
 )
+
+// IsValid reports whether v is one of the closed LayoutKind wire values
+// (Phase 12 A4).
+func (v LayoutKind) IsValid() bool { return IsValidEnum(v, AllowedLayoutKind()) }

@@ -13,6 +13,10 @@ const (
 	Ratio21 ColumnRatio = "2:1"
 )
 
+// IsValid reports whether v is one of the closed ColumnRatio wire values
+// (Phase 12 A4).
+func (v ColumnRatio) IsValid() bool { return IsValidEnum(v, AllowedColumnRatio()) }
+
 // TwoColumn splits a slide into left and right child columns. Both sides
 // must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
 // Children are []SlideNode and nest recursively.
