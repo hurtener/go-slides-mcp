@@ -15,6 +15,11 @@ const (
 	ListChecklist ListKind = "checklist"
 )
 
+// IsValid reports whether v is one of the closed ListKind wire values
+// (Phase 12 A4). The validator additionally accepts "" (empty) so an
+// unset/omitempty field defaults at render time.
+func (v ListKind) IsValid() bool { return IsValidEnum(v, AllowedListKind()) }
+
 // ListItem is one entry in a List. Mirror of scene.ListItem.
 type ListItem struct {
 	// Text is the item's content.

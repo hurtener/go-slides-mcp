@@ -1165,6 +1165,33 @@ export interface MoveSlideNodeOutput {
   validation: SlideValidation;
 }
 /**
+ * EnumError is the typed error returned when a wire value does not name a
+ * known constant of a named enum. It names the offending field, the bad
+ * value, and the closed set of allowed values — so a wrong enum reaches
+ * the model as a loud, correctable error message (Phase 12 A4).
+ */
+export interface EnumError {
+  /**
+   * Field is the dotted path to the offending field on its node
+   * (e.g. "calloutKind", "steps[0].connector", "align.horizontal").
+   */
+  Field: string;
+  /**
+   * Got is the received wire value.
+   */
+  Got: string;
+  /**
+   * Allowed is the closed set of wire values the type accepts; kept
+   * in the order declared so the message is stable + diff-friendly.
+   */
+  Allowed: string[];
+  /**
+   * Type is the named enum type (e.g. "CalloutKind"), included in
+   * the message so the error is self-describing.
+   */
+  Type: string;
+}
+/**
  * ExportDeckInput is the typed input for export_deck.
  */
 export interface ExportDeckInput {

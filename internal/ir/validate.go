@@ -20,73 +20,67 @@ func ValidateDoc(d contracts.SlideDoc) error {
 }
 
 // ValidateSlide validates a slide's top-level nodes (and, via recursion, their
-// descendants).
+// descendants) plus the slide's own enum-typed fields (layout, alignment,
+// variant, background kind/color).
 func ValidateSlide(s contracts.Slide) error {
-	return childErr("nodes", s.Nodes)
+	return errors.Join(
+		contracts.ValidateSlideEnums(s),
+		childErr("nodes", s.Nodes),
+	)
 }
 
 // ValidateNode runs Stage-1 structural validation on a single node, mirroring
 // pptx-go's scene.ValidateScene per-node rules, recursing into containers.
-// Optional enum fields left empty are accepted (they default at render time);
-// the substantive structural rules are enforced. Nodes are the pointer forms
-// the codec produces.
+// After structural checks, enum validation is applied via ValidateNodeEnums:
+// optional enum fields left empty are accepted (they default at render time);
+// unknown wire values produce an error naming the field and the allowed set.
 func ValidateNode(n contracts.SlideNode) error {
+	var errs []error
 	switch v := n.(type) {
 	case *contracts.Heading:
 		if v.Level < 1 || v.Level > 6 {
-			return fmt.Errorf("heading: level %d out of range 1..6", v.Level)
+			errs = append(errs, fmt.Errorf("heading: level %d out of range 1..6", v.Level))
 		}
 	case *contracts.List:
-		var errs []error
-		if !validListKind(v.Kind) {
-			errs = append(errs, fmt.Errorf("list: invalid listKind %q", v.Kind))
-		}
 		if len(v.Items) == 0 {
 			errs = append(errs, errors.New("list: needs at least one item"))
 		}
-		return errors.Join(errs...)
-	case *contracts.Callout:
-		if !validCalloutKind(v.Kind) {
-			return fmt.Errorf("callout: invalid calloutKind %q", v.Kind)
-		}
 	case *contracts.Image:
-		var errs []error
 		if v.AssetID == "" {
 			errs = append(errs, errors.New("image: empty assetId"))
 		}
 		errs = append(errs, cropErrs(v.Crop)...)
-		return errors.Join(errs...)
 	case *contracts.Chart:
 		if v.AssetID == "" {
-			return errors.New("chart: empty assetId")
+			errs = append(errs, errors.New("chart: empty assetId"))
 		}
 	case *contracts.CodeBlock:
 		if v.AssetID == "" {
-			return errors.New("code_block: empty assetId")
+			errs = append(errs, errors.New("code_block: empty assetId"))
 		}
 	case *contracts.Flow:
 		if len(v.Steps) == 0 {
-			return errors.New("flow: needs at least one step")
+			errs = append(errs, errors.New("flow: needs at least one step"))
 		}
 	case *contracts.Table:
-		return validateTable(v)
+		errs = append(errs, validateTable(v))
 	case *contracts.TwoColumn:
-		return validateTwoColumn(v)
+		errs = append(errs, validateTwoColumn(v))
 	case *contracts.Grid:
-		return validateGrid(v)
+		errs = append(errs, validateGrid(v))
 	case *contracts.Card:
-		return childErr("card.body", v.Body)
+		errs = append(errs, childErr("card.body", v.Body))
 	case *contracts.CardSection:
 		if len(v.Body) == 0 {
-			return errors.New("card_section: body must be non-empty")
+			errs = append(errs, errors.New("card_section: body must be non-empty"))
 		}
-		return childErr("card_section.body", v.Body)
+		errs = append(errs, childErr("card_section.body", v.Body))
 	case *contracts.Decoration:
-		return validateDecoration(v)
+		errs = append(errs, validateDecoration(v))
 	}
-	// Nodes with no structural constraints (hero, prose, quote, chip, arrow,
-	// divider, section_divider) are always valid.
-	return nil
+	// Enum validation applies to every node type; optional empty fields pass.
+	errs = append(errs, contracts.ValidateNodeEnums(n))
+	return errors.Join(errs...)
 }
 
 // childErr validates each child node under label, joining violations.
@@ -150,6 +144,8 @@ func validateGrid(g *contracts.Grid) error {
 	return errors.Join(errs...)
 }
 
+// validateDecoration checks structural constraints for Decoration nodes.
+// The enum check for DecorationKind itself is handled by ValidateNodeEnums.
 func validateDecoration(d *contracts.Decoration) error {
 	var errs []error
 	switch d.Kind {
@@ -161,8 +157,6 @@ func validateDecoration(d *contracts.Decoration) error {
 		if d.AssetID == "" {
 			errs = append(errs, errors.New("decoration: asset kind needs an assetId"))
 		}
-	default:
-		errs = append(errs, fmt.Errorf("decoration: invalid decorationKind %q (want preset or asset)", d.Kind))
 	}
 	if d.Opacity < 0 || d.Opacity > 1 {
 		errs = append(errs, fmt.Errorf("decoration: opacity %.3f out of [0,1]", d.Opacity))
@@ -187,22 +181,4 @@ func cropErrs(c contracts.Crop) []error {
 		errs = append(errs, errors.New("image: crop top+bottom must be < 1"))
 	}
 	return errs
-}
-
-// validListKind accepts the known list kinds plus empty (defaults to bullet).
-func validListKind(k contracts.ListKind) bool {
-	switch k {
-	case "", contracts.ListBullet, contracts.ListNumber, contracts.ListChecklist:
-		return true
-	}
-	return false
-}
-
-// validCalloutKind accepts the known callout kinds plus empty (defaults to note).
-func validCalloutKind(k contracts.CalloutKind) bool {
-	switch k {
-	case "", contracts.CalloutNote, contracts.CalloutWarning, contracts.CalloutTip, contracts.CalloutImportant:
-		return true
-	}
-	return false
 }

@@ -15,6 +15,10 @@ const (
 	FlowVertical   FlowOrientation = "vertical"
 )
 
+// IsValid reports whether v is one of the closed FlowOrientation values
+// (Phase 12 A4).
+func (v FlowOrientation) IsValid() bool { return IsValidEnum(v, AllowedFlowOrientation()) }
+
 // ConnectorKind selects the connector style between flow steps (mirrors
 // pptx-go's scene.ConnectorKind; ConnectorArrow is the default).
 type ConnectorKind string
@@ -26,6 +30,10 @@ const (
 	ConnectorCycle       ConnectorKind = "cycle"
 	ConnectorPlus        ConnectorKind = "plus"
 )
+
+// IsValid reports whether v is one of the closed ConnectorKind values
+// (Phase 12 A4).
+func (v ConnectorKind) IsValid() bool { return IsValidEnum(v, AllowedConnectorKind()) }
 
 // FlowStep is one step in a Flow. Mirror of scene.FlowStep. Icon is a closed-
 // name curated/extension icon (Stage-1 validated at render time).

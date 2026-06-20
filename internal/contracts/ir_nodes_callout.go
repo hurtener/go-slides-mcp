@@ -11,6 +11,11 @@ const (
 	CalloutImportant CalloutKind = "important"
 )
 
+// IsValid reports whether v is one of the closed CalloutKind wire values
+// (Phase 12 A4). The validator additionally accepts "" (empty) so an
+// unset/omitempty field defaults at render time.
+func (v CalloutKind) IsValid() bool { return IsValidEnum(v, AllowedCalloutKind()) }
+
 // Callout is a highlighted note with a title and rich body. Mirror of
 // scene.Callout. The JSON field for the variant is "calloutKind" (not
 // "kind", which is the node discriminator).

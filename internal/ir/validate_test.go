@@ -44,8 +44,8 @@ func TestValidateNodeRules(t *testing.T) {
 		{"heading-level-low", &contracts.Heading{Level: 0}, "out of range"},
 		{"heading-level-high", &contracts.Heading{Level: 7}, "out of range"},
 		{"list-empty", &contracts.List{}, "at least one item"},
-		{"list-bad-kind", &contracts.List{Kind: "bogus", Items: []contracts.ListItem{{}}}, "invalid listKind"},
-		{"callout-bad-kind", &contracts.Callout{Kind: "bogus"}, "invalid calloutKind"},
+		{"list-bad-kind", &contracts.List{Kind: "bogus", Items: []contracts.ListItem{{}}}, "want one of"},
+		{"callout-bad-kind", &contracts.Callout{Kind: "bogus"}, "want one of"},
 		{"image-no-asset", &contracts.Image{}, "empty assetId"},
 		{"image-crop-oob", &contracts.Image{AssetID: "a", Crop: contracts.Crop{Left: 1.5}}, "out of [0,1]"},
 		{"image-crop-sum", &contracts.Image{AssetID: "a", Crop: contracts.Crop{Left: 0.6, Right: 0.6}}, "left+right"},
@@ -60,7 +60,7 @@ func TestValidateNodeRules(t *testing.T) {
 		{"cardsection-empty", &contracts.CardSection{Header: "h"}, "must be non-empty"},
 		{"decoration-preset", &contracts.Decoration{Kind: contracts.DecorationPreset}, "needs a preset"},
 		{"decoration-asset", &contracts.Decoration{Kind: contracts.DecorationAsset}, "needs an assetId"},
-		{"decoration-kind", &contracts.Decoration{}, "invalid decorationKind"},
+		{"decoration-kind", &contracts.Decoration{}, "want one of"},
 		{"decoration-opacity", &contracts.Decoration{Kind: contracts.DecorationPreset, Preset: "p", Opacity: 2}, "opacity"},
 	}
 	for _, c := range cases {

@@ -18,6 +18,10 @@ const (
 	ColorInfo       ColorRole = "info"
 )
 
+// IsValid reports whether v is one of the closed ColorRole wire values
+// (Phase 12 A4).
+func (v ColorRole) IsValid() bool { return IsValidEnum(v, AllowedColorRole()) }
+
 // SpaceRole names a spacing token role (mirrors pptx-go's SpaceRole).
 type SpaceRole string
 
@@ -31,6 +35,10 @@ const (
 	Space2XL SpaceRole = "2xl"
 )
 
+// IsValid reports whether v is one of the closed SpaceRole wire values
+// (Phase 12 A4).
+func (v SpaceRole) IsValid() bool { return IsValidEnum(v, AllowedSpaceRole()) }
+
 // ElevationRole names a shadow elevation role (mirrors pptx-go's
 // ElevationRole).
 type ElevationRole string
@@ -41,3 +49,8 @@ const (
 	ElevationRaised   ElevationRole = "raised"
 	ElevationElevated ElevationRole = "elevated"
 )
+
+// IsValid reports whether v is one of the closed ElevationRole wire values
+// (Phase 12 A4). Empty string is rejected here; the validator passes "" as
+// legal in the optional-with-default semantics it actually uses.
+func (v ElevationRole) IsValid() bool { return IsValidEnum(v, AllowedElevationRole()) }
