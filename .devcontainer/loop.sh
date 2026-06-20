@@ -57,8 +57,15 @@ while [ "$i" -lt "$MAX_ITERS" ]; do
   out="$(timeout "${ITER_TIMEOUT:-900}" opencode run --model "$CUR_MODEL" "${variant_args[@]}" --agent "$BUILD_AGENT" "$BUILD_PROMPT" 2>&1)"
   printf '%s\n' "$out" >> "$LOG"
 
+  # A [goal:complete] is only trusted when REAL gate output is present in the same
+  # iteration — a model that merely mentions the token while planning (a false complete
+  # that wrote nothing) lacks a gate-pass signal and is ignored so the loop keeps working.
   if printf '%s' "$out" | grep -q '\[goal:complete\]'; then
-    note "COMPLETE — unit reported done at iteration $i"; echo "COMPLETE" > "$STATUS"; break
+    if printf '%s' "$out" | grep -qE 'test: OK|^ok[[:space:]]+github\.com|0 issues|categories passed'; then
+      note "COMPLETE — unit reported done at iteration $i (gate output present)"; echo "COMPLETE" > "$STATUS"; break
+    else
+      note "IGNORED premature [goal:complete] at iter $i — no gate output in the iteration; continuing"
+    fi
   fi
   if printf '%s' "$out" | grep -q '\[goal:blocked\]'; then
     note "BLOCKED — model reported a blocker at iteration $i"; echo "BLOCKED" > "$STATUS"; break
