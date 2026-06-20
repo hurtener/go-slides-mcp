@@ -3,8 +3,12 @@ package contracts
 import "encoding/json"
 
 // RichText is an ordered list of styled runs — the inline-text content type
-// used across the slide IR (CONVENTIONS §4). It marshals as a JSON array of
-// TextRun objects; each run is a flat { text, typeRole?, bold?, ... , color? }.
+// used across the slide IR (CONVENTIONS §4). On the wire it is a JSON ARRAY of
+// FLAT run objects; there is no nested "style" object and every key is
+// lowercase. A plain run is just {"text":"hello"}; a styled run inlines its
+// flags: {"text":"38% lower","bold":true,"italic":true,"code":true,
+// "color":{"token":"accent"}}. So a bold-emphasis phrase is two runs:
+// [{"text":"Latency "},{"text":"38% lower","bold":true}].
 type RichText []TextRun
 
 // PlainText returns the concatenated run text, with no styling — used for
@@ -20,20 +24,54 @@ func (rt RichText) PlainText() string {
 	return string(b)
 }
 
-// TextRun is one styled run of text. Its JSON shape is flat (CONVENTIONS §4):
-// the Style fields are inlined into the run object and Color is omitted when
-// unset (meaning the token "primary").
+// TextRun is one styled run of text. Its JSON shape is FLAT (CONVENTIONS §4):
+// the typography role and inline-formatting flags are inlined as lowercase
+// keys on the run object — there is no nested "style" object. Color is omitted
+// when unset (meaning the token "primary"). Examples: {"text":"hello"} or
+// {"text":"bold bit","bold":true,"italic":true,"color":{"token":"accent"}}.
 type TextRun struct {
 	// Text is the literal run content.
-	Text string
-	// Style carries typography and inline formatting.
-	Style RunStyle
-	// Color is the run color; the zero value means the token "primary".
-	Color TextColor
+	Text string `json:"text"`
+	// TypeRole selects a typography scale role (body, h2, ...); empty = body.
+	TypeRole TypeRole `json:"typeRole,omitempty"`
+	// Bold toggles bold weight.
+	Bold bool `json:"bold,omitempty"`
+	// Italic toggles italic style.
+	Italic bool `json:"italic,omitempty"`
+	// Underline toggles underline.
+	Underline bool `json:"underline,omitempty"`
+	// Strike toggles strikethrough.
+	Strike bool `json:"strike,omitempty"`
+	// Code marks the run as inline code (mono + tint).
+	Code bool `json:"code,omitempty"`
+	// Link marks the run as a hyperlink; Href is the target.
+	Link bool `json:"link,omitempty"`
+	// Href is the link URL when Link is true.
+	Href string `json:"href,omitempty"`
+	// Color is the run color as {"token":"<role>"} or {"literal":"RRGGBB"};
+	// omit it (the zero value) for the default token "primary".
+	Color TextColor `json:"color,omitempty"`
+}
+
+// Style returns the run's typography role and inline-formatting flags grouped
+// as a RunStyle — the form the renderer and layout estimator consume. The wire
+// shape stays flat; this is an internal convenience over the flat fields.
+func (r TextRun) Style() RunStyle {
+	return RunStyle{
+		TypeRole:  r.TypeRole,
+		Bold:      r.Bold,
+		Italic:    r.Italic,
+		Underline: r.Underline,
+		Strike:    r.Strike,
+		Code:      r.Code,
+		Link:      r.Link,
+		Href:      r.Href,
+	}
 }
 
 // RunStyle mirrors pptx-go's scene.RunStyle: typography role plus inline
-// formatting flags and a link target.
+// formatting flags and a link target. It is the grouped, in-memory form of a
+// TextRun's flat style fields (see TextRun.Style); it is not a wire shape.
 type RunStyle struct {
 	// TypeRole selects a typography scale role (TypeBody, TypeH2, ...).
 	TypeRole TypeRole
@@ -117,14 +155,14 @@ func (r TextRun) MarshalJSON() ([]byte, error) {
 	}
 	p := plain{
 		Text:      r.Text,
-		TypeRole:  r.Style.TypeRole,
-		Bold:      r.Style.Bold,
-		Italic:    r.Style.Italic,
-		Underline: r.Style.Underline,
-		Strike:    r.Style.Strike,
-		Code:      r.Style.Code,
-		Link:      r.Style.Link,
-		Href:      r.Style.Href,
+		TypeRole:  r.TypeRole,
+		Bold:      r.Bold,
+		Italic:    r.Italic,
+		Underline: r.Underline,
+		Strike:    r.Strike,
+		Code:      r.Code,
+		Link:      r.Link,
+		Href:      r.Href,
 	}
 	if r.Color != (TextColor{}) {
 		c := r.Color
@@ -158,16 +196,14 @@ func (r *TextRun) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	r.Text = p.Text
-	r.Style = RunStyle{
-		TypeRole:  p.TypeRole,
-		Bold:      p.Bold,
-		Italic:    p.Italic,
-		Underline: p.Underline,
-		Strike:    p.Strike,
-		Code:      p.Code,
-		Link:      p.Link,
-		Href:      p.Href,
-	}
+	r.TypeRole = p.TypeRole
+	r.Bold = p.Bold
+	r.Italic = p.Italic
+	r.Underline = p.Underline
+	r.Strike = p.Strike
+	r.Code = p.Code
+	r.Link = p.Link
+	r.Href = p.Href
 	if p.Color != nil {
 		r.Color = *p.Color
 	}

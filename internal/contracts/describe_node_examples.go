@@ -29,7 +29,7 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Paragraphs: []RichText{
 				{
 					{Text: "This quarter we shipped "},
-					{Text: "three major features", Style: RunStyle{Bold: true}},
+					{Text: "three major features", Bold: true},
 				},
 			},
 		}, true
@@ -41,7 +41,7 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 				{Text: RichText{{Text: "Shipped the new dashboard"}}},
 				{Text: RichText{
 					{Text: "Reduced latency by "},
-					{Text: "38%", Style: RunStyle{Bold: true}},
+					{Text: "38%", Bold: true},
 				}},
 				{Text: RichText{{Text: "Onboarded 12 new customers"}}},
 			},
@@ -116,7 +116,7 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 		return &Table{
 			Headers: []RichText{
 				{{Text: "Metric"}},
-				{{Text: "Value", Style: RunStyle{Bold: true}}},
+				{{Text: "Value", Bold: true}},
 			},
 			Rows: [][]RichText{
 				{{{Text: "Revenue"}}, {{Text: "$2.4M"}}},

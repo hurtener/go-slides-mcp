@@ -156,7 +156,7 @@ func validateRichTextEnums(field string, rt RichText) error {
 	for i, run := range rt {
 		if err := checkEnum(
 			fmt.Sprintf("%s[%d].typeRole", field, i),
-			"TypeRole", run.Style.TypeRole, AllowedTypeRole(), true,
+			"TypeRole", run.TypeRole, AllowedTypeRole(), true,
 		); err != nil {
 			errs = append(errs, err)
 		}

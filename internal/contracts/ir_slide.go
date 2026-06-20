@@ -27,9 +27,11 @@ type Slide struct {
 	// Nil (the default) draws nothing — byte-identical to pre-existing slides.
 	Background *Background `json:"background,omitempty"`
 	// Nodes is the slide's top-level node tree.
-	Nodes []SlideNode `json:"nodes,omitempty"`
-	// Notes is the speaker notes.
-	Notes RichText `json:"notes,omitempty"`
+	Nodes []SlideNode `json:"nodes,omitempty" jsonschema:"ordered list of slide nodes. Each node is a JSON object with a kind discriminator, one of: hero|heading|prose|list|callout|quote|chip|table|two_column|grid|card|card_section|flow|chart|code_block|image|divider|arrow|section_divider|decoration. Every RichText field (heading.text, prose.paragraphs[], quote.text, callout.body, list items[].text, table headers/rows, flow steps[].label/detail) is an ARRAY of FLAT runs — [{\"text\":\"hi\"}] or [{\"text\":\"38% lower\",\"bold\":true,\"italic\":true,\"color\":{\"token\":\"accent\"}}]; there is NO nested style object and keys are lowercase. Variant keys are NOT named kind: list uses listKind (bullet|ordered|checklist) + items[].text; callout uses calloutKind (info|tip|warning|success|error) + title + body. flow uses steps[] of {label:RichText, detail:RichText, icon?} — NOT title/body. Examples: heading {\"kind\":\"heading\",\"level\":2,\"text\":[{\"text\":\"Highlights\"}]}; list {\"kind\":\"list\",\"listKind\":\"bullet\",\"items\":[{\"text\":[{\"text\":\"first\"}]}]}; callout {\"kind\":\"callout\",\"calloutKind\":\"tip\",\"title\":\"Heads up\",\"body\":[{\"text\":\"detail\"}]}; flow {\"kind\":\"flow\",\"steps\":[{\"label\":[{\"text\":\"Start\"}],\"detail\":[{\"text\":\"kick off\"}]}]}. Call describe_node for the full per-kind shape."`
+	// Notes is the speaker notes as RichText — a JSON ARRAY of FLAT runs, e.g.
+	// [{"text":"speak to "},{"text":"this point","bold":true}]. There is no
+	// nested "style" object and every key is lowercase.
+	Notes RichText `json:"notes,omitempty" jsonschema:"speaker notes as RichText: a JSON array of FLAT runs — [{\"text\":\"plain\"}] or [{\"text\":\"emphasis\",\"bold\":true,\"italic\":true,\"color\":{\"token\":\"accent\"}}]. There is NO nested style object and keys are lowercase (text, typeRole, bold, italic, underline, strike, code, link, href, color)."`
 }
 
 // MarshalJSON routes Nodes through each child's MarshalJSON and Notes through

@@ -163,7 +163,7 @@ func TestFlowRoundTripStaysGreen(t *testing.T) {
 		Connector:   ConnectorArrow,
 		Steps: []FlowStep{
 			{Label: RichText{{Text: "start"}}, Detail: RichText{{Text: "go"}}, Icon: "play"},
-			{Label: RichText{{Text: "end"}, {Text: "!", Style: RunStyle{Bold: true}}}},
+			{Label: RichText{{Text: "end"}, {Text: "!", Bold: true}}},
 		},
 	}
 	b, err := json.Marshal(node)
