@@ -253,6 +253,11 @@ tools:
     output: internal/contracts.DeckPreviewOutput
     ui: deck-preview
     task_support: forbidden
+  - name: describe_node
+    description: Return the authoritative JSON shape of any slide node kind so agents can look up exact fields instead of guessing.
+    input: internal/contracts.DescribeNodeInput
+    output: internal/contracts.DescribeNodeOutput
+    task_support: forbidden
 
 # The three Deckard UI surfaces. URIs are honored verbatim (CLAUDE.md §7); each
 # is a single-file Svelte bundle under a deny-by-default CSP.

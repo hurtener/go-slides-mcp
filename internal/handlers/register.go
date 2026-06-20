@@ -302,6 +302,12 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.DescribeNodeInput, contracts.DescribeNodeOutput]("describe_node").
+		Describe("Return the authoritative JSON shape of any slide node kind so agents can look up exact fields instead of guessing.").
+		Handler(h.describeNode).
+		Register(srv); err != nil {
+		return err
+	}
 
 	return nil
 }

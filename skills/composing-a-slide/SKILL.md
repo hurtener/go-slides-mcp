@@ -212,3 +212,4 @@ compatible, byte-identical output).
 
 - `building-a-deck` — the overall loop. · `design-principles` — making it tasteful.
 - `charts-and-code` — `chart` / `code_block` nodes.
+- Unsure of a node's exact field names or shapes? Call `describe_node {kind:"<kind>"}` — it returns the authoritative field list and a canonical copy-paste example.
