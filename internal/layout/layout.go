@@ -238,8 +238,8 @@ func naturalWidthRTAt(rt contracts.RichText, base pptx.TypeRole, theme *pptx.The
 		if len(run.Text) == 0 {
 			continue
 		}
-		role := layoutTypeRole(run.Style.TypeRole)
-		if role == pptx.TypeDisplay && run.Style.TypeRole == "" {
+		role := layoutTypeRole(run.TypeRole)
+		if role == pptx.TypeDisplay && run.TypeRole == "" {
 			role = base
 		}
 		spec := theme.ResolveType(role)

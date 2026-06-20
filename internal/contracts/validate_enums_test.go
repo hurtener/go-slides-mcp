@@ -56,7 +56,7 @@ func TestValidateNodeEnumsKnownGood(t *testing.T) {
 		{"heading-align", &contracts.Heading{Level: 1, Align: contracts.HAlignRight}},
 		{"prose-align", &contracts.Prose{Align: contracts.HAlignCenter}},
 		{"section-divider-align", &contracts.SectionDivider{Align: contracts.HAlignLeft}},
-		{"richtext-type-role", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Style: contracts.RunStyle{TypeRole: contracts.TypeH1}}}}},
+		{"richtext-type-role", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", TypeRole: contracts.TypeH1}}}},
 		{"richtext-color-token", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: contracts.TextAccent}}}}},
 	}
 	for _, tc := range cases {
@@ -159,8 +159,8 @@ func TestValidateNodeEnumsBadValues(t *testing.T) {
 		// HAlign on leaf
 		{"halign-bad", &contracts.Hero{Align: "justify"}, "want one of"},
 		// TypeRole in RichText
-		{"type-role-bad", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Style: contracts.RunStyle{TypeRole: "huge"}}}}, "want one of"},
-		{"type-role-field", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Style: contracts.RunStyle{TypeRole: "huge"}}}}, "typeRole"},
+		{"type-role-bad", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", TypeRole: "huge"}}}, "want one of"},
+		{"type-role-field", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", TypeRole: "huge"}}}, "typeRole"},
 		// TextColorRole in RichText
 		{"text-color-role-bad", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: "pink"}}}}, "want one of"},
 		{"text-color-role-field", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: "pink"}}}}, "color.token"},
@@ -275,7 +275,7 @@ func TestValidateNodeEnumsFullyValidNode(t *testing.T) {
 		Elevation:   contracts.ElevationFlat,
 		Body: []contracts.SlideNode{
 			&contracts.Prose{Align: contracts.HAlignLeft, Paragraphs: []contracts.RichText{
-				{{Text: "hello", Style: contracts.RunStyle{TypeRole: contracts.TypeBody}, Color: contracts.TextColor{Token: contracts.TextPrimary}}},
+				{{Text: "hello", TypeRole: contracts.TypeBody, Color: contracts.TextColor{Token: contracts.TextPrimary}}},
 			}},
 		},
 	}

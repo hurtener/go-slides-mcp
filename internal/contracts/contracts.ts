@@ -2290,7 +2290,9 @@ export interface Slide {
    */
   nodes?: SlideNode[];
   /**
-   * Notes is the speaker notes.
+   * Notes is the speaker notes as RichText — a JSON ARRAY of FLAT runs, e.g.
+   * [{"text":"speak to "},{"text":"this point","bold":true}]. There is no
+   * nested "style" object and every key is lowercase.
    */
   notes?: RichText;
 }
@@ -2537,32 +2539,68 @@ export interface ApplyRecipeOutput {
 }
 /**
  * RichText is an ordered list of styled runs — the inline-text content type
- * used across the slide IR (CONVENTIONS §4). It marshals as a JSON array of
- * TextRun objects; each run is a flat { text, typeRole?, bold?, ... , color? }.
+ * used across the slide IR (CONVENTIONS §4). On the wire it is a JSON ARRAY of
+ * FLAT run objects; there is no nested "style" object and every key is
+ * lowercase. A plain run is just {"text":"hello"}; a styled run inlines its
+ * flags: {"text":"38% lower","bold":true,"italic":true,"code":true,
+ * "color":{"token":"accent"}}. So a bold-emphasis phrase is two runs:
+ * [{"text":"Latency "},{"text":"38% lower","bold":true}].
  */
 export type RichText = TextRun[];
 /**
- * TextRun is one styled run of text. Its JSON shape is flat (CONVENTIONS §4):
- * the Style fields are inlined into the run object and Color is omitted when
- * unset (meaning the token "primary").
+ * TextRun is one styled run of text. Its JSON shape is FLAT (CONVENTIONS §4):
+ * the typography role and inline-formatting flags are inlined as lowercase
+ * keys on the run object — there is no nested "style" object. Color is omitted
+ * when unset (meaning the token "primary"). Examples: {"text":"hello"} or
+ * {"text":"bold bit","bold":true,"italic":true,"color":{"token":"accent"}}.
  */
 export interface TextRun {
   /**
    * Text is the literal run content.
    */
-  Text: string;
+  text: string;
   /**
-   * Style carries typography and inline formatting.
+   * TypeRole selects a typography scale role (body, h2, ...); empty = body.
    */
-  Style: RunStyle;
+  typeRole?: TypeRole;
   /**
-   * Color is the run color; the zero value means the token "primary".
+   * Bold toggles bold weight.
    */
-  Color: TextColor;
+  bold?: boolean;
+  /**
+   * Italic toggles italic style.
+   */
+  italic?: boolean;
+  /**
+   * Underline toggles underline.
+   */
+  underline?: boolean;
+  /**
+   * Strike toggles strikethrough.
+   */
+  strike?: boolean;
+  /**
+   * Code marks the run as inline code (mono + tint).
+   */
+  code?: boolean;
+  /**
+   * Link marks the run as a hyperlink; Href is the target.
+   */
+  link?: boolean;
+  /**
+   * Href is the link URL when Link is true.
+   */
+  href?: string;
+  /**
+   * Color is the run color as {"token":"<role>"} or {"literal":"RRGGBB"};
+   * omit it (the zero value) for the default token "primary".
+   */
+  color?: TextColor;
 }
 /**
  * RunStyle mirrors pptx-go's scene.RunStyle: typography role plus inline
- * formatting flags and a link target.
+ * formatting flags and a link target. It is the grouped, in-memory form of a
+ * TextRun's flat style fields (see TextRun.Style); it is not a wire shape.
  */
 export interface RunStyle {
   /**

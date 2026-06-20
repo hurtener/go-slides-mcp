@@ -13,11 +13,11 @@ func richTextSample() RichText {
 	return RichText{
 		{Text: "see ", Color: TextColor{Token: TextSecondary}},
 		{
-			Text:  "the docs",
-			Style: RunStyle{Link: true, Href: "https://example.com", Code: false, TypeRole: TypeBody},
+			Text: "the docs",
+			Link: true, Href: "https://example.com", Code: false, TypeRole: TypeBody,
 			Color: TextColor{Literal: "FF0000"},
 		},
-		{Text: "bold mono", Style: RunStyle{Bold: true, Italic: true, Underline: true, Strike: true, TypeRole: TypeMono}},
+		{Text: "bold mono", Bold: true, Italic: true, Underline: true, Strike: true, TypeRole: TypeMono},
 		{Text: "default-color run"},
 	}
 }
@@ -48,10 +48,10 @@ func nodeRoundTrips() []struct {
 		node SlideNode
 	}{
 		{"hero", &Hero{Eyebrow: "Q2", Title: "Review", Subtitle: "what shipped"}},
-		{"heading", &Heading{Text: RichText{{Text: "Highlights", Style: RunStyle{TypeRole: TypeH2}}}, Level: 2}},
+		{"heading", &Heading{Text: RichText{{Text: "Highlights", TypeRole: TypeH2}}, Level: 2}},
 		{"prose", &Prose{Paragraphs: []RichText{
 			{{Text: "first paragraph"}},
-			{{Text: "second", Style: RunStyle{Italic: true, TypeRole: TypeBodySmall}}},
+			{{Text: "second", Italic: true, TypeRole: TypeBodySmall}},
 		}}},
 		{"list", &List{Kind: ListChecklist, Items: []ListItem{
 			{Text: RichText{{Text: "ship it"}}, Checked: true},
@@ -83,18 +83,18 @@ func nodeRoundTrips() []struct {
 			&Grid{Columns: 2, Cells: []SlideNode{&Hero{Title: "g"}}},
 		}}},
 		{"divider", &Divider{Spacing: SpaceLG}},
-		{"quote", &Quote{Text: RichText{{Text: "a quote"}, {Text: "emphasis", Style: RunStyle{Italic: true, TypeRole: TypeBody}}}, Attribution: "me"}},
+		{"quote", &Quote{Text: RichText{{Text: "a quote"}, {Text: "emphasis", Italic: true, TypeRole: TypeBody}}, Attribution: "me"}},
 		{"chip", &Chip{Label: "new", Tone: ChipSolid, Color: ColorAccent}},
 		{"arrow", &Arrow{Direction: ArrowRight, Label: "next"}},
 		{"section_divider", &SectionDivider{Eyebrow: "Part 2", Label: "Details"}},
 		{"table", &Table{
-			Headers: []RichText{{{Text: "A"}}, {{Text: "B", Style: RunStyle{Bold: true, TypeRole: TypeH3}}}},
+			Headers: []RichText{{{Text: "A"}}, {{Text: "B", Bold: true, TypeRole: TypeH3}}},
 			Rows:    [][]RichText{{{{Text: "1"}}}, {{{Text: "2"}}}},
 			Caption: "cap",
 		}},
 		{"flow", &Flow{Orientation: FlowHorizontal, Connector: ConnectorArrow, Steps: []FlowStep{
 			{Label: RichText{{Text: "start"}}, Detail: RichText{{Text: "go"}}, Icon: "play"},
-			{Label: RichText{{Text: "end"}, {Text: "!", Style: RunStyle{Bold: true}}}},
+			{Label: RichText{{Text: "end"}, {Text: "!", Bold: true}}},
 		}}},
 		{"image", &Image{AssetID: "logo", Alt: "logo", Frame: FrameBrowser, FrameName: "",
 			Crop: Crop{Left: 0.1, Top: 0.1, Right: 0.1, Bottom: 0.1}, Fit: FitFill}},
@@ -142,7 +142,7 @@ func TestRecursiveNesting(t *testing.T) {
 				Left: []SlideNode{&Card{Header: "C", Fill: ColorSurface, Elevation: ElevationRaised,
 					Body: []SlideNode{&List{Kind: ListBullet, Items: []ListItem{
 						{Text: RichText{{Text: "a"}}},
-						{Text: RichText{{Text: "b", Style: RunStyle{Bold: true}}}, Level: 1},
+						{Text: RichText{{Text: "b", Bold: true}}, Level: 1},
 					}}}}},
 				Right: []SlideNode{&Heading{Text: RichText{{Text: "R"}}, Level: 3}},
 			},
@@ -153,7 +153,7 @@ func TestRecursiveNesting(t *testing.T) {
 				}},
 			}},
 		},
-		Notes: RichText{{Text: "speaker notes"}, {Text: "second run", Style: RunStyle{Code: true, TypeRole: TypeCode}}},
+		Notes: RichText{{Text: "speaker notes"}, {Text: "second run", Code: true, TypeRole: TypeCode}},
 	}}}
 
 	b, err := json.Marshal(want)

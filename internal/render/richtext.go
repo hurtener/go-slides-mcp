@@ -13,7 +13,7 @@ func mapRichText(text contracts.RichText) scene.RichText {
 	for i, run := range text {
 		mapped[i] = scene.TextRun{
 			Text:  run.Text,
-			Style: mapRunStyle(run.Style),
+			Style: mapRunStyle(run.Style()),
 			Color: mapTextColor(run.Color),
 		}
 	}

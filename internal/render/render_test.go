@@ -157,14 +157,12 @@ func rt(text string) contracts.RichText {
 
 func rtStyled(text string) contracts.RichText {
 	return contracts.RichText{{
-		Text: text,
-		Style: contracts.RunStyle{
-			TypeRole:  contracts.TypeBody,
-			Bold:      true,
-			Underline: true,
-			Link:      true,
-			Href:      "https://example.test/render",
-		},
-		Color: contracts.TextColor{Literal: strings.ToUpper("3b9c94")},
+		Text:      text,
+		TypeRole:  contracts.TypeBody,
+		Bold:      true,
+		Underline: true,
+		Link:      true,
+		Href:      "https://example.test/render",
+		Color:     contracts.TextColor{Literal: strings.ToUpper("3b9c94")},
 	}}
 }
