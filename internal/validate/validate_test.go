@@ -32,13 +32,13 @@ func TestScoreEmptyIsPerfect(t *testing.T) {
 
 func TestScoreErrorAndWarningPenalties(t *testing.T) {
 	// one structural error: structural subscore 1.0-0.20=0.80; total =
-	// 1.0 - 0.15*(0.20) = 0.97. passed=false.
+	// 1.0 - 0.12*(0.20) = 0.976. passed=false.
 	s := Score([]Issue{{Category: CategoryStructural, Severity: SeverityError}})
 	if s.Passed {
 		t.Fatal("an error must fail")
 	}
-	if math.Abs(s.Score-0.97) > 1e-9 {
-		t.Fatalf("score = %.4f, want 0.97", s.Score)
+	if math.Abs(s.Score-0.976) > 1e-9 {
+		t.Fatalf("score = %.4f, want 0.976", s.Score)
 	}
 	if math.Abs(s.ByCategory[CategoryStructural]-0.80) > 1e-9 {
 		t.Fatalf("structural subscore = %.4f, want 0.80", s.ByCategory[CategoryStructural])
@@ -46,7 +46,7 @@ func TestScoreErrorAndWarningPenalties(t *testing.T) {
 	// one contrast warning: contrast subscore 0.95; total = 1 - 0.25*0.05 = 0.9875; passes.
 	w := Score([]Issue{{Category: CategoryContrast, Severity: SeverityWarning}})
 	if !w.Passed || math.Abs(w.Score-0.9875) > 1e-9 {
-		t.Fatalf("warning score = %+v, want 0.9875/passed", w)
+		t.Fatalf("warning score = %+v, want 0.9875/passed", w.Score)
 	}
 }
 

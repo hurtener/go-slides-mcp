@@ -20,6 +20,11 @@ const (
 	CategoryTypography Category = "typography"
 	CategorySpacing    Category = "spacing"
 	CategoryToken      Category = "token"
+	// CategoryContent groups content-fidelity findings: empty RichText leaves
+	// (heading/prose/list-item/callout/table cell/flow step) and the
+	// wholesale-empty repeating containers that flipped OK=false in the
+	// El Mate deck (Phase 12C, docs/PHASE-12-FIDELITY.md).
+	CategoryContent Category = "content"
 )
 
 // Issue is one validation finding against a slide or its theme.
@@ -31,14 +36,18 @@ type Issue struct {
 }
 
 // categoryWeights are the StyleScore weights (sum to 1.0). Re-derived for the
-// IR-native model from research/01 §4.5: token 30%, contrast 25%, typography
-// 15%, spacing 15%, structural 15%.
+// IR-native model from research/01 §4.5 and retuned after Phase 12C to make
+// room for the content-fidelity category without diluting the soul/contrast
+// guarantees: token 25%, contrast 25%, typography 12%, spacing 12%,
+// structural 12%, content 14% (a wholesale-empty Flow / List / Grid can
+// now move the score without burying the contrast story).
 var categoryWeights = map[Category]float64{
-	CategoryToken:      0.30,
+	CategoryToken:      0.25,
 	CategoryContrast:   0.25,
-	CategoryTypography: 0.15,
-	CategorySpacing:    0.15,
-	CategoryStructural: 0.15,
+	CategoryTypography: 0.12,
+	CategorySpacing:    0.12,
+	CategoryStructural: 0.12,
+	CategoryContent:    0.14,
 }
 
 const (
