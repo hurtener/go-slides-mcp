@@ -1,0 +1,65 @@
+{
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "fields": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "jsonType": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "isRichText": {
+                  "type": "boolean"
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "jsonType"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "example": true
+        },
+        "required": [
+          "kind",
+          "summary",
+          "fields",
+          "example"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "nodes"
+  ],
+  "additionalProperties": false
+}

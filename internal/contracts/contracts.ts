@@ -818,6 +818,81 @@ export interface SetDeckSectionsOutput {
   sections?: DeckSection[];
 }
 /**
+ * DescribeNodeInput is the typed input for the describe_node tool.
+ */
+export interface DescribeNodeInput {
+  /**
+   * Kind is the node kind discriminator to describe. Empty string returns
+   * every registered kind (the full vocabulary).
+   */
+  kind?: string;
+}
+/**
+ * DescribeNodeOutput is the structured result for describe_node.
+ */
+export interface DescribeNodeOutput {
+  /**
+   * Nodes is the per-kind shape description, one entry per returned kind.
+   */
+  nodes: NodeShape[];
+}
+/**
+ * NodeShape is the authoritative shape description for one slide node kind.
+ */
+export interface NodeShape {
+  /**
+   * Kind is the node kind discriminator — the value of the "kind" JSON field
+   * that selects this node type.
+   */
+  kind: string;
+  /**
+   * Summary is a one-line agent-facing description of the node's purpose
+   * and its key fields.
+   */
+  summary: string;
+  /**
+   * Fields is the ordered list of JSON fields for this node kind, derived
+   * from the contract struct. The "kind" discriminator itself is omitted
+   * (it is always injected by MarshalJSON).
+   */
+  fields: NodeField[];
+  /**
+   * Example is a canonical, schema-valid JSON object for this kind, built
+   * by marshalling a populated real node struct. Safe to copy/paste directly
+   * into a slide IR — it always round-trips through UnmarshalSlideNode.
+   */
+  example: any /* json.RawMessage */;
+}
+/**
+ * NodeField describes one JSON field of a node kind.
+ */
+export interface NodeField {
+  /**
+   * Name is the JSON field name (the json tag key).
+   */
+  name: string;
+  /**
+   * JSONType is a human-readable description of the field's JSON wire type.
+   */
+  jsonType: string;
+  /**
+   * Required is true when the field has no omitempty tag and must always
+   * appear in the JSON object.
+   */
+  required?: boolean;
+  /**
+   * IsRichText is true when the field's wire type is a RichText value — a
+   * JSON array of flat run objects [{text,bold?,italic?,…}]. Do NOT use a
+   * plain string for a RichText field, and do NOT nest a style object.
+   */
+  isRichText?: boolean;
+  /**
+   * Note is an optional clarifying note for agents, surfacing common
+   * gotchas or enum values.
+   */
+  note?: string;
+}
+/**
  * IRPath is a structural path into a slide's node tree.
  */
 export type IRPath = any[];
