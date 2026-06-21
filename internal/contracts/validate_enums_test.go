@@ -303,3 +303,19 @@ func TestValidateNodeEnumsFullyValidNode(t *testing.T) {
 		t.Fatalf("fully-valid card should pass, got: %v", err)
 	}
 }
+
+// TestAllowedVAlignCoversFill guards enum-const/allowed-set drift: R2 added
+// VAlign "fill" without updating AllowedVAlign, so a valid value was rejected
+// by enum validation until a deck actually used it. Adding an enum value must
+// update its Allowed set.
+func TestAllowedVAlignCoversFill(t *testing.T) {
+	var found bool
+	for _, v := range contracts.AllowedVAlign() {
+		if v == contracts.VAlignFill {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("AllowedVAlign() must include VAlignFill")
+	}
+}
