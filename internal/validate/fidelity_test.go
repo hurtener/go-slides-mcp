@@ -281,7 +281,7 @@ func TestFidelityConnectedToScore(t *testing.T) {
 		},
 	}
 	// Build a full Slide() report (Slide uses no theme + no render warnings).
-	report := Slide(slide, nil, nil)
+	report := Slide(slide, nil, nil, nil)
 	if report.Score.Passed {
 		t.Fatal("Slide() with all-empty flow must flip Passed=false")
 	}

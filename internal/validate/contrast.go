@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hurtener/pptx-go/pptx"
+	"github.com/hurtener/pptx-go/scene"
 )
 
 // WCAG contrast thresholds.
@@ -58,25 +59,31 @@ func parseHex(s string) (r, g, b float64, ok bool) {
 }
 
 // contrastPair is a text-on-surface pairing the soul promises to render legibly.
+// largeText marks pairs used for display/heading/hero text (WCAG AA large-text
+// threshold 3:1 applies instead of the normal-text 4.5:1 threshold).
 type contrastPair struct {
-	name    string
-	text    pptx.TextColorRole
-	surface pptx.ColorRole
+	name      string
+	text      pptx.TextColorRole
+	surface   pptx.ColorRole
+	largeText bool // true = WCAG AA large-text (3:1); false = normal text (4.5:1)
 }
 
 // defaultPairs are the core text-on-surface combinations Deckard relies on.
 // Because the IR addresses colors by token, a soul that fails one of these
 // fails it on every slide that uses that pairing — so the audit is soul-level.
+// TextInverse-on-accent pairings are large-text (hero/display roles) so the
+// WCAG AA large-text threshold (3:1) applies; the normal-text pairs keep 4.5:1.
 var defaultPairs = []contrastPair{
-	{"primary text on canvas", pptx.TextPrimary, pptx.ColorCanvas},
-	{"primary text on surface", pptx.TextPrimary, pptx.ColorSurface},
-	{"secondary text on surface", pptx.TextSecondary, pptx.ColorSurface},
-	{"inverse text on accent", pptx.TextInverse, pptx.ColorAccent},
-	{"inverse text on accent-alt", pptx.TextInverse, pptx.ColorAccentAlt},
+	{"primary text on canvas", pptx.TextPrimary, pptx.ColorCanvas, false},
+	{"primary text on surface", pptx.TextPrimary, pptx.ColorSurface, false},
+	{"secondary text on surface", pptx.TextSecondary, pptx.ColorSurface, false},
+	{"inverse text on accent", pptx.TextInverse, pptx.ColorAccent, true},        // hero/display = large text
+	{"inverse text on accent-alt", pptx.TextInverse, pptx.ColorAccentAlt, true}, // hero/display = large text
 }
 
 // AuditTheme checks the soul theme's core text-on-surface pairings against WCAG.
-// Below 3:1 is an error; below the 4.5:1 AA target is a warning.
+// Below 3:1 is an error for all text. Between 3:1 and 4.5:1 is a warning for
+// normal-text pairs; large-text pairs (hero/display roles) pass at ≥ 3:1.
 func AuditTheme(t *pptx.Theme) []Issue {
 	if t == nil {
 		return nil
@@ -84,6 +91,51 @@ func AuditTheme(t *pptx.Theme) []Issue {
 	var issues []Issue
 	for _, p := range defaultPairs {
 		ratio, ok := ContrastRatio(t.ResolveTextColor(p.text), t.ResolveColor(p.surface))
+		if !ok {
+			continue
+		}
+		// WCAG AA: normal text requires 4.5:1; large text (≥ 18pt or ≥ 14pt bold)
+		// requires 3:1. Below 3:1 is always an error regardless of text size.
+		aaTarget := contrastAA // 4.5 for normal text
+		if p.largeText {
+			aaTarget = contrastMin // large text: the AA target equals the minimum (3:1)
+		}
+		switch {
+		case ratio < contrastMin:
+			issues = append(issues, Issue{
+				Category: CategoryContrast,
+				Severity: SeverityError,
+				Message:  fmt.Sprintf("%s: contrast %.2f:1 is below the %.0f:1 minimum", p.name, ratio, contrastMin),
+			})
+		case ratio < aaTarget:
+			issues = append(issues, Issue{
+				Category: CategoryContrast,
+				Severity: SeverityWarning,
+				Message:  fmt.Sprintf("%s: contrast %.2f:1 is below the AA %.1f:1 target", p.name, ratio, aaTarget),
+			})
+		}
+	}
+	return issues
+}
+
+// AuditSlideColors checks the primary-text/canvas and primary-text/surface pairs
+// against the engine's R7 per-slide resolved colors (scene.SlideColors). It is
+// variant-aware: for a VariantDark slide the engine resolves dark-palette RGBs
+// into Colors, so this check evaluates the slide against what it actually renders
+// with rather than the soul's light theme. Both checked pairs are body-text
+// weight → normal-text 4.5:1 AA threshold.
+func AuditSlideColors(sc scene.SlideColors) []Issue {
+	pairs := []struct {
+		name    string
+		text    pptx.RGB
+		surface pptx.RGB
+	}{
+		{"primary text on canvas", sc.PrimaryText, sc.Canvas},
+		{"primary text on surface", sc.PrimaryText, sc.Surface},
+	}
+	var issues []Issue
+	for _, p := range pairs {
+		ratio, ok := ContrastRatio(p.text, p.surface)
 		if !ok {
 			continue
 		}

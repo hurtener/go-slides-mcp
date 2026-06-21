@@ -11,11 +11,14 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/render"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 	"github.com/hurtener/go-slides-mcp/internal/validate"
+	"github.com/hurtener/pptx-go/scene"
 )
 
 func (h *handlers) validateSlideIR(_ context.Context, in contracts.ValidateSlideIRInput) (tool.Result[contracts.ValidateSlideIROutput], error) {
 	s := h.resolveSoul(in.SoulID)
-	report := validate.Slide(in.Slide, s.Theme, h.renderWarnings(contracts.SlideDoc{Slides: []contracts.Slide{in.Slide}}, s))
+	doc := contracts.SlideDoc{Slides: []contracts.Slide{in.Slide}}
+	rr := h.renderStats(doc, s)
+	report := validate.Slide(in.Slide, s.Theme, rr.slideColors(0), rr.warnings)
 	out := contracts.ValidateSlideIROutput{
 		OK:       report.Score.Passed,
 		Score:    report.Score.Score,
@@ -36,7 +39,9 @@ func (h *handlers) validateSlide(_ context.Context, in contracts.ValidateSlideIn
 	}
 
 	s := h.resolveSoul(stored.SoulID)
-	report := validate.Slide(*slide, s.Theme, h.renderWarnings(contracts.SlideDoc{Slides: []contracts.Slide{*slide}}, s))
+	doc := contracts.SlideDoc{Slides: []contracts.Slide{*slide}}
+	rr := h.renderStats(doc, s)
+	report := validate.Slide(*slide, s.Theme, rr.slideColors(0), rr.warnings)
 	out := contracts.ValidateSlideOutput{
 		SlideID:  in.SlideID,
 		OK:       report.Score.Passed,
@@ -55,7 +60,8 @@ func (h *handlers) validateDeckForExport(_ context.Context, in contracts.Validat
 
 	doc := contracts.SlideDoc{Title: stored.Title, Slides: append([]contracts.Slide(nil), stored.Slides...)}
 	s := h.resolveSoul(stored.SoulID)
-	deckReport, perSlide := validate.Deck(doc, s.Theme, [][]string{h.renderWarnings(doc, s)})
+	rr := h.renderStats(doc, s)
+	deckReport, perSlide := validate.Deck(doc, s.Theme, [][]string{rr.warnings}, rr.colors)
 
 	out := contracts.ValidateDeckForExportOutput{
 		OK:       deckReport.Score.Passed,
@@ -87,15 +93,31 @@ func (h *handlers) resolveSoul(soulID string) *soul.Soul {
 	return soul.DeckardWhite()
 }
 
-// renderWarnings renders a doc and returns the layout warnings (the render-truth
-// overflow pass). A render error is reported as a warning rather than failing
-// validation.
-func (h *handlers) renderWarnings(doc contracts.SlideDoc, s *soul.Soul) []string {
+// renderResult holds the render-truth outputs used by the validate handlers:
+// layout-overflow warnings and R7 per-slide resolved colors.
+type renderResult struct {
+	warnings []string
+	colors   []scene.SlideColors
+}
+
+// slideColors returns a pointer to the resolved colors for slide index i, or nil
+// if the render produced no colors for that index (safe to pass to validate.Slide).
+func (r renderResult) slideColors(i int) *scene.SlideColors {
+	if i < len(r.colors) {
+		return &r.colors[i]
+	}
+	return nil
+}
+
+// renderStats renders doc and returns layout warnings and per-slide resolved
+// colors (R7). A render error is surfaced as a warning rather than failing
+// validation so that the contrast and structural checks still run.
+func (h *handlers) renderStats(doc contracts.SlideDoc, s *soul.Soul) renderResult {
 	_, stats, err := render.RenderWithAssets(doc, s, raster.NewStoreResolver(h.deps.Assets))
 	if err != nil {
-		return []string{"render failed: " + err.Error()}
+		return renderResult{warnings: []string{"render failed: " + err.Error()}}
 	}
-	return stats.Warnings
+	return renderResult{warnings: stats.Warnings, colors: stats.Colors}
 }
 
 func findings(issues []validate.Issue) []contracts.StyleFinding {

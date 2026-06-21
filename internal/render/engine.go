@@ -15,6 +15,11 @@ type Stats struct {
 	Shapes   int
 	Assets   int
 	Warnings []string
+	// Colors are the per-slide resolved canvas/surface/primary-text RGBs the
+	// engine rendered each slide with (R7, scene.Stats.Colors). In scene order.
+	// VariantDark slides carry their derived dark palette here, not the soul's
+	// light theme — callers use these for variant-aware contrast auditing.
+	Colors []scene.SlideColors
 }
 
 // Render maps doc+soul to a scene and renders deterministic .pptx bytes.
@@ -95,5 +100,6 @@ func statsFromScene(s scene.Stats) Stats {
 		Shapes:   s.Shapes,
 		Assets:   s.Assets,
 		Warnings: warnings,
+		Colors:   s.Colors,
 	}
 }
