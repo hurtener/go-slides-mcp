@@ -71,7 +71,7 @@ func (h *handlers) deleteDeck(_ context.Context, in contracts.DeleteDeckInput) (
 }
 
 func (h *handlers) setDeckChrome(_ context.Context, in contracts.SetDeckChromeInput) (tool.Result[contracts.SetDeckChromeOutput], error) {
-	stored, err := h.deps.Store.SetChrome(in.DeckID, deck.Chrome{Header: in.Chrome.Header, Footer: in.Chrome.Footer, ShowOnCover: in.Chrome.ShowOnCover})
+	stored, err := h.deps.Store.SetChrome(in.DeckID, deck.Chrome{Enabled: in.Chrome.Enabled, BrandAssetID: in.Chrome.BrandAssetID, BrandText: in.Chrome.BrandText})
 	if err != nil {
 		return tool.Result[contracts.SetDeckChromeOutput]{}, mapDeckError(in.DeckID, err)
 	}
@@ -96,7 +96,7 @@ func mapDeckError(id string, err error) error {
 }
 
 func mapChrome(chrome deck.Chrome) contracts.DeckChrome {
-	return contracts.DeckChrome{Header: chrome.Header, Footer: chrome.Footer, ShowOnCover: chrome.ShowOnCover}
+	return contracts.DeckChrome{Enabled: chrome.Enabled, BrandAssetID: chrome.BrandAssetID, BrandText: chrome.BrandText}
 }
 
 func mapSections(sections []deck.Section) []contracts.DeckSection {

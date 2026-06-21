@@ -202,6 +202,44 @@ the rest of the slide defaults to left:
 Note: slide `align` is an object (`{ "vertical": "…", "horizontal": "…" }`);
 node `align` is a string (`"left"` | `"center"` | `"right"`).
 
+## Slide chrome — section eyebrow label (R3, opt-in)
+
+When the deck's chrome is enabled (via `set_deck_chrome { chrome: { enabled: true } }`),
+set a `section` string on each slide to populate the **top section-eyebrow band**:
+
+```json
+{
+  "layout": "title_content",
+  "section": "01 — Direction",
+  "nodes": [...]
+}
+```
+
+The engine draws the eyebrow caption + hairline rule above the body only on slides
+that carry a non-empty `section`. Slides without `section` (e.g. a cover or a
+full-bleed divider) skip the eyebrow but still get the footer (page number + brand).
+Omitting `section` entirely — or chrome being disabled — is byte-identical to before.
+
+The **footer** (bottom band with "N / total" page number and brand slot) is always
+drawn on every slide when chrome is enabled, regardless of `section`.
+
+A canonical chrome slide:
+
+```json
+{
+  "layout": "title_content",
+  "section": "02 — Execution",
+  "align": { "vertical": "fill" },
+  "nodes": [
+    { "kind": "heading", "level": 1, "text": [{"text": "Key initiatives"}] },
+    { "kind": "list", "listKind": "bullet", "items": [
+      { "text": [{"text": "Initiative A"}] },
+      { "text": [{"text": "Initiative B"}] }
+    ]}
+  ]
+}
+```
+
 ## Dark & full-bleed slides
 
 Two optional slide-level fields let you flip a slide to dark or paint a

@@ -609,21 +609,32 @@ export interface SlideSummary {
   revision?: string;
 }
 /**
- * DeckChrome is the deck-level header/footer chrome contract.
+ * DeckChrome is the deck-level slide chrome configuration (R3). When Enabled
+ * is true the engine draws a top section-eyebrow band on slides that carry a
+ * Section label and a bottom footer (brand slot + "N / total" page number) on
+ * every slide. The zero value (Enabled == false) draws no chrome, keeping a
+ * chrome-free deck byte-identical to one authored before R3.
  */
 export interface DeckChrome {
   /**
-   * Header is the header text shown on slides.
+   * Enabled is the master chrome switch. Set to true to activate the
+   * section-eyebrow and footer bands. When false (the default) no chrome is
+   * drawn and the deck output is byte-identical to before R3.
    */
-  header?: string;
+  enabled?: boolean;
   /**
-   * Footer is the footer text shown on slides.
+   * BrandAssetID is the asset id (from upload_asset) of the brand image
+   * drawn in the footer-left slot. Takes precedence over BrandText when set.
+   * The asset is resolved via the AssetResolver at render time; an
+   * unresolved asset degrades to a layout warning (warn-don't-fail).
    */
-  footer?: string;
+  brandAssetId?: string;
   /**
-   * ShowOnCover controls whether chrome appears on the cover slide.
+   * BrandText is the footer-left brand label rendered as a caption when
+   * BrandAssetID is not set (e.g. "Acme Corp"). Both empty means no brand
+   * slot is drawn in the footer.
    */
-  showOnCover?: boolean;
+  brandText?: string;
 }
 /**
  * DeckSection is one named grouping of slide IDs.
@@ -787,7 +798,9 @@ export interface SetDeckChromeInput {
    */
   deckId: string;
   /**
-   * Chrome is the replacement chrome configuration.
+   * Chrome is the replacement chrome configuration. Set Enabled to true to
+   * activate the section-eyebrow + footer bands; supply BrandText or a
+   * BrandAssetID to populate the footer brand slot.
    */
   chrome: DeckChrome;
 }
@@ -2367,6 +2380,13 @@ export interface Slide {
    */
   background?: Background;
   /**
+   * Section is the per-slide chrome eyebrow label (R3, opt-in). When the
+   * deck chrome is enabled, this string appears in the top section-eyebrow
+   * band above the body on this slide (e.g. "01 — Direction"). Empty means
+   * no eyebrow is drawn on this slide even when deck chrome is enabled.
+   */
+  section?: string;
+  /**
    * Nodes is the slide's top-level node tree.
    */
   nodes?: SlideNode[];
@@ -2378,15 +2398,22 @@ export interface Slide {
   notes?: RichText;
 }
 /**
- * SlideDoc is the deck-of-slides wrapper: a title plus an ordered slide list.
- * Slides route through Slide's own marshal/unmarshal, so node trees and notes
- * are codec-handled throughout.
+ * SlideDoc is the deck-of-slides wrapper: a title, deck-level chrome, and an
+ * ordered slide list. Slides route through Slide's own marshal/unmarshal, so
+ * node trees and notes are codec-handled throughout.
  */
 export interface SlideDoc {
   /**
    * Title is the deck title.
    */
   title?: string;
+  /**
+   * Chrome is the deck-level slide chrome configuration (R3). When
+   * Chrome.Enabled is true the engine draws section-eyebrow and footer bands.
+   * The zero value (Enabled == false) draws no chrome — byte-identical to
+   * decks authored before R3.
+   */
+  chrome?: DeckChrome;
   /**
    * Slides is the deck's slides, in order.
    */

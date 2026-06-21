@@ -32,14 +32,25 @@ type SlideSummary struct {
 	Revision string `json:"revision,omitempty"`
 }
 
-// DeckChrome is the deck-level header/footer chrome contract.
+// DeckChrome is the deck-level slide chrome configuration (R3). When Enabled
+// is true the engine draws a top section-eyebrow band on slides that carry a
+// Section label and a bottom footer (brand slot + "N / total" page number) on
+// every slide. The zero value (Enabled == false) draws no chrome, keeping a
+// chrome-free deck byte-identical to one authored before R3.
 type DeckChrome struct {
-	// Header is the header text shown on slides.
-	Header string `json:"header,omitempty"`
-	// Footer is the footer text shown on slides.
-	Footer string `json:"footer,omitempty"`
-	// ShowOnCover controls whether chrome appears on the cover slide.
-	ShowOnCover bool `json:"showOnCover,omitempty"`
+	// Enabled is the master chrome switch. Set to true to activate the
+	// section-eyebrow and footer bands. When false (the default) no chrome is
+	// drawn and the deck output is byte-identical to before R3.
+	Enabled bool `json:"enabled,omitempty"`
+	// BrandAssetID is the asset id (from upload_asset) of the brand image
+	// drawn in the footer-left slot. Takes precedence over BrandText when set.
+	// The asset is resolved via the AssetResolver at render time; an
+	// unresolved asset degrades to a layout warning (warn-don't-fail).
+	BrandAssetID string `json:"brandAssetId,omitempty"`
+	// BrandText is the footer-left brand label rendered as a caption when
+	// BrandAssetID is not set (e.g. "Acme Corp"). Both empty means no brand
+	// slot is drawn in the footer.
+	BrandText string `json:"brandText,omitempty"`
 }
 
 // DeckSection is one named grouping of slide IDs.
@@ -135,7 +146,9 @@ type DeleteDeckOutput struct {
 type SetDeckChromeInput struct {
 	// DeckID addresses the deck by stable ID or slug.
 	DeckID string `json:"deckId"`
-	// Chrome is the replacement chrome configuration.
+	// Chrome is the replacement chrome configuration. Set Enabled to true to
+	// activate the section-eyebrow + footer bands; supply BrandText or a
+	// BrandAssetID to populate the footer brand slot.
 	Chrome DeckChrome `json:"chrome"`
 }
 

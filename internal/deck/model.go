@@ -28,14 +28,15 @@ type Deck struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-// Chrome is the deck-level slide chrome.
+// Chrome is the deck-level slide chrome configuration (R3).
 type Chrome struct {
-	// Header is the header text.
-	Header string `json:"header,omitempty"`
-	// Footer is the footer text.
-	Footer string `json:"footer,omitempty"`
-	// ShowOnCover controls whether chrome appears on the cover slide.
-	ShowOnCover bool `json:"showOnCover,omitempty"`
+	// Enabled is the master chrome switch.
+	Enabled bool `json:"enabled,omitempty"`
+	// BrandAssetID is the footer-left brand image asset id.
+	BrandAssetID string `json:"brandAssetId,omitempty"`
+	// BrandText is the footer-left brand label text used when BrandAssetID
+	// is not set.
+	BrandText string `json:"brandText,omitempty"`
 }
 
 // Section is one named grouping of slide IDs.

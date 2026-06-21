@@ -11,19 +11,21 @@ func mapSlides(slides []contracts.Slide) []scene.SceneSlide {
 	}
 	mapped := make([]scene.SceneSlide, len(slides))
 	for i, slide := range slides {
-		mapped[i] = mapSlide(slide)
+		mapped[i] = mapSlide(slide, i)
 	}
 	return mapped
 }
 
-func mapSlide(slide contracts.Slide) scene.SceneSlide {
+func mapSlide(slide contracts.Slide, idx int) scene.SceneSlide {
 	ss := scene.SceneSlide{
-		ID:      slide.ID,
-		Layout:  mapLayoutKind(slide.Layout),
-		Content: mapAlignment(slide.Align),
-		Variant: mapVariant(slide.Variant),
-		Nodes:   mapNodes(slide.Nodes),
-		Notes:   mapRichText(slide.Notes),
+		ID:         slide.ID,
+		Layout:     mapLayoutKind(slide.Layout),
+		Content:    mapAlignment(slide.Align),
+		Variant:    mapVariant(slide.Variant),
+		Nodes:      mapNodes(slide.Nodes),
+		Notes:      mapRichText(slide.Notes),
+		Section:    slide.Section,
+		PageNumber: idx + 1, // 1-based; engine default (0) would also resolve here
 	}
 	if slide.Background != nil {
 		ss.Background = mapBackground(*slide.Background)

@@ -58,6 +58,9 @@
           },
           "additionalProperties": false
         },
+        "section": {
+          "type": "string"
+        },
         "nodes": {
           "type": [
             "null",

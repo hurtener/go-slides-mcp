@@ -49,6 +49,7 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolv
 		Meta: scene.Metadata{
 			Title: doc.Title,
 		},
+		Chrome: mapDocChrome(doc.Chrome),
 	}
 
 	opts := []scene.RenderOption{scene.WithWorkers(workers)}
@@ -66,6 +67,22 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolv
 	}
 
 	return buf, statsFromScene(sceneStats), nil
+}
+
+// mapDocChrome converts the deck-level DeckChrome contract to the engine's
+// scene.Chrome. The zero value (Enabled == false) returns an empty
+// scene.Chrome so a chrome-free deck renders byte-identical to before R3.
+// When enabled, Total is left at 0: the engine uses len(Scene.Slides) as the
+// page-number denominator by convention.
+func mapDocChrome(c contracts.DeckChrome) scene.Chrome {
+	if !c.Enabled {
+		return scene.Chrome{}
+	}
+	return scene.Chrome{
+		Enabled:    true,
+		Brand:      c.BrandText,
+		BrandAsset: scene.AssetID(c.BrandAssetID),
+	}
 }
 
 func statsFromScene(s scene.Stats) Stats {
