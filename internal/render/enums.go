@@ -441,6 +441,19 @@ func mapBackgroundKind(k contracts.BackgroundKind) scene.BackgroundKind {
 	}
 }
 
+// mapDeltaTone converts the wire-level DeltaTone string to the scene integer
+// enum. The empty string and "neutral" both map to DeltaNeutral (zero value).
+func mapDeltaTone(t contracts.DeltaTone) scene.DeltaTone {
+	switch t {
+	case contracts.DeltaUp:
+		return scene.DeltaUp
+	case contracts.DeltaDown:
+		return scene.DeltaDown
+	default: // DeltaNeutral ("neutral") and empty string
+		return scene.DeltaNeutral
+	}
+}
+
 // mapBackground converts a contracts.Background to scene.Background.
 // The gradient slice is mapped to the engine's [2]pptx.ColorRole:
 //   - 0 roles → both stops are the zero ColorRole

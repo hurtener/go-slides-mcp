@@ -45,6 +45,9 @@ func TestValidateNodeEnumsKnownGood(t *testing.T) {
 		{"card-layout-icon-top", &contracts.Card{Layout: contracts.CardLayoutIconTop}},
 		{"card-elevation", &contracts.Card{Elevation: contracts.ElevationRaised}},
 		{"card-fill", &contracts.Card{Fill: contracts.ColorSurface}},
+		{"stat-delta-up", &contracts.Stat{Value: "$2,200", Label: "ARR", Delta: "+18%", DeltaTone: contracts.DeltaUp}},
+		{"stat-delta-down", &contracts.Stat{Value: "14 days", Label: "cycle", Delta: "-2 days", DeltaTone: contracts.DeltaDown}},
+		{"stat-delta-neutral", &contracts.Stat{Value: "98%", Label: "NPS", Delta: "±0", DeltaTone: contracts.DeltaNeutral}},
 		{"decoration-preset", &contracts.Decoration{Kind: contracts.DecorationPreset}},
 		{"decoration-asset", &contracts.Decoration{Kind: contracts.DecorationAsset}},
 		{"decoration-layer-bg", &contracts.Decoration{Kind: contracts.DecorationPreset, Layer: contracts.LayerBackground}},
@@ -77,6 +80,7 @@ func TestValidateNodeEnumsOptionalEmpty(t *testing.T) {
 	}{
 		{"callout-empty-kind", &contracts.Callout{}},
 		{"list-empty-kind", &contracts.List{Items: []contracts.ListItem{{}}}},
+		{"stat-empty-delta-tone", &contracts.Stat{Value: "42", Label: "units"}},
 		{"chip-empty-tone", &contracts.Chip{}},
 		{"chip-empty-color", &contracts.Chip{}},
 		{"arrow-empty-direction", &contracts.Arrow{}},
@@ -122,6 +126,9 @@ func TestValidateNodeEnumsBadValues(t *testing.T) {
 		// ConnectorKind — "line" is not valid
 		{"connector-bad", &contracts.Flow{Connector: "line", Steps: []contracts.FlowStep{{}}}, "want one of"},
 		{"connector-field", &contracts.Flow{Connector: "line", Steps: []contracts.FlowStep{{}}}, "connector"},
+		// DeltaTone — "positive" is not a valid wire value
+		{"delta-tone-bad", &contracts.Stat{Value: "1", DeltaTone: "positive"}, "want one of"},
+		{"delta-tone-field", &contracts.Stat{Value: "1", DeltaTone: "positive"}, "deltaTone"},
 		// ColorRole — "blue" is not valid (e.g. as fill on card)
 		{"fill-bad", &contracts.Card{Fill: "blue"}, "want one of"},
 		{"fill-field", &contracts.Card{Fill: "blue"}, "fill"},

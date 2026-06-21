@@ -173,6 +173,16 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Layer:  LayerBackground,
 		}, true
 
+	case KindStat:
+		// A single stat: big metric, supporting label, directional delta. A
+		// grid of stats forms a metric/pricing strip (D-057).
+		return &Stat{
+			Value:     "$2,200",
+			Label:     "per month",
+			Delta:     "+18%",
+			DeltaTone: DeltaUp,
+		}, true
+
 	default:
 		return nil, false
 	}

@@ -33,6 +33,11 @@ const (
 	KindDecoration     Kind = "decoration"
 )
 
+// Node kind added in R6 — the Stat leaf node (D-057).
+const (
+	KindStat Kind = "stat"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

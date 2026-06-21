@@ -330,6 +330,15 @@ func AllowedHAlign() []HAlign {
 // strings — for inclusion in an error message.
 func (HAlign) allowedStrings() []string { return stringsFrom(AllowedHAlign()) }
 
+// AllowedDeltaTone returns the closed set of DeltaTone wire values (D-057).
+func AllowedDeltaTone() []DeltaTone {
+	return []DeltaTone{DeltaNeutral, DeltaUp, DeltaDown}
+}
+
+// allowedStrings returns the closed set of DeltaTone wire values as plain
+// strings — for inclusion in an error message.
+func (DeltaTone) allowedStrings() []string { return stringsFrom(AllowedDeltaTone()) }
+
 // AllowedVariant returns the closed set of Variant wire values. Empty
 // string means VariantLight (default) and is also legal.
 func AllowedVariant() []Variant { return []Variant{VariantLight, VariantDark} }

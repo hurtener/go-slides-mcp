@@ -1453,6 +1453,10 @@ export const KindDecoration = "decoration";
  */
 export type Kind = typeof KindDivider | typeof KindQuote | typeof KindChip | typeof KindArrow | typeof KindSectionDivider | typeof KindTable | typeof KindFlow | typeof KindImage | typeof KindCodeBlock | typeof KindChart | typeof KindDecoration;
 /**
+ * Node kind added in R6 — the Stat leaf node (D-057).
+ */
+export const KindStat: Kind = "stat";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -2133,6 +2137,52 @@ export interface Quote {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+}
+/**
+ * DeltaTone selects the color direction of a Stat's delta (mirrors
+ * pptx-go's scene.DeltaTone; D-057). The zero value "neutral" is muted,
+ * so a delta with no tone set reads as neutral.
+ */
+export type DeltaTone = string;
+/**
+ * Delta tone wire values (D-057).
+ */
+export const DeltaNeutral: DeltaTone = "neutral"; // muted — the zero / omitted value
+/**
+ * Delta tone wire values (D-057).
+ */
+export const DeltaUp: DeltaTone = "up"; // positive (success color)
+/**
+ * Delta tone wire values (D-057).
+ */
+export const DeltaDown: DeltaTone = "down"; // negative (error color)
+/**
+ * Stat is a hero big-number metric: a display-scale Value with a Label
+ * and an optional directional Delta (e.g. "$2,200" / "ARR" / "+18%"). A
+ * row of Stats inside a Grid forms a metric or pricing strip. Mirror of
+ * pptx-go's scene.Stat. The engine renders Value/Delta verbatim — it
+ * formats no numbers (D-026).
+ */
+export interface Stat {
+  /**
+   * Value is the display-scale metric (e.g. "$2,200", "98%"). The engine
+   * renders it verbatim at display type scale — format it before passing.
+   */
+  value?: string;
+  /**
+   * Label is the supporting caption below the value (e.g. "ARR", "per month").
+   */
+  label?: string;
+  /**
+   * Delta is the optional change indicator (e.g. "+18%", "-3 pp"). Omit
+   * or leave empty to render no delta line.
+   */
+  delta?: string;
+  /**
+   * DeltaTone colors the delta: "neutral" (muted, default) | "up" (success
+   * color) | "down" (error color). Ignored when Delta is empty.
+   */
+  deltaTone?: DeltaTone;
 }
 /**
  * Table is a grid of cells with a header row and a caption. Renders as native
