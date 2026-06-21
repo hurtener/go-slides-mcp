@@ -115,6 +115,57 @@ func nodeRoundTrips() []struct {
 		{"stat-full", &Stat{Value: "$2,200", Label: "per month", Delta: "+18%", DeltaTone: DeltaUp}},
 		{"stat-no-delta", &Stat{Value: "98%", Label: "NPS score"}},
 		{"stat-delta-down", &Stat{Value: "14 days", Label: "avg cycle", Delta: "-2 days", DeltaTone: DeltaDown}},
+		// R5 (D-055) — TwoColumn connector/badge.
+		{"two_column-badge-join", &TwoColumn{
+			Ratio:     Ratio11,
+			Join:      JoinBadge,
+			JoinLabel: "VS",
+			Left:      []SlideNode{&Hero{Title: "Option A"}},
+			Right:     []SlideNode{&Hero{Title: "Option B"}},
+		}},
+		{"two_column-arrow-join", &TwoColumn{
+			Ratio: Ratio11,
+			Join:  JoinArrow,
+			Left:  []SlideNode{&Hero{Title: "Before"}},
+			Right: []SlideNode{&Hero{Title: "After"}},
+		}},
+		{"two_column-no-join", &TwoColumn{
+			Ratio: Ratio11,
+			Left:  []SlideNode{&Hero{Title: "L"}},
+			Right: []SlideNode{&Hero{Title: "R"}},
+		}},
+		// R5 (D-056) — Bento grid.
+		{"bento-labeled-rows", &Bento{
+			Columns: 3,
+			Rows: []BentoRow{
+				{
+					Label: "Core",
+					Cells: []BentoCell{
+						{Span: 2, Node: &Prose{Paragraphs: []RichText{{{Text: "Primary"}}}}},
+						{Span: 1, Node: &Chip{Label: "New", Tone: ChipSolid, Color: ColorAccent}},
+					},
+				},
+				{
+					Label: "Details",
+					Cells: []BentoCell{
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "A"}}}}},
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "B"}}}}},
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "C"}}}}},
+					},
+				},
+			},
+		}},
+		{"bento-no-labels", &Bento{
+			Columns: 2,
+			Rows: []BentoRow{
+				{
+					Cells: []BentoCell{
+						{Span: 1, Node: &Hero{Title: "Left"}},
+						{Span: 1, Node: &Hero{Title: "Right"}},
+					},
+				},
+			},
+		}},
 	}
 }
 

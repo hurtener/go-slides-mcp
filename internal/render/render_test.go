@@ -118,7 +118,9 @@ func testDoc() contracts.SlideDoc {
 						},
 					},
 					&contracts.TwoColumn{
-						Ratio: contracts.Ratio11,
+						Ratio:     contracts.Ratio11,
+						Join:      contracts.JoinBadge,
+						JoinLabel: "VS",
 						Left: []contracts.SlideNode{
 							&contracts.Card{Header: "Left card", Eyebrow: "Recursion", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Cards hold child nodes.")}}}, Fill: contracts.ColorSurfaceAlt, Elevation: contracts.ElevationRaised},
 						},
@@ -134,6 +136,26 @@ func testDoc() contracts.SlideDoc {
 											&contracts.Card{Header: "B", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Grid cell B")}}}},
 										},
 									},
+								},
+							},
+						},
+					},
+					&contracts.Bento{
+						Columns: 3,
+						Rows: []contracts.BentoRow{
+							{
+								Label: "Metrics",
+								Cells: []contracts.BentoCell{
+									{Span: 2, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("Primary cell")}}},
+									{Span: 1, Node: &contracts.Chip{Label: "Live", Tone: contracts.ChipSolid, Color: contracts.ColorSuccess}},
+								},
+							},
+							{
+								Label: "Detail",
+								Cells: []contracts.BentoCell{
+									{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("A")}}},
+									{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("B")}}},
+									{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("C")}}},
 								},
 							},
 						},

@@ -17,9 +17,32 @@ const (
 // (Phase 12 A4).
 func (v ColumnRatio) IsValid() bool { return IsValidEnum(v, AllowedColumnRatio()) }
 
+// ColumnJoin selects the optional element drawn centered on the column seam
+// (mirrors pptx-go's scene.ColumnJoin; D-055). JoinNone (zero value / empty)
+// draws nothing; an existing TwoColumn with no join field renders byte-for-byte
+// unchanged.
+type ColumnJoin string
+
+// Column join styles (wire values per compose-a-scene).
+const (
+	// JoinNone (default) draws nothing on the column seam.
+	JoinNone ColumnJoin = ""
+	// JoinBadge draws a circular text badge (JoinLabel) centered on the seam.
+	JoinBadge ColumnJoin = "badge"
+	// JoinArrow draws a right-arrow connector between the columns.
+	JoinArrow ColumnJoin = "arrow"
+)
+
+// IsValid reports whether v is one of the closed ColumnJoin wire values.
+// The empty string (JoinNone) is also valid.
+func (v ColumnJoin) IsValid() bool { return IsValidEnum(v, AllowedColumnJoin()) }
+
 // TwoColumn splits a slide into left and right child columns. Both sides
 // must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
 // Children are []SlideNode and nest recursively.
+//
+// Join and JoinLabel are additive (D-055): their zero values draw no element
+// on the seam, so an existing TwoColumn renders byte-for-byte unchanged.
 type TwoColumn struct {
 	// Ratio is the left:right width split.
 	Ratio ColumnRatio `json:"ratio,omitempty"`
@@ -27,6 +50,12 @@ type TwoColumn struct {
 	Left []SlideNode `json:"left,omitempty"`
 	// Right is the right-column children.
 	Right []SlideNode `json:"right,omitempty"`
+	// Join is the optional element drawn centered on the column seam.
+	// JoinNone (empty / omitted) draws nothing (default).
+	Join ColumnJoin `json:"join,omitempty"`
+	// JoinLabel is the badge text when Join == "badge" (e.g. "VS").
+	// Ignored for other Join values.
+	JoinLabel string `json:"joinLabel,omitempty"`
 }
 
 func (TwoColumn) slideNodeKind() Kind { return KindTwoColumn }
@@ -39,15 +68,19 @@ func (t *TwoColumn) MarshalJSON() ([]byte, error) { return marshalNode(KindTwoCo
 // so the container nests recursively (CONVENTIONS §3).
 func (t *TwoColumn) UnmarshalJSON(data []byte) error {
 	type raw struct {
-		Ratio ColumnRatio       `json:"ratio,omitempty"`
-		Left  []json.RawMessage `json:"left,omitempty"`
-		Right []json.RawMessage `json:"right,omitempty"`
+		Ratio     ColumnRatio       `json:"ratio,omitempty"`
+		Left      []json.RawMessage `json:"left,omitempty"`
+		Right     []json.RawMessage `json:"right,omitempty"`
+		Join      ColumnJoin        `json:"join,omitempty"`
+		JoinLabel string            `json:"joinLabel,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
 		return err
 	}
 	t.Ratio = r.Ratio
+	t.Join = r.Join
+	t.JoinLabel = r.JoinLabel
 	left, err := unmarshalNodes(r.Left)
 	if err != nil {
 		return err

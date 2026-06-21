@@ -56,10 +56,15 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 		}, true
 
 	case KindTwoColumn:
+		// Join and JoinLabel are additive (D-055): a "badge" join with label "VS"
+		// draws a circular badge centered on the column seam. Omit both fields for
+		// a plain two-column with no seam element (byte-identical to pre-R5 output).
 		return &TwoColumn{
-			Ratio: Ratio11,
-			Left:  []SlideNode{&Heading{Text: RichText{{Text: "Left Column"}}, Level: 2}},
-			Right: []SlideNode{&Prose{Paragraphs: []RichText{{{Text: "Right column content."}}}}},
+			Ratio:     Ratio11,
+			Join:      JoinBadge,
+			JoinLabel: "VS",
+			Left:      []SlideNode{&Heading{Text: RichText{{Text: "Option A"}}, Level: 2}},
+			Right:     []SlideNode{&Heading{Text: RichText{{Text: "Option B"}}, Level: 2}},
 		}, true
 
 	case KindGrid:
@@ -181,6 +186,32 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Label:     "per month",
 			Delta:     "+18%",
 			DeltaTone: DeltaUp,
+		}, true
+
+	case KindBento:
+		// Bento (D-056): a row-labeled grid with variable column spans. Columns
+		// sets the shared column-unit count; each row's cell spans must sum to
+		// <= Columns. An optional Label on a row reserves a left-gutter label
+		// column for all rows. Cells hold any child SlideNode.
+		return &Bento{
+			Columns: 3,
+			Rows: []BentoRow{
+				{
+					Label: "Core",
+					Cells: []BentoCell{
+						{Span: 2, Node: &Prose{Paragraphs: []RichText{{{Text: "Primary feature spans two columns."}}}}},
+						{Span: 1, Node: &Chip{Label: "New", Tone: ChipSolid, Color: ColorAccent}},
+					},
+				},
+				{
+					Label: "Details",
+					Cells: []BentoCell{
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "Detail A."}}}}},
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "Detail B."}}}}},
+						{Span: 1, Node: &Prose{Paragraphs: []RichText{{{Text: "Detail C."}}}}},
+					},
+				},
+			},
 		}, true
 
 	default:

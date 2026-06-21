@@ -1470,6 +1470,10 @@ export type Kind = typeof KindDivider | typeof KindQuote | typeof KindChip | typ
  */
 export const KindStat: Kind = "stat";
 /**
+ * Node kinds added in R5 — the Bento grid (D-056).
+ */
+export const KindBento: Kind = "bento";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -1505,6 +1509,55 @@ export const LayoutBlank: LayoutKind = "blank";
  * CONVENTIONS §3.
  */
 export type SlideNode = any;
+/**
+ * BentoCell is one cell of a BentoRow: the child node and how many of the
+ * bento's shared column units this cell spans (>= 1; defaults to 1 when zero).
+ * Mirror of pptx-go's scene.BentoCell (D-056).
+ */
+export interface BentoCell {
+  /**
+   * Span is the number of shared column units this cell occupies (>= 1).
+   */
+  span?: number /* int */;
+  /**
+   * Node is the child slide node rendered in this cell.
+   */
+  node?: SlideNode;
+}
+/**
+ * BentoRow is one row of a Bento: an optional left-gutter label and a
+ * left-to-right sequence of span-weighted cells. Mirror of pptx-go's
+ * scene.BentoRow (D-056).
+ */
+export interface BentoRow {
+  /**
+   * Label is the optional left-gutter row label. Empty means no label for
+   * this row; if any row has a label a gutter column is reserved for all rows.
+   */
+  label?: string;
+  /**
+   * Cells is the left-to-right sequence of cells in this row.
+   */
+  cells?: BentoCell[];
+}
+/**
+ * Bento is a row-labeled grid (D-056): rows that each carry an optional left
+ * label and cells of variable column span, measured against Columns shared
+ * column units (a span-S cell occupies S units, so columns align across rows).
+ * A row's cell spans must sum to <= Columns. Bento is a container node — its
+ * cells render per their own policy — and is distinct from Grid (uniform
+ * columns, one child per cell). Mirror of pptx-go's scene.Bento.
+ */
+export interface Bento {
+  /**
+   * Columns is the shared column-unit count all rows are measured against (>= 1).
+   */
+  columns?: number /* int */;
+  /**
+   * Rows is the ordered sequence of bento rows.
+   */
+  rows?: BentoRow[];
+}
 /**
  * CalloutKind selects a callout variant (mirrors pptx-go's scene.CalloutKind).
  */
@@ -2235,9 +2288,30 @@ export const Ratio12: ColumnRatio = "1:2";
  */
 export const Ratio21: ColumnRatio = "2:1";
 /**
+ * ColumnJoin selects the optional element drawn centered on the column seam
+ * (mirrors pptx-go's scene.ColumnJoin; D-055). JoinNone (zero value / empty)
+ * draws nothing; an existing TwoColumn with no join field renders byte-for-byte
+ * unchanged.
+ */
+export type ColumnJoin = string;
+/**
+ * JoinNone (default) draws nothing on the column seam.
+ */
+export const JoinNone: ColumnJoin = "";
+/**
+ * JoinBadge draws a circular text badge (JoinLabel) centered on the seam.
+ */
+export const JoinBadge: ColumnJoin = "badge";
+/**
+ * JoinArrow draws a right-arrow connector between the columns.
+ */
+export const JoinArrow: ColumnJoin = "arrow";
+/**
  * TwoColumn splits a slide into left and right child columns. Both sides
  * must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
  * Children are []SlideNode and nest recursively.
+ * Join and JoinLabel are additive (D-055): their zero values draw no element
+ * on the seam, so an existing TwoColumn renders byte-for-byte unchanged.
  */
 export interface TwoColumn {
   /**
@@ -2252,6 +2326,16 @@ export interface TwoColumn {
    * Right is the right-column children.
    */
   right?: SlideNode[];
+  /**
+   * Join is the optional element drawn centered on the column seam.
+   * JoinNone (empty / omitted) draws nothing (default).
+   */
+  join?: ColumnJoin;
+  /**
+   * JoinLabel is the badge text when Join == "badge" (e.g. "VS").
+   * Ignored for other Join values.
+   */
+  joinLabel?: string;
 }
 /**
  * ColorRole names a surface fill color role (mirrors pptx-go's ColorRole;

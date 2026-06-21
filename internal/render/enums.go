@@ -94,6 +94,17 @@ func mapColumnRatio(ratio contracts.ColumnRatio) scene.ColumnRatio {
 	}
 }
 
+func mapColumnJoin(join contracts.ColumnJoin) scene.ColumnJoin {
+	switch join {
+	case contracts.JoinBadge:
+		return scene.JoinBadge
+	case contracts.JoinArrow:
+		return scene.JoinArrow
+	default: // JoinNone ("") and any unknown value
+		return scene.JoinNone
+	}
+}
+
 func mapBodyLayout(layout contracts.BodyLayout) scene.BodyLayout {
 	if layout == contracts.BodyHorizontal {
 		return scene.BodyHorizontal
