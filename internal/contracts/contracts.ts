@@ -31,9 +31,20 @@ export const VAlignBottom = "bottom";
  */
 export const VAlignJustify = "justify";
 /**
+ * VAlignFill pins fixed leaf nodes (heading, prose, list, callout, divider,
+ * etc.) at the top (like "top") and grows the flexible container nodes
+ * (grid, two_column, card, card_section, table, chart, image) to consume
+ * the remaining body height, so a heading-plus-content slide fills its
+ * frame instead of reading thin at the bottom. When no flexible node is
+ * present, or when content already overflows the body height, it behaves
+ * exactly like "top". Beats "center"/"justify" for heading-plus-content
+ * slides where the content block should dominate the frame.
+ */
+export const VAlignFill = "fill";
+/**
  * Vertical alignment wire values. Empty string == "top" (the default).
  */
-export type VAlign = typeof VAlignTop | typeof VAlignCenter | typeof VAlignBottom | typeof VAlignJustify;
+export type VAlign = typeof VAlignTop | typeof VAlignCenter | typeof VAlignBottom | typeof VAlignJustify | typeof VAlignFill;
 /**
  * HAlign selects horizontal alignment of leaf nodes within the body region.
  * Wire value is a JSON string; the zero value (empty string) is treated as
@@ -69,7 +80,9 @@ export type HAlign = typeof HAlignLeft | typeof HAlignCenter | typeof HAlignRigh
 export interface Alignment {
   /**
    * Vertical sets the body stack's vertical position within the body region:
-   * "top" (default), "center", "bottom", or "justify". Empty = top.
+   * "top" (default), "center", "bottom", "justify", or "fill". Empty = top.
+   * Use "fill" to grow container nodes (grid, card, image, chart, etc.) to
+   * consume the remaining body height — ideal for heading-plus-content slides.
    */
   vertical?: VAlign;
   /**

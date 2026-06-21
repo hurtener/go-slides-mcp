@@ -162,6 +162,7 @@ func TestMapAlignEnums(t *testing.T) {
 		{contracts.VAlignCenter, scene.VAlignCenter},
 		{contracts.VAlignBottom, scene.VAlignBottom},
 		{contracts.VAlignJustify, scene.VAlignJustify},
+		{contracts.VAlignFill, scene.VAlignFill},
 	}
 	for _, tc := range vCases {
 		if got := mapVAlign(tc.in); got != tc.want {

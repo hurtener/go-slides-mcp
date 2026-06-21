@@ -87,14 +87,37 @@ a pillar-by-pillar summary); add `watermark` for section-number cues in dense gr
 
 By default the body stacks from the top, so a slide with a heading + one block leaves
 the bottom half empty and reads thin. Unless a slide is genuinely meant to hug the top,
-**set the slide `align` to center the content vertically**:
+use one of the vertical alignment modes below.
+
+**`"fill"` — the recommended choice for heading-plus-content slides.**
+It pins fixed nodes (headings, prose, lists, callouts) at the top and grows the
+container/visual nodes (grid, card, two_column, table, chart, image) to consume the
+remaining body height, so the content block dominates the frame rather than floating
+at the top:
+
+```json
+{ "layout": "title_content", "align": { "vertical": "fill" }, "nodes": [
+  { "kind": "heading", "level": 1, "text": [{"text":"Key metric"}] },
+  { "kind": "grid", "columns": 3, "cells": [ … ] }
+] }
+```
+
+The heading stays pinned at the top; the grid grows down to the body bottom. Use
+`"fill"` whenever the primary content is a container (`grid`, `card`, `chart`,
+`image`, `two_column`, `table`) and you want it to fill the available space.
+
+**`"center"`** distributes equal whitespace above and below the whole stack — good
+for a single-node slide (a hero, a quote) or when you want intentional breathing room.
+
+**`"justify"`** spreads inter-node gaps evenly, pushing the first node toward the top
+and the last toward the bottom. Useful for 3–4 balanced blocks with no dominant item.
 
 ```json
 { "layout": "card_grid", "align": { "vertical": "center" }, "nodes": [ … ] }
 ```
 
-For a heading-plus-content slide, `"justify"` pushes the heading toward the top and the
-block toward the bottom, using the whole frame. Centered or justified beats top-heavy.
+`"fill"` beats `"center"` and `"justify"` for a heading-plus-content slide — the
+content block grows rather than floating, giving the slide visual weight.
 
 ## Getting the node encoding right
 
@@ -120,7 +143,7 @@ layout unchanged.
 { "align": { "vertical": "center", "horizontal": "center" } }
 ```
 
-- `vertical`: `"top"` (default) · `"center"` · `"bottom"` · `"justify"` (spreads inter-node gaps).
+- `vertical`: `"top"` (default) · `"center"` · `"bottom"` · `"justify"` (spreads inter-node gaps) · `"fill"` (grows container nodes to consume remaining body height).
 - `horizontal`: `"left"` (default) · `"center"` · `"right"` (narrows each leaf node to its natural text width).
 
 **Per-node alignment** — set `align` on individual `hero`, `heading`,
