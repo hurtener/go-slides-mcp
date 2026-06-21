@@ -15,13 +15,24 @@ you never need them. Decks render to a real `.pptx` in pure Go.
    If you don't pass a `soulId`, the deck uses the built-in **Deckard White**
    soul (a warm, editorial look). To match a brand, see `styling-with-souls`.
 
-2. **Plan the narrative, then add slides.** Decide the story first (cover →
+2. **(Optional) Enable slide chrome.** For a designed, consistent deck, turn on
+   the recurring furniture with `set_deck_chrome { deckId, chrome: { enabled: true, brandText: "Acme" } }`.
+   This activates a **bottom footer** (brand slot + "N / total" page number) on
+   every slide, and a **top section-eyebrow band** on any slide that carries a
+   `section` label (see step 3 and `composing-a-slide`). Use `brandAssetId`
+   instead of `brandText` to place a logo image from `upload_asset`. Chrome is
+   opt-in: omit this step to skip it entirely — the deck is byte-identical to
+   before.
+
+3. **Plan the narrative, then add slides.** Decide the story first (cover →
    agenda → sections → close), then `add_slide { deckId, slide }` per slide.
    A slide is `{ layout, nodes: [ … ] }`. Pick the layout for intent
    (`cover`, `title_content`, `two_column`, `card_grid`, `full_bleed`, `blank`,
-   `section_divider`) and compose nodes — see `composing-a-slide`.
+   `section_divider`) and compose nodes — see `composing-a-slide`. When chrome
+   is enabled, set a `section` label on each content slide (e.g.
+   `"section": "01 — Direction"`) so the eyebrow band shows the current chapter.
 
-3. **Use the authoring helpers — they return ready-made nodes, so you never
+4. **Use the authoring helpers — they return ready-made nodes, so you never
    hand-encode rich text** (each tool's result text includes the node JSON to copy):
    - `compile_markdown { markdown }` → a `nodes` array (headings, lists, quotes,
      prose). **This is the reliable way to build text slides** — pass the returned
@@ -30,15 +41,15 @@ you never need them. Decks render to a real `.pptx` in pure Go.
    - `compile_code { code, language }` → a `code_block` node.
    Drop the returned node(s) into a slide's `nodes`.
 
-4. **Preview as you go.** `get_deck_preview { deckId }` renders the glanceable
+5. **Preview as you go.** `get_deck_preview { deckId }` renders the glanceable
    deck surface for the human. `open_slide_editor` / `get_deck_overview` open the
    editing surfaces — but you can also just keep building by tool.
 
-5. **Validate before export.** `validate_deck_for_export { deckId }` returns a
+6. **Validate before export.** `validate_deck_for_export { deckId }` returns a
    0–1 **StyleScore** plus structured findings (structural / contrast / overflow).
    Fix `error`-severity findings; `warning`s are advisory. See `validating-and-exporting`.
 
-6. **Export.** `export_deck { deckId }` always writes a deterministic file AND
+7. **Export.** `export_deck { deckId }` always writes a deterministic file AND
    exposes a downloadable `deck://export/<id>.pptx` resource. Hand the human that
    resource — no extra steps.
 

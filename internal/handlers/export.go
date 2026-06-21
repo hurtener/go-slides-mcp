@@ -30,7 +30,7 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 		}
 	}
 
-	doc := contracts.SlideDoc{Title: stored.Title, Slides: append([]contracts.Slide(nil), stored.Slides...)}
+	doc := contracts.SlideDoc{Title: stored.Title, Chrome: mapChrome(stored.Chrome), Slides: append([]contracts.Slide(nil), stored.Slides...)}
 	resolver := raster.NewStoreResolver(h.deps.Assets)
 	path, stats, err := exportstore.ExportWithResolver(h.deps.Workspace, stored.ID, doc, deckSoul, resolver)
 	if err != nil {

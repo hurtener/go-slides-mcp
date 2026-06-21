@@ -157,7 +157,7 @@ func TestMapSlideVariantDark(t *testing.T) {
 		Variant: contracts.VariantDark,
 		Nodes:   []contracts.SlideNode{&contracts.Hero{Title: "Dark Section"}},
 	}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Variant != scene.VariantDark {
 		t.Errorf("Variant = %v, want VariantDark", got.Variant)
@@ -181,7 +181,7 @@ func TestMapSlideDarkWithGradientBackground(t *testing.T) {
 		},
 		Nodes: []contracts.SlideNode{&contracts.Hero{Title: "Brand Section"}},
 	}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Variant != scene.VariantDark {
 		t.Errorf("Variant = %v, want VariantDark", got.Variant)
@@ -208,7 +208,7 @@ func TestMapSlideZeroVariantBackground(t *testing.T) {
 	t.Parallel()
 
 	slide := contracts.Slide{ID: "light", Nodes: []contracts.SlideNode{&contracts.Hero{Title: "Light"}}}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Variant != scene.VariantLight {
 		t.Errorf("zero Variant should map to VariantLight, got %v", got.Variant)
@@ -230,7 +230,7 @@ func TestMapSlideColorBackground(t *testing.T) {
 		},
 		Nodes: []contracts.SlideNode{&contracts.Hero{Title: "Solid BG"}},
 	}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Background.Kind != scene.BackgroundColor {
 		t.Errorf("Background.Kind = %v, want BackgroundColor", got.Background.Kind)

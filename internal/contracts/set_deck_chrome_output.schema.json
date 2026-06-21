@@ -7,14 +7,14 @@
     "chrome": {
       "type": "object",
       "properties": {
-        "header": {
-          "type": "string"
-        },
-        "footer": {
-          "type": "string"
-        },
-        "showOnCover": {
+        "enabled": {
           "type": "boolean"
+        },
+        "brandAssetId": {
+          "type": "string"
+        },
+        "brandText": {
+          "type": "string"
         }
       },
       "additionalProperties": false

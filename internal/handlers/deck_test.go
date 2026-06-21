@@ -58,11 +58,11 @@ func TestDeckHandlersRoundTripThroughStore(t *testing.T) {
 		t.Fatalf("getDeck first slide title = %q, want Agenda", got.Structured.Slides[0].Title)
 	}
 
-	chrome, err := h.setDeckChrome(ctx, contracts.SetDeckChromeInput{DeckID: stored.ID, Chrome: contracts.DeckChrome{Header: "Deckard", Footer: "Confidential", ShowOnCover: true}})
+	chrome, err := h.setDeckChrome(ctx, contracts.SetDeckChromeInput{DeckID: stored.ID, Chrome: contracts.DeckChrome{Enabled: true, BrandText: "Deckard"}})
 	if err != nil {
 		t.Fatalf("setDeckChrome: %v", err)
 	}
-	if chrome.Structured.Chrome.Header != "Deckard" || !chrome.Structured.Chrome.ShowOnCover {
+	if !chrome.Structured.Chrome.Enabled || chrome.Structured.Chrome.BrandText != "Deckard" {
 		t.Fatalf("setDeckChrome got %+v", chrome.Structured.Chrome)
 	}
 

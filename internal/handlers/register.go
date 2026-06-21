@@ -36,7 +36,7 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		return err
 	}
 	if err := tool.New[contracts.SetDeckChromeInput, contracts.SetDeckChromeOutput]("set_deck_chrome").
-		Describe("Replace a deck's header and footer chrome.").
+		Describe("Enable or disable the deck chrome (section-eyebrow band + page-number footer + brand slot). Set enabled:true with an optional brandText or brandAssetId to activate recurring slide furniture.").
 		Handler(h.setDeckChrome).
 		Register(srv); err != nil {
 		return err

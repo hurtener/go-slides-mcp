@@ -17,7 +17,7 @@ func TestMapSlideAlignment(t *testing.T) {
 		Align: contracts.Alignment{Vertical: contracts.VAlignCenter, Horizontal: contracts.HAlignCenter},
 		Nodes: []contracts.SlideNode{&contracts.Hero{Title: "Hello"}},
 	}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Content.Vertical != scene.VAlignCenter {
 		t.Errorf("Content.Vertical = %v, want %v", got.Content.Vertical, scene.VAlignCenter)
@@ -33,7 +33,7 @@ func TestMapSlideZeroAlignment(t *testing.T) {
 	t.Parallel()
 
 	slide := contracts.Slide{ID: "s", Nodes: []contracts.SlideNode{&contracts.Heading{Level: 1}}}
-	got := mapSlide(slide)
+	got := mapSlide(slide, 0)
 
 	if got.Content != (scene.Alignment{}) {
 		t.Errorf("zero Align should produce zero scene.Alignment, got %+v", got.Content)

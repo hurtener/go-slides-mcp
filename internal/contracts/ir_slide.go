@@ -26,6 +26,11 @@ type Slide struct {
 	// linear gradient of soul color roles), or "asset" (full-bleed picture).
 	// Nil (the default) draws nothing — byte-identical to pre-existing slides.
 	Background *Background `json:"background,omitempty"`
+	// Section is the per-slide chrome eyebrow label (R3, opt-in). When the
+	// deck chrome is enabled, this string appears in the top section-eyebrow
+	// band above the body on this slide (e.g. "01 — Direction"). Empty means
+	// no eyebrow is drawn on this slide even when deck chrome is enabled.
+	Section string `json:"section,omitempty"`
 	// Nodes is the slide's top-level node tree.
 	Nodes []SlideNode `json:"nodes,omitempty" jsonschema:"ordered list of slide nodes. Each node is a JSON object with a kind discriminator, one of: hero|heading|prose|list|callout|quote|chip|table|two_column|grid|card|card_section|flow|chart|code_block|image|divider|arrow|section_divider|decoration. Every RichText field (heading.text, prose.paragraphs[], quote.text, callout.body, list items[].text, table headers/rows, flow steps[].label/detail) is an ARRAY of FLAT runs — [{\"text\":\"hi\"}] or [{\"text\":\"38% lower\",\"bold\":true,\"italic\":true,\"color\":{\"token\":\"accent\"}}]; there is NO nested style object and keys are lowercase. Variant keys are NOT named kind: list uses listKind (bullet|ordered|checklist) + items[].text; callout uses calloutKind (info|tip|warning|success|error) + title + body. flow uses steps[] of {label:RichText, detail:RichText, icon?} — NOT title/body. Examples: heading {\"kind\":\"heading\",\"level\":2,\"text\":[{\"text\":\"Highlights\"}]}; list {\"kind\":\"list\",\"listKind\":\"bullet\",\"items\":[{\"text\":[{\"text\":\"first\"}]}]}; callout {\"kind\":\"callout\",\"calloutKind\":\"tip\",\"title\":\"Heads up\",\"body\":[{\"text\":\"detail\"}]}; flow {\"kind\":\"flow\",\"steps\":[{\"label\":[{\"text\":\"Start\"}],\"detail\":[{\"text\":\"kick off\"}]}]}. Call describe_node for the full per-kind shape."`
 	// Notes is the speaker notes as RichText — a JSON ARRAY of FLAT runs, e.g.
@@ -44,6 +49,7 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 		Align      Alignment   `json:"align,omitempty"`
 		Variant    Variant     `json:"variant,omitempty"`
 		Background *Background `json:"background,omitempty"`
+		Section    string      `json:"section,omitempty"`
 		Nodes      []SlideNode `json:"nodes,omitempty"`
 		Notes      RichText    `json:"notes,omitempty"`
 	}
@@ -53,6 +59,7 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 		Align:      s.Align,
 		Variant:    s.Variant,
 		Background: s.Background,
+		Section:    s.Section,
 		Nodes:      s.Nodes,
 		Notes:      s.Notes,
 	})
@@ -67,6 +74,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 		Align      Alignment         `json:"align,omitempty"`
 		Variant    Variant           `json:"variant,omitempty"`
 		Background *Background       `json:"background,omitempty"`
+		Section    string            `json:"section,omitempty"`
 		Nodes      []json.RawMessage `json:"nodes,omitempty"`
 		Notes      RichText          `json:"notes,omitempty"`
 	}
@@ -79,6 +87,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	s.Align = r.Align
 	s.Variant = r.Variant
 	s.Background = r.Background
+	s.Section = r.Section
 	nodes, err := unmarshalNodes(r.Nodes)
 	if err != nil {
 		return err
@@ -88,12 +97,17 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// SlideDoc is the deck-of-slides wrapper: a title plus an ordered slide list.
-// Slides route through Slide's own marshal/unmarshal, so node trees and notes
-// are codec-handled throughout.
+// SlideDoc is the deck-of-slides wrapper: a title, deck-level chrome, and an
+// ordered slide list. Slides route through Slide's own marshal/unmarshal, so
+// node trees and notes are codec-handled throughout.
 type SlideDoc struct {
 	// Title is the deck title.
 	Title string `json:"title,omitempty"`
+	// Chrome is the deck-level slide chrome configuration (R3). When
+	// Chrome.Enabled is true the engine draws section-eyebrow and footer bands.
+	// The zero value (Enabled == false) draws no chrome — byte-identical to
+	// decks authored before R3.
+	Chrome DeckChrome `json:"chrome,omitempty"`
 	// Slides is the deck's slides, in order.
 	Slides []Slide `json:"slides,omitempty"`
 }
@@ -102,24 +116,27 @@ type SlideDoc struct {
 // helper type has no MarshalJSON, so this never recurses.
 func (d *SlideDoc) MarshalJSON() ([]byte, error) {
 	type plain struct {
-		Title  string  `json:"title,omitempty"`
-		Slides []Slide `json:"slides,omitempty"`
+		Title  string     `json:"title,omitempty"`
+		Chrome DeckChrome `json:"chrome,omitempty"`
+		Slides []Slide    `json:"slides,omitempty"`
 	}
-	return json.Marshal(plain{Title: d.Title, Slides: d.Slides})
+	return json.Marshal(plain{Title: d.Title, Chrome: d.Chrome, Slides: d.Slides})
 }
 
 // UnmarshalJSON routes Slides through each Slide's UnmarshalJSON (which in
 // turn dispatches nodes recursively).
 func (d *SlideDoc) UnmarshalJSON(data []byte) error {
 	type raw struct {
-		Title  string  `json:"title,omitempty"`
-		Slides []Slide `json:"slides,omitempty"`
+		Title  string     `json:"title,omitempty"`
+		Chrome DeckChrome `json:"chrome,omitempty"`
+		Slides []Slide    `json:"slides,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
 		return err
 	}
 	d.Title = r.Title
+	d.Chrome = r.Chrome
 	d.Slides = r.Slides
 	return nil
 }

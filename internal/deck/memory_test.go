@@ -121,11 +121,11 @@ func TestMemoryStoreChromeSectionsConflictAndDuplicateDeepCopy(t *testing.T) {
 		t.Fatalf("AddSlide: %v", err)
 	}
 
-	deck, err = store.SetChrome(deck.ID, Chrome{Header: "Deckard", Footer: "Confidential", ShowOnCover: true})
+	deck, err = store.SetChrome(deck.ID, Chrome{Enabled: true, BrandText: "Deckard", BrandAssetID: "logo-123"})
 	if err != nil {
 		t.Fatalf("SetChrome: %v", err)
 	}
-	if deck.Chrome.Header != "Deckard" || deck.Chrome.Footer != "Confidential" || !deck.Chrome.ShowOnCover {
+	if !deck.Chrome.Enabled || deck.Chrome.BrandText != "Deckard" || deck.Chrome.BrandAssetID != "logo-123" {
 		t.Fatalf("SetChrome got %+v", deck.Chrome)
 	}
 
