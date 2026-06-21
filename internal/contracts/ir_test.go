@@ -111,6 +111,10 @@ func nodeRoundTrips() []struct {
 		{"decoration", &Decoration{Kind: DecorationPreset, Preset: "blob", Layer: LayerBackground,
 			Anchor: AnchorTopLeft, Offset: Position{X: 10, Y: 20}, Size: Size{W: 100, H: 100},
 			Bleed: true, Opacity: 0.5, Rotation: 15}},
+		// R6 (D-057) — Stat leaf node.
+		{"stat-full", &Stat{Value: "$2,200", Label: "per month", Delta: "+18%", DeltaTone: DeltaUp}},
+		{"stat-no-delta", &Stat{Value: "98%", Label: "NPS score"}},
+		{"stat-delta-down", &Stat{Value: "14 days", Label: "avg cycle", Delta: "-2 days", DeltaTone: DeltaDown}},
 	}
 }
 

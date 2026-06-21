@@ -34,7 +34,30 @@ object with a `kind` discriminator.
 | `chart` | A data visual — produce with `compile_chart`, embed the returned node. |
 | `code_block` | A code snippet — produce with `compile_code`, embed the returned node. |
 | `image` | A picture (`assetId` from `upload_asset`), with an optional frame. |
+| `stat` | A hero big-number metric. `value`, `label`, optional `delta` + `deltaTone` (`neutral`/`up`/`down`). A `grid` of stats = a metric or pricing strip. |
 | `divider` / `section_divider` | A rule, or a full-bleed section break. |
+
+## Metric/pricing strips with `stat`
+
+A `stat` node renders one big-number metric: a large `value`, a muted `label` below
+it, and an optional `delta` line colored by `deltaTone`. Three stats in a 3-column
+`grid` build a compact KPI row:
+
+```json
+{ "layout": "title_content", "nodes": [
+  { "kind": "heading", "level": 1, "text": [{"text": "Q2 KPIs"}] },
+  { "kind": "grid", "columns": 3, "cells": [
+    { "kind": "stat", "value": "$2,200", "label": "ARR",
+      "delta": "+18%", "deltaTone": "up" },
+    { "kind": "stat", "value": "98%", "label": "NPS" },
+    { "kind": "stat", "value": "14 days", "label": "avg cycle",
+      "delta": "-2 days", "deltaTone": "down" }
+  ]}
+]}
+```
+
+`deltaTone` accepts `"up"` (success), `"down"` (error), or `"neutral"` (muted,
+default). Omit `delta` entirely to render just the value and label.
 
 ## How to make a slide land
 

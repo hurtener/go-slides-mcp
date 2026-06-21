@@ -115,6 +115,10 @@ func ValidateNodeEnums(n SlideNode) error {
 				errs = append(errs, validateRichTextEnums(fmt.Sprintf("rows[%d][%d]", i, j), cell))
 			}
 		}
+	case *Stat:
+		errs = append(errs,
+			checkEnum("deltaTone", "DeltaTone", v.DeltaTone, AllowedDeltaTone(), true),
+		)
 	}
 	return errors.Join(errs...)
 }
