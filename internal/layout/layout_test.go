@@ -157,3 +157,130 @@ func TestComputeDetectsOverflow(t *testing.T) {
 		t.Fatal("6×3in images should overflow the body region")
 	}
 }
+
+// TestR1ContentAwareHeightMultiLineProse asserts that a Prose node with a very
+// long paragraph is allotted ≥ 2 line-heights (R1 mirror fidelity), and that a
+// second stacked node's Y is strictly below the Prose's bottom edge (no overlap).
+func TestR1ContentAwareHeightMultiLineProse(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	// Build a long string guaranteed to wrap in the body column.
+	// Body width ≈ Slide16x9Width − 2×bodyMargin ≈ 11.3M EMU.
+	// TypeBody avgW ≈ 14pt × 0.5 × 12700 ≈ 88,900 EMU/char.
+	// ~200 chars → ~17.7M EMU → at least 2 lines.
+	longText := ""
+	for i := 0; i < 200; i++ {
+		longText += "w"
+	}
+
+	slide := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.Prose{Paragraphs: []contracts.RichText{rt(longText)}},
+		&contracts.Heading{Level: 2, Text: rt("After")},
+	}}
+	lay := Compute(slide, theme)
+
+	if len(lay.Placements) != 2 {
+		t.Fatalf("got %d placements, want 2", len(lay.Placements))
+	}
+	prose := lay.Placements[0]
+	heading := lay.Placements[1]
+
+	// The prose height must be ≥ 2 × In(0.4) (at least 2 lines).
+	twoLineH := int64(pptx.In(0.4)) * 2
+	if prose.Box.H < twoLineH {
+		t.Fatalf("prose height %d < 2×In(0.4)=%d; R1 content-aware height not applied",
+			prose.Box.H, twoLineH)
+	}
+
+	// The heading must start below the prose bottom edge (no overlap).
+	proseBottom := prose.Box.Y + prose.Box.H
+	if heading.Box.Y <= proseBottom {
+		t.Fatalf("heading Y=%d ≤ prose bottom=%d: nodes overlap", heading.Box.Y, proseBottom)
+	}
+}
+
+// TestR1ContentAwareHeightMultiLineList asserts that a List with long items is
+// taller than a single-line-per-item height (R1 list wrapping).
+func TestR1ContentAwareHeightMultiLineList(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	// ~150 chars per item wraps to >1 line at body width.
+	longItem := ""
+	for i := 0; i < 150; i++ {
+		longItem += "x"
+	}
+
+	slide := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.List{Items: []contracts.ListItem{
+			{Text: rt(longItem)},
+			{Text: rt(longItem)},
+		}},
+	}}
+	lay := Compute(slide, theme)
+	if len(lay.Placements) != 1 {
+		t.Fatalf("got %d placements, want 1", len(lay.Placements))
+	}
+	list := lay.Placements[0]
+
+	// Single-line height for 2 items = 2 × In(0.32). With wrapping, it must be larger.
+	twoItemH := int64(pptx.In(0.32)) * 2
+	if list.Box.H <= twoItemH {
+		t.Fatalf("list height %d ≤ 2×In(0.32)=%d; R1 content-aware height not applied",
+			list.Box.H, twoItemH)
+	}
+}
+
+// TestR1WrappedContentOverflow asserts that layout.Compute sets Overflow=true
+// when a Prose with many long paragraphs overflows the body region (C7 mirror).
+// Before R1 the fixed height under-counted; now the snapshot matches the engine.
+func TestR1WrappedContentOverflow(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	// Build a slide whose wrapped content exceeds the body height (~7.5" at 16:9).
+	// Each Prose paragraph wraps to ~2+ lines; stacking many pushes past body.H.
+	longPara := ""
+	for i := 0; i < 200; i++ {
+		longPara += "m"
+	}
+	// 15 paragraphs of ~2 lines each = ~30 × In(0.4) ≈ 12" >> 6.5" body.
+	paras := make([]contracts.RichText, 15)
+	for i := range paras {
+		paras[i] = rt(longPara)
+	}
+	slide := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.Prose{Paragraphs: paras},
+	}}
+	lay := Compute(slide, theme)
+	if !lay.Overflow {
+		t.Fatalf("slide with many wrapped paragraphs should set Overflow=true (C7)")
+	}
+}
+
+// TestR1ShortContentUnchanged asserts that single-line / short content produces
+// the same geometry as the pre-R1 fixed-height values (backward-compat).
+func TestR1ShortContentUnchanged(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	slide := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.Heading{Level: 2, Text: rt("Hi")},
+		&contracts.Prose{Paragraphs: []contracts.RichText{rt("Short.")}},
+		&contracts.List{Items: []contracts.ListItem{{Text: rt("one")}, {Text: rt("two")}}},
+	}}
+	lay := Compute(slide, theme)
+
+	if len(lay.Placements) != 3 {
+		t.Fatalf("got %d placements, want 3", len(lay.Placements))
+	}
+	h0 := lay.Placements[0]
+	h1 := lay.Placements[1]
+	h2 := lay.Placements[2]
+
+	// Heading: "Hi" is 2 chars, 1 line → In(0.6).
+	if h0.Box.H != int64(pptx.In(0.6)) {
+		t.Errorf("short heading H=%d, want %d (1 line)", h0.Box.H, int64(pptx.In(0.6)))
+	}
+	// Prose: "Short." is short, 1 line → In(0.4).
+	if h1.Box.H != int64(pptx.In(0.4)) {
+		t.Errorf("short prose H=%d, want %d (1 line)", h1.Box.H, int64(pptx.In(0.4)))
+	}
+	// List: "one" and "two" are short → 2 × In(0.32).
+	if h2.Box.H != int64(pptx.In(0.32))*2 {
+		t.Errorf("short list H=%d, want %d (2 single-line items)", h2.Box.H, int64(pptx.In(0.32))*2)
+	}
+}

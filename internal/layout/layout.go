@@ -21,6 +21,14 @@ var (
 	bodyMargin    = pptx.In(0.5)
 	cardChromeEst = pptx.EMU(1097280) // ~1.2"
 	estGap        = pptx.EMU(137160)  // ~0.15"
+
+	// Content-aware increments and insets (Phase 22 / R1), mirrored verbatim
+	// from scene/render.go constants block — PINNED to the pptx-go version in
+	// go.mod. Keep in sync with that block.
+	quoteLineEst     = pptx.EMU(411480) // ~0.45"; per extra wrapped line of a Quote
+	calloutLineEst   = pptx.EMU(274320) // ~0.30"; per extra wrapped line of a Callout body
+	calloutInsetEst  = pptx.EMU(182880) // ~0.20"; accent bar + text inset (renderCallout)
+	cardBodyInsetEst = pptx.EMU(182880) // ~0.20"; per-side card body padding estimate
 )
 
 // Compute returns the canvas geometry for a slide. theme supplies the SpaceMD
@@ -108,7 +116,7 @@ func (c *computer) alignedStackIn(box pptx.Box, ns []contracts.SlideNode, align 
 	heights := make([]pptx.EMU, n)
 	var bodyH pptx.EMU
 	for i, nd := range ns {
-		heights[i] = preferredHeight(nd)
+		heights[i] = preferredHeight(nd, box.W, c.theme)
 		bodyH += heights[i]
 	}
 
@@ -261,6 +269,28 @@ func naturalWidthPlain(text string, role pptx.TypeRole, theme *pptx.Theme) pptx.
 	return avgW * pptx.EMU(len(text))
 }
 
+// wrappedLinesLayout estimates how many lines rt occupies when laid out in a
+// column of width avail (mirrors scene/metrics.go wrappedLines — PINNED to the
+// pptx-go version in go.mod). Uses naturalWidthRTAt with base substituted for
+// runs whose TypeRole is empty. Returns 1 when avail ≤ 0 or theme is nil, so
+// a content-aware call that lacks a real width/theme reproduces the
+// pre-R1 fixed-height output (fallback = single-line height).
+func wrappedLinesLayout(rt contracts.RichText, base pptx.TypeRole, avail pptx.EMU, theme *pptx.Theme) int {
+	if avail <= 0 || theme == nil {
+		return 1
+	}
+	w := naturalWidthRTAt(rt, base, theme)
+	if w <= 0 {
+		return 1
+	}
+	// ceil(w / avail) with positive integers — identical to scene/metrics.go.
+	lines := int((w + avail - 1) / avail)
+	if lines < 1 {
+		lines = 1
+	}
+	return lines
+}
+
 // nodeNaturalWidth mirrors scene/metrics.go nodeNaturalWidth (PINNED).
 // Containers and visual nodes return 0 (they are always full-width).
 func nodeNaturalWidth(n contracts.SlideNode, theme *pptx.Theme) pptx.EMU {
@@ -339,7 +369,7 @@ func layoutTypeRole(r contracts.TypeRole) pptx.TypeRole {
 func (c *computer) stack(box pptx.Box, nodes []contracts.SlideNode, prefix []any) {
 	y := box.Y
 	for i, n := range nodes {
-		h := preferredHeight(n)
+		h := preferredHeight(n, box.W, c.theme)
 		nb := pptx.Box{X: box.X, Y: y, W: box.W, H: h}
 		c.emit(nb, n, appendPath(prefix, i))
 		y += h + c.gap
@@ -380,23 +410,52 @@ func (c *computer) emit(box pptx.Box, n contracts.SlideNode, path []any) {
 }
 
 // preferredHeight mirrors scene/render.go preferredHeight EXACTLY (PINNED to the
-// pptx-go version in go.mod). Keep in sync.
-func preferredHeight(n contracts.SlideNode) pptx.EMU {
+// pptx-go version in go.mod — R1 / Phase 22 content-aware update). Keep in sync.
+//
+// Text-bearing nodes are content-aware: their height grows with the number of
+// wrapped lines estimated by wrappedLinesLayout. avail ≤ 0 or a nil theme falls
+// back to a single-line height, reproducing the pre-R1 fixed output byte-for-byte.
+// Visual/atom nodes (Hero, Divider, Chip, Arrow, Image, Chart, CodeBlock, Flow)
+// do not wrap and keep fixed slot heights.
+func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) pptx.EMU {
 	switch v := n.(type) {
 	case *contracts.Hero:
 		return pptx.In(2.2)
 	case *contracts.Heading:
-		return pptx.In(0.6)
+		lines := wrappedLinesLayout(v.Text, headingRole(v.Level), avail, theme)
+		return pptx.In(0.6) * pptx.EMU(lines)
 	case *contracts.Prose:
-		return pptx.In(0.4) * pptx.EMU(atLeast(len(v.Paragraphs), 1))
+		if len(v.Paragraphs) == 0 {
+			return pptx.In(0.4)
+		}
+		var h pptx.EMU
+		for _, para := range v.Paragraphs {
+			lines := wrappedLinesLayout(para, pptx.TypeBody, avail, theme)
+			h += pptx.In(0.4) * pptx.EMU(lines)
+		}
+		return h
 	case *contracts.List:
-		return pptx.In(0.32) * pptx.EMU(atLeast(len(v.Items), 1))
+		if len(v.Items) == 0 {
+			return pptx.In(0.32)
+		}
+		var h pptx.EMU
+		for _, item := range v.Items {
+			lines := wrappedLinesLayout(item.Text, pptx.TypeBody, avail, theme)
+			h += pptx.In(0.32) * pptx.EMU(lines)
+		}
+		return h
 	case *contracts.Divider:
 		return pptx.In(0.2)
 	case *contracts.Quote:
-		return pptx.In(1.1)
+		// Fixed chrome (attribution + padding) = In(1.1); each extra wrapped
+		// line of the quote text adds quoteLineEst (mirrors scene/render.go).
+		lines := wrappedLinesLayout(v.Text, pptx.TypeH3, avail, theme)
+		return pptx.In(1.1) + quoteLineEst*pptx.EMU(lines-1)
 	case *contracts.Callout:
-		return pptx.In(1.0)
+		// Body wraps within the box minus the accent bar + text inset
+		// (mirrors renderCallout's In(0.2) inset via calloutInsetEst).
+		lines := wrappedLinesLayout(v.Body, pptx.TypeBody, avail-calloutInsetEst, theme)
+		return pptx.In(1.0) + calloutLineEst*pptx.EMU(lines-1)
 	case *contracts.Chip:
 		return pptx.In(0.4)
 	case *contracts.Arrow:
@@ -408,17 +467,10 @@ func preferredHeight(n contracts.SlideNode) pptx.EMU {
 	case *contracts.Chart:
 		return pptx.In(3.0)
 	case *contracts.Table:
-		rows := len(v.Rows)
-		if len(v.Headers) > 0 {
-			rows++
-		}
-		h := pptx.In(0.4) * pptx.EMU(rows)
-		if v.Caption != "" {
-			h += pptx.In(0.4)
-		}
-		return h
+		return tableHeightLayout(v, avail, theme)
 	case *contracts.TwoColumn:
-		return maxEMU(nodesHeight(v.Left), nodesHeight(v.Right))
+		colW := (avail - estGap) / 2
+		return maxEMU(nodesHeight(v.Left, colW, theme), nodesHeight(v.Right, colW, theme))
 	case *contracts.Grid:
 		cols := v.Columns
 		if cols < 1 {
@@ -428,17 +480,18 @@ func preferredHeight(n contracts.SlideNode) pptx.EMU {
 		if rows < 1 {
 			rows = 1
 		}
+		cellW := (avail - estGap*pptx.EMU(cols-1)) / pptx.EMU(cols)
 		var maxCell pptx.EMU
 		for _, cell := range v.Cells {
-			if hh := preferredHeight(cell); hh > maxCell {
+			if hh := preferredHeight(cell, cellW, theme); hh > maxCell {
 				maxCell = hh
 			}
 		}
 		return pptx.EMU(rows)*maxCell + estGap*pptx.EMU(rows-1)
 	case *contracts.Card:
-		return cardChromeEst + nodesHeight(v.Body) + estGap
+		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGap
 	case *contracts.CardSection:
-		return cardChromeEst + nodesHeight(v.Body) + estGap
+		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGap
 	case *contracts.Flow:
 		if v.Orientation == contracts.FlowVertical {
 			return pptx.In(0.9) * pptx.EMU(atLeast(len(v.Steps), 1))
@@ -449,15 +502,69 @@ func preferredHeight(n contracts.SlideNode) pptx.EMU {
 	}
 }
 
-func nodesHeight(nodes []contracts.SlideNode) pptx.EMU {
+// nodesHeight estimates the stacked height of a node list laid out in a column
+// of width avail (mirrors scene/render.go nodesHeight — PINNED).
+func nodesHeight(nodes []contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) pptx.EMU {
 	var total pptx.EMU
 	for i, n := range nodes {
-		total += preferredHeight(n)
+		total += preferredHeight(n, avail, theme)
 		if i > 0 {
 			total += estGap
 		}
 	}
 	return total
+}
+
+// tableHeightLayout mirrors scene/render.go tableHeight (PINNED). When avail,
+// cols, or theme are unavailable it falls back to the count-based pre-R1 height.
+func tableHeightLayout(v *contracts.Table, avail pptx.EMU, theme *pptx.Theme) pptx.EMU {
+	cols := tableColumnsLayout(v)
+	if cols < 1 || avail <= 0 || theme == nil {
+		rows := len(v.Rows)
+		if len(v.Headers) > 0 {
+			rows++
+		}
+		h := pptx.In(0.4) * pptx.EMU(rows)
+		if v.Caption != "" {
+			h += pptx.In(0.4)
+		}
+		return h
+	}
+	colW := avail / pptx.EMU(cols)
+	var h pptx.EMU
+	if len(v.Headers) > 0 {
+		h += tableRowHeightLayout(v.Headers, colW, theme)
+	}
+	for _, row := range v.Rows {
+		h += tableRowHeightLayout(row, colW, theme)
+	}
+	if v.Caption != "" {
+		h += pptx.In(0.4)
+	}
+	return h
+}
+
+// tableColumnsLayout mirrors scene/render_table.go tableColumns (PINNED).
+func tableColumnsLayout(v *contracts.Table) int {
+	cols := len(v.Headers)
+	for _, row := range v.Rows {
+		if len(row) > cols {
+			cols = len(row)
+		}
+	}
+	return cols
+}
+
+// tableRowHeightLayout is In(0.4) × the wrapped line count of the tallest cell
+// in the row (mirrors scene/render.go tableRowHeight — PINNED).
+func tableRowHeightLayout(cells []contracts.RichText, colW pptx.EMU, theme *pptx.Theme) pptx.EMU {
+	maxLines := 1
+	for _, cell := range cells {
+		if l := wrappedLinesLayout(cell, pptx.TypeBody, colW, theme); l > maxLines {
+			maxLines = l
+		}
+	}
+	return pptx.In(0.4) * pptx.EMU(maxLines)
 }
 
 func ratioWeights(rt contracts.ColumnRatio) []int {
