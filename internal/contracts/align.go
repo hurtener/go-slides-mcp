@@ -19,6 +19,15 @@ const (
 	// VAlignJustify distributes vertical slack evenly into the inter-node gaps.
 	// Equivalent to VAlignTop for a single node or when there is no slack.
 	VAlignJustify VAlign = "justify"
+	// VAlignFill pins fixed leaf nodes (heading, prose, list, callout, divider,
+	// etc.) at the top (like "top") and grows the flexible container nodes
+	// (grid, two_column, card, card_section, table, chart, image) to consume
+	// the remaining body height, so a heading-plus-content slide fills its
+	// frame instead of reading thin at the bottom. When no flexible node is
+	// present, or when content already overflows the body height, it behaves
+	// exactly like "top". Beats "center"/"justify" for heading-plus-content
+	// slides where the content block should dominate the frame.
+	VAlignFill VAlign = "fill"
 )
 
 // HAlign selects horizontal alignment of leaf nodes within the body region.
@@ -47,7 +56,9 @@ const (
 // to top/left, reproducing the pre-alignment layout unchanged.
 type Alignment struct {
 	// Vertical sets the body stack's vertical position within the body region:
-	// "top" (default), "center", "bottom", or "justify". Empty = top.
+	// "top" (default), "center", "bottom", "justify", or "fill". Empty = top.
+	// Use "fill" to grow container nodes (grid, card, image, chart, etc.) to
+	// consume the remaining body height — ideal for heading-plus-content slides.
 	Vertical VAlign `json:"vertical,omitempty"`
 	// Horizontal sets the default horizontal alignment for leaf nodes in the
 	// body stack: "left" (default), "center", or "right". Empty = left.

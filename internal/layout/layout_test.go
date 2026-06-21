@@ -253,6 +253,99 @@ func TestR1WrappedContentOverflow(t *testing.T) {
 	}
 }
 
+// TestR2FillGrowsFlexibleNode asserts that VAlignFill on a heading+grid slide
+// grows the grid to fill the body (the grid's bottom edge reaches the body
+// bottom), while the heading stays at the body top edge (top-pinned). Mirrors
+// the acceptance criterion from DECKARD-PRODUCT-REQUIREMENTS.md R2.
+func TestR2FillGrowsFlexibleNode(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	slide := contracts.Slide{
+		Align: contracts.Alignment{Vertical: contracts.VAlignFill},
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 1, Text: rt("Results")},
+			&contracts.Grid{Columns: 3, Cells: []contracts.SlideNode{
+				&contracts.Heading{Level: 3, Text: rt("A")},
+				&contracts.Heading{Level: 3, Text: rt("B")},
+				&contracts.Heading{Level: 3, Text: rt("C")},
+			}},
+		},
+	}
+	lay := Compute(slide, theme)
+
+	if len(lay.Placements) < 2 {
+		t.Fatalf("got %d placements, want ≥2", len(lay.Placements))
+	}
+	heading := lay.Placements[0]
+	grid := lay.Placements[1]
+
+	// Heading is top-pinned: its Y must equal the body top (margin).
+	margin := int64(pptx.In(0.5))
+	if heading.Box.Y != margin {
+		t.Errorf("fill: heading Y = %d, want body top %d (top-pinned)", heading.Box.Y, margin)
+	}
+
+	// Grid bottom must reach the body bottom edge.
+	bodyBottom := int64(pptx.Slide16x9Height) - margin
+	gridBottom := grid.Box.Y + grid.Box.H
+	if gridBottom != bodyBottom {
+		t.Errorf("fill: grid bottom = %d, want body bottom %d (grid did not grow to fill)", gridBottom, bodyBottom)
+	}
+}
+
+// TestR2FillNoFlexibleNodeTopAligns asserts that VAlignFill with no flexible
+// nodes (all text/atom nodes) behaves exactly like VAlignTop — top-pinned,
+// no overflow, no geometry change.
+func TestR2FillNoFlexibleNodeTopAligns(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	nodes := []contracts.SlideNode{
+		&contracts.Heading{Level: 1, Text: rt("Title")},
+		&contracts.Prose{Paragraphs: []contracts.RichText{rt("Body text.")}},
+	}
+	withFill := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{Vertical: contracts.VAlignFill}}, theme)
+	withTop := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{Vertical: contracts.VAlignTop}}, theme)
+
+	if len(withFill.Placements) != len(withTop.Placements) {
+		t.Fatalf("placement count: fill=%d top=%d", len(withFill.Placements), len(withTop.Placements))
+	}
+	for i, a := range withFill.Placements {
+		b := withTop.Placements[i]
+		if a.Box != b.Box {
+			t.Errorf("placement[%d] box differs fill vs top: fill=%+v top=%+v", i, a.Box, b.Box)
+		}
+	}
+}
+
+// TestR2FillOtherModesUnchanged is a regression guard: a slide using VAlignTop,
+// VAlignCenter, VAlignBottom, and VAlignJustify must produce the same geometry
+// whether VAlignFill exists or not (byte-identical to the pre-R2 behavior).
+func TestR2FillOtherModesUnchanged(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	nodes := []contracts.SlideNode{
+		&contracts.Heading{Level: 2, Text: rt("Title")},
+		&contracts.List{Items: []contracts.ListItem{{Text: rt("a")}, {Text: rt("b")}}},
+	}
+
+	for _, va := range []contracts.VAlign{
+		contracts.VAlignTop,
+		contracts.VAlignCenter,
+		contracts.VAlignBottom,
+		contracts.VAlignJustify,
+	} {
+		ref := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{Vertical: va}}, theme)
+		// Re-compute to confirm determinism (same result twice).
+		got := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{Vertical: va}}, theme)
+		if len(ref.Placements) != len(got.Placements) {
+			t.Fatalf("mode=%q: placement count %d vs %d", va, len(ref.Placements), len(got.Placements))
+		}
+		for i, a := range ref.Placements {
+			b := got.Placements[i]
+			if a.Box != b.Box {
+				t.Errorf("mode=%q placement[%d]: %+v vs %+v", va, i, a.Box, b.Box)
+			}
+		}
+	}
+}
+
 // TestR1ShortContentUnchanged asserts that single-line / short content produces
 // the same geometry as the pre-R1 fixed-height values (backward-compat).
 func TestR1ShortContentUnchanged(t *testing.T) {

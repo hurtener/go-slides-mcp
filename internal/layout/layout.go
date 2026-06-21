@@ -158,6 +158,18 @@ func (c *computer) alignedStackIn(box pptx.Box, ns []contracts.SlideNode, align 
 		c.overflow = true
 	}
 
+	// VAlignFill: grow the flexible nodes (containers + Image/Chart) to consume
+	// the leftover body height, so the last flexible node's bottom reaches
+	// box.Bottom(). Top-pinned (startY stays box.Y) with the standard gap; only
+	// positive slack is distributed, so fill never overlaps and never fights the
+	// overflow case. Mirrors scene/render.go alignedStackIn VAlignFill branch
+	// and distributeFill (PINNED to the pptx-go version in go.mod).
+	if align.Vertical == contracts.VAlignFill {
+		if slack := box.H - totalH; slack > 0 {
+			distributeFill(ns, heights, slack)
+		}
+	}
+
 	out := make([]pptx.Box, n)
 	y := startY
 	for i, nd := range ns {
@@ -594,6 +606,55 @@ func atLeast(n, floor int) int {
 
 func emuBox(b pptx.Box) contracts.EMUBox {
 	return contracts.EMUBox{X: int64(b.X), Y: int64(b.Y), W: int64(b.W), H: int64(b.H)}
+}
+
+// isFlexible mirrors scene/render.go isFlexible (PINNED). The flexible node
+// set is the containers (Grid, TwoColumn, Card, CardSection) and the two
+// stretchable visuals (Table, Chart, Image). Text leaves, atoms, CodeBlock,
+// and Flow are fixed — stretching text or monospaced code rasters is
+// meaningless or distorts the output.
+func isFlexible(n contracts.SlideNode) bool {
+	switch n.(type) {
+	case *contracts.Grid, *contracts.TwoColumn, *contracts.Card, *contracts.CardSection,
+		*contracts.Table, *contracts.Chart, *contracts.Image:
+		return true
+	}
+	return false
+}
+
+// distributeFill mirrors scene/render.go distributeFill (PINNED). It grows
+// the flexible nodes in place so their combined added heights equal exactly
+// slack (slack > 0). The share is proportional to each flexible node's
+// preferred height (larger nodes grow more, relative proportions preserved);
+// the rounding remainder is assigned to the last flexible node so the total
+// is exact. When all flexible heights are zero, slack is split equally. Pure
+// integer EMU arithmetic — result is deterministic regardless of scheduling.
+func distributeFill(nodes []contracts.SlideNode, heights []pptx.EMU, slack pptx.EMU) {
+	var flex []int
+	var flexH pptx.EMU
+	for i, nd := range nodes {
+		if isFlexible(nd) {
+			flex = append(flex, i)
+			flexH += heights[i]
+		}
+	}
+	if len(flex) == 0 {
+		return
+	}
+	var used pptx.EMU
+	for k, idx := range flex {
+		var add pptx.EMU
+		switch {
+		case k == len(flex)-1:
+			add = slack - used // last flexible node absorbs the rounding remainder
+		case flexH > 0:
+			add = slack * heights[idx] / flexH
+		default:
+			add = slack / pptx.EMU(len(flex)) // all flexible heights zero → equal split
+		}
+		heights[idx] += add
+		used += add
+	}
 }
 
 // appendPath returns a fresh path slice (never aliases prefix's backing array).

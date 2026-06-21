@@ -38,6 +38,10 @@ func TestAlignmentRoundTrip(t *testing.T) {
 			name:  "horizontal only",
 			align: Alignment{Horizontal: HAlignCenter},
 		},
+		{
+			name:  "fill vertical",
+			align: Alignment{Vertical: VAlignFill},
+		},
 	}
 
 	for _, tc := range cases {
