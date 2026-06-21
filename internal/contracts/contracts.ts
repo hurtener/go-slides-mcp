@@ -1621,6 +1621,24 @@ export interface Card {
    * Elevation is the card shadow role.
    */
   elevation?: ElevationRole;
+  /**
+   * HeaderFill is the color role of a banded header region drawn above the
+   * body (D-054). The body keeps `fill`. Omit (=empty string) to skip the
+   * band — an unset value is byte-identical to a pre-Phase-14 card.
+   */
+  headerFill?: ColorRole;
+  /**
+   * StatusDot is the color role of a small status dot placed in the top-right
+   * corner of the card (D-054). Useful for "live / won / at-risk" cues.
+   * Omit (=empty string) to draw no dot.
+   */
+  statusDot?: ColorRole;
+  /**
+   * Watermark is a large, low-opacity label drawn behind the body
+   * (D-054) — e.g. "01", "Q4", or a section number. Omit (=empty string)
+   * to draw no watermark.
+   */
+  watermark?: string;
 }
 /**
  * CardSection is a top-level card accepting grids, two-columns, or nested

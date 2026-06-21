@@ -402,6 +402,18 @@ func mapSize(s contracts.Size) scene.Size {
 	return scene.Size{W: pptx.Pt(s.W), H: pptx.Pt(s.H)}
 }
 
+// mapColorRolePtr maps an optional ColorRole to a *pptx.ColorRole.
+// An empty role returns nil — the engine's zero/none sentinel for optional
+// colored card elements such as HeaderFill and StatusDot (D-054). A non-empty
+// role delegates to mapColorRole.
+func mapColorRolePtr(role contracts.ColorRole) *pptx.ColorRole {
+	if role == "" {
+		return nil
+	}
+	r := mapColorRole(role)
+	return &r
+}
+
 // mapVariant converts the wire-level Variant string to the scene enum.
 // The empty string and "light" both map to VariantLight (the zero value).
 func mapVariant(v contracts.Variant) scene.Variant {

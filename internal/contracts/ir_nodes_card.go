@@ -71,6 +71,18 @@ type Card struct {
 	Layout CardLayout `json:"layout,omitempty"`
 	// Elevation is the card shadow role.
 	Elevation ElevationRole `json:"elevation,omitempty"`
+	// HeaderFill is the color role of a banded header region drawn above the
+	// body (D-054). The body keeps `fill`. Omit (=empty string) to skip the
+	// band — an unset value is byte-identical to a pre-Phase-14 card.
+	HeaderFill ColorRole `json:"headerFill,omitempty"`
+	// StatusDot is the color role of a small status dot placed in the top-right
+	// corner of the card (D-054). Useful for "live / won / at-risk" cues.
+	// Omit (=empty string) to draw no dot.
+	StatusDot ColorRole `json:"statusDot,omitempty"`
+	// Watermark is a large, low-opacity label drawn behind the body
+	// (D-054) — e.g. "01", "Q4", or a section number. Omit (=empty string)
+	// to draw no watermark.
+	Watermark string `json:"watermark,omitempty"`
 }
 
 func (Card) slideNodeKind() Kind { return KindCard }
@@ -95,6 +107,9 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 		Size        CardSize          `json:"size,omitempty"`
 		Layout      CardLayout        `json:"layout,omitempty"`
 		Elevation   ElevationRole     `json:"elevation,omitempty"`
+		HeaderFill  ColorRole         `json:"headerFill,omitempty"`
+		StatusDot   ColorRole         `json:"statusDot,omitempty"`
+		Watermark   string            `json:"watermark,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -116,6 +131,9 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 	c.Size = r.Size
 	c.Layout = r.Layout
 	c.Elevation = r.Elevation
+	c.HeaderFill = r.HeaderFill
+	c.StatusDot = r.StatusDot
+	c.Watermark = r.Watermark
 	return nil
 }
 
