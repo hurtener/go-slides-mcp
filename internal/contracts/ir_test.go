@@ -79,6 +79,14 @@ func nodeRoundTrips() []struct {
 			Layout:      CardLayoutIconTop,
 			Elevation:   ElevationRaised,
 		}},
+		{"card_r4", &Card{
+			Header:     "Pillar",
+			Fill:       ColorSurface,
+			HeaderFill: ColorAccent,
+			StatusDot:  ColorSuccess,
+			Watermark:  "01",
+			Body:       []SlideNode{&Prose{Paragraphs: []RichText{{{Text: "R4 rich card"}}}}},
+		}},
 		{"card_section", &CardSection{Header: "S", Body: []SlideNode{
 			&Grid{Columns: 2, Cells: []SlideNode{&Hero{Title: "g"}}},
 		}}},
@@ -194,5 +202,27 @@ func TestUnknownKindIsNotSilent(t *testing.T) {
 	}
 	if !errors.Is(err, err) { // trivial: ensures errors import is exercised
 		t.Fatal("errors.Is sanity")
+	}
+}
+
+// TestCardR4FieldsOmitWhenEmpty asserts that headerFill, statusDot, and watermark
+// are absent from the JSON output when the Card carries none of the R4 fields —
+// the omitempty contract guarantees byte-identical output to a pre-R4 card.
+func TestCardR4FieldsOmitWhenEmpty(t *testing.T) {
+	t.Parallel()
+
+	c := &Card{Header: "Plain", Fill: ColorSurface}
+	b, err := json.Marshal(c)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatalf("unmarshal map: %v", err)
+	}
+	for _, field := range []string{"headerFill", "statusDot", "watermark"} {
+		if _, ok := m[field]; ok {
+			t.Errorf("field %q present in JSON for empty Card, want omitted; JSON=%s", field, b)
+		}
 	}
 }

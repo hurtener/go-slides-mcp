@@ -114,6 +114,9 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Size:        mapCardSize(n.Size),
 			Layout:      mapCardLayout(n.Layout),
 			Elevation:   mapElevationRole(n.Elevation),
+			HeaderFill:  mapColorRolePtr(n.HeaderFill),
+			StatusDot:   mapColorRolePtr(n.StatusDot),
+			Watermark:   n.Watermark,
 		}
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}

@@ -62,15 +62,26 @@ are what turn a card grid from "a list in boxes" into something that looks built
 - `eyebrow` — a small kicker label above the header (e.g. `"FOUNDATION"`).
 - `headerPill` — a short badge to the right of the header (e.g. `"01"`, `"NEW"`).
 - `icon` — a curated icon name; `layout: "iconTop"` stacks it above the header.
+- `headerFill` — a color role for a **banded header region** drawn above the body
+  (e.g. `"accent"`, `"accentAlt"`, `"canvas"`). The body retains its own `fill`.
+  Omit (or leave empty) to draw no band — absence is byte-identical to a pre-R4 card.
+- `statusDot` — a color role for a **small status dot** in the top-right corner
+  (e.g. `"success"`, `"warning"`, `"error"`). Great for live/won/at-risk cues.
+  Omit to draw no dot.
+- `watermark` — a **large, low-opacity label** drawn behind the body (e.g. `"01"`,
+  `"Q4"`, `"DRAFT"`). Omit or use `""` to draw nothing.
 
 ```json
-{ "kind": "card", "fill": "surfaceAlt", "elevation": "raised",
-  "eyebrow": "FOUNDATION", "header": "Contract-first", "headerPill": "P3",
+{ "kind": "card", "fill": "surface", "headerFill": "accent",
+  "statusDot": "success", "watermark": "01",
+  "header": "Pillar", "eyebrow": "FOUNDATION",
   "body": [ { "kind": "prose", "paragraphs": [[ { "text": "One clear sentence." } ]] } ] }
 ```
 
 **Default to filled + raised + eyebrow** for any card grid or two-column-of-cards —
-it is the single biggest lift from "correct" to "designed."
+it is the single biggest lift from "correct" to "designed." Add `headerFill` +
+`statusDot` when the deck needs a visual status language (e.g. a pipeline board or
+a pillar-by-pillar summary); add `watermark` for section-number cues in dense grids.
 
 ## Fill the frame — don't leave content top-heavy
 
