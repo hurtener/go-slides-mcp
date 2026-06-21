@@ -73,6 +73,7 @@ func ValidateNodeEnums(n SlideNode) error {
 	case *TwoColumn:
 		errs = append(errs,
 			checkEnum("ratio", "ColumnRatio", v.Ratio, AllowedColumnRatio(), true),
+			checkEnum("join", "ColumnJoin", v.Join, AllowedColumnJoin(), true),
 		)
 	case *Flow:
 		errs = append(errs,

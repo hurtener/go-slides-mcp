@@ -61,6 +61,11 @@ func TestValidateNodeEnumsKnownGood(t *testing.T) {
 		{"section-divider-align", &contracts.SectionDivider{Align: contracts.HAlignLeft}},
 		{"richtext-type-role", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", TypeRole: contracts.TypeH1}}}},
 		{"richtext-color-token", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: contracts.TextAccent}}}}},
+		// R5 (D-055) — TwoColumn connector/badge.
+		{"two-column-join-badge", &contracts.TwoColumn{Ratio: contracts.Ratio11, Join: contracts.JoinBadge, JoinLabel: "VS",
+			Left: []contracts.SlideNode{&contracts.Hero{}}, Right: []contracts.SlideNode{&contracts.Hero{}}}},
+		{"two-column-join-arrow", &contracts.TwoColumn{Ratio: contracts.Ratio11, Join: contracts.JoinArrow,
+			Left: []contracts.SlideNode{&contracts.Hero{}}, Right: []contracts.SlideNode{&contracts.Hero{}}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -87,6 +92,7 @@ func TestValidateNodeEnumsOptionalEmpty(t *testing.T) {
 		{"divider-empty-spacing", &contracts.Divider{}},
 		{"grid-empty-gap", &contracts.Grid{Columns: 2, Cells: []contracts.SlideNode{&contracts.Hero{}, &contracts.Hero{}}}},
 		{"two-column-empty-ratio", &contracts.TwoColumn{Left: []contracts.SlideNode{&contracts.Hero{}}, Right: []contracts.SlideNode{&contracts.Hero{}}}},
+		{"two-column-empty-join", &contracts.TwoColumn{Left: []contracts.SlideNode{&contracts.Hero{}}, Right: []contracts.SlideNode{&contracts.Hero{}}}},
 		{"flow-empty-orientation", &contracts.Flow{Steps: []contracts.FlowStep{{}}}},
 		{"flow-empty-connector", &contracts.Flow{Steps: []contracts.FlowStep{{}}}},
 		{"card-empty-fields", &contracts.Card{}},
@@ -171,6 +177,13 @@ func TestValidateNodeEnumsBadValues(t *testing.T) {
 		// TextColorRole in RichText
 		{"text-color-role-bad", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: "pink"}}}}, "want one of"},
 		{"text-color-role-field", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x", Color: contracts.TextColor{Token: "pink"}}}}, "color.token"},
+		// R5 (D-055) — ColumnJoin bad value
+		{"column-join-bad", &contracts.TwoColumn{Join: "circle",
+			Left:  []contracts.SlideNode{&contracts.Hero{}},
+			Right: []contracts.SlideNode{&contracts.Hero{}}}, "want one of"},
+		{"column-join-field", &contracts.TwoColumn{Join: "circle",
+			Left:  []contracts.SlideNode{&contracts.Hero{}},
+			Right: []contracts.SlideNode{&contracts.Hero{}}}, "join"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

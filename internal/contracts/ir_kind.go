@@ -38,6 +38,11 @@ const (
 	KindStat Kind = "stat"
 )
 
+// Node kinds added in R5 — the Bento grid (D-056).
+const (
+	KindBento Kind = "bento"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

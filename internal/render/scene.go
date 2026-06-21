@@ -99,7 +99,15 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Rotation: n.Rotation,
 		}
 	case *contracts.TwoColumn:
-		return scene.TwoColumn{Ratio: mapColumnRatio(n.Ratio), Left: mapNodes(n.Left), Right: mapNodes(n.Right)}
+		return scene.TwoColumn{
+			Ratio:     mapColumnRatio(n.Ratio),
+			Left:      mapNodes(n.Left),
+			Right:     mapNodes(n.Right),
+			Join:      mapColumnJoin(n.Join),
+			JoinLabel: n.JoinLabel,
+		}
+	case *contracts.Bento:
+		return mapBento(n)
 	case *contracts.Grid:
 		return scene.Grid{Columns: n.Columns, Ratio: cloneInts(n.Ratio), Gap: mapSpaceRole(n.Gap), Cells: mapNodes(n.Cells)}
 	case *contracts.Card:
@@ -171,6 +179,21 @@ func mapFlowSteps(steps []contracts.FlowStep) []scene.FlowStep {
 		mapped[i] = scene.FlowStep{Label: mapRichText(step.Label), Detail: mapRichText(step.Detail), Icon: step.Icon}
 	}
 	return mapped
+}
+
+func mapBento(n *contracts.Bento) scene.Bento {
+	rows := make([]scene.BentoRow, len(n.Rows))
+	for ri, row := range n.Rows {
+		cells := make([]scene.BentoCell, len(row.Cells))
+		for ci, cell := range row.Cells {
+			cells[ci] = scene.BentoCell{
+				Span: cell.Span,
+				Node: mapNode(cell.Node),
+			}
+		}
+		rows[ri] = scene.BentoRow{Label: row.Label, Cells: cells}
+	}
+	return scene.Bento{Columns: n.Columns, Rows: rows}
 }
 
 func cloneInts(values []int) []int {

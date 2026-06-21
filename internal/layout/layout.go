@@ -509,6 +509,13 @@ func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) p
 			return pptx.In(0.9) * pptx.EMU(atLeast(len(v.Steps), 1))
 		}
 		return pptx.In(1.4)
+	case *contracts.Bento:
+		// Mirrors scene/render_bento.go bentoGeometry: each row is allotted an
+		// equal fraction of the available height. We estimate the minimum row
+		// height as a fixed 1.4" × row count plus gaps (PINNED to the pptx-go
+		// version in go.mod). The Bento is flexible so VAlignFill will grow it.
+		nRows := atLeast(len(v.Rows), 1)
+		return pptx.In(1.4)*pptx.EMU(nRows) + estGap*pptx.EMU(nRows-1)
 	default:
 		return pptx.In(1.0)
 	}
@@ -609,13 +616,14 @@ func emuBox(b pptx.Box) contracts.EMUBox {
 }
 
 // isFlexible mirrors scene/render.go isFlexible (PINNED). The flexible node
-// set is the containers (Grid, TwoColumn, Card, CardSection) and the two
-// stretchable visuals (Table, Chart, Image). Text leaves, atoms, CodeBlock,
+// set is the containers (Grid, TwoColumn, Bento, Card, CardSection) and the
+// two stretchable visuals (Table, Chart, Image). Text leaves, atoms, CodeBlock,
 // and Flow are fixed — stretching text or monospaced code rasters is
 // meaningless or distorts the output.
 func isFlexible(n contracts.SlideNode) bool {
 	switch n.(type) {
-	case *contracts.Grid, *contracts.TwoColumn, *contracts.Card, *contracts.CardSection,
+	case *contracts.Grid, *contracts.TwoColumn, *contracts.Bento,
+		*contracts.Card, *contracts.CardSection,
 		*contracts.Table, *contracts.Chart, *contracts.Image:
 		return true
 	}

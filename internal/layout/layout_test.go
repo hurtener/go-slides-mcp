@@ -377,3 +377,82 @@ func TestR1ShortContentUnchanged(t *testing.T) {
 		t.Errorf("short list H=%d, want %d (2 single-line items)", h2.Box.H, int64(pptx.In(0.32))*2)
 	}
 }
+
+// TestR5BentoFlexible asserts that a Bento is treated as a flexible node
+// under VAlignFill, growing to fill the body alongside a heading (R5 / D-056).
+func TestR5BentoFlexible(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	slide := contracts.Slide{
+		Align: contracts.Alignment{Vertical: contracts.VAlignFill},
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 1, Text: rt("Dashboard")},
+			&contracts.Bento{
+				Columns: 3,
+				Rows: []contracts.BentoRow{
+					{
+						Label: "Q2",
+						Cells: []contracts.BentoCell{
+							{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("A")}}},
+							{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("B")}}},
+							{Span: 1, Node: &contracts.Prose{Paragraphs: []contracts.RichText{rt("C")}}},
+						},
+					},
+				},
+			},
+		},
+	}
+	lay := Compute(slide, theme)
+	if len(lay.Placements) < 2 {
+		t.Fatalf("got %d placements, want ≥2", len(lay.Placements))
+	}
+	heading := lay.Placements[0]
+	bento := lay.Placements[1]
+
+	// Heading is top-pinned.
+	margin := int64(pptx.In(0.5))
+	if heading.Box.Y != margin {
+		t.Errorf("bento-fill: heading Y=%d, want body top %d (top-pinned)", heading.Box.Y, margin)
+	}
+
+	// Bento bottom must reach the body bottom edge (bento grew to fill).
+	bodyBottom := int64(pptx.Slide16x9Height) - margin
+	bentoBottom := bento.Box.Y + bento.Box.H
+	if bentoBottom != bodyBottom {
+		t.Errorf("bento-fill: bento bottom=%d, want body bottom %d (did not grow to fill)", bentoBottom, bodyBottom)
+	}
+}
+
+// TestR5TwoColumnJoinByteIdenticalWhenEmpty asserts that a TwoColumn with
+// no join fields (zero-value Join and JoinLabel) produces the same placement
+// geometry as the pre-R5 TwoColumn (the join fields are additive, D-055).
+func TestR5TwoColumnJoinByteIdenticalWhenEmpty(t *testing.T) {
+	theme := pptx.DefaultTheme()
+	// Pre-R5 form: no join fields.
+	plain := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.TwoColumn{
+			Ratio: contracts.Ratio11,
+			Left:  []contracts.SlideNode{&contracts.Heading{Level: 2, Text: rt("L")}},
+			Right: []contracts.SlideNode{&contracts.Heading{Level: 2, Text: rt("R")}},
+		},
+	}}
+	// R5 form: explicit JoinNone (empty string — same as omitted).
+	withJoinNone := contracts.Slide{Nodes: []contracts.SlideNode{
+		&contracts.TwoColumn{
+			Ratio: contracts.Ratio11,
+			Join:  contracts.JoinNone,
+			Left:  []contracts.SlideNode{&contracts.Heading{Level: 2, Text: rt("L")}},
+			Right: []contracts.SlideNode{&contracts.Heading{Level: 2, Text: rt("R")}},
+		},
+	}}
+	layPlain := Compute(plain, theme)
+	layJoin := Compute(withJoinNone, theme)
+	if len(layPlain.Placements) != len(layJoin.Placements) {
+		t.Fatalf("placement count: plain=%d join-none=%d", len(layPlain.Placements), len(layJoin.Placements))
+	}
+	for i, a := range layPlain.Placements {
+		b := layJoin.Placements[i]
+		if a.Box != b.Box {
+			t.Errorf("placement[%d] box differs plain vs join-none: plain=%+v joinNone=%+v", i, a.Box, b.Box)
+		}
+	}
+}

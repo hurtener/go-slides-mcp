@@ -182,6 +182,17 @@ func AllowedColumnRatio() []ColumnRatio {
 // strings — for inclusion in an error message.
 func (ColumnRatio) allowedStrings() []string { return stringsFrom(AllowedColumnRatio()) }
 
+// AllowedColumnJoin returns the closed set of ColumnJoin wire values (D-055).
+// The empty string (JoinNone) is excluded from this list but is accepted by
+// the validator (acceptEmpty=true).
+func AllowedColumnJoin() []ColumnJoin {
+	return []ColumnJoin{JoinBadge, JoinArrow}
+}
+
+// allowedStrings returns the closed set of ColumnJoin wire values as plain
+// strings — for inclusion in an error message.
+func (ColumnJoin) allowedStrings() []string { return stringsFrom(AllowedColumnJoin()) }
+
 // AllowedBodyLayout returns the closed set of BodyLayout wire values.
 func AllowedBodyLayout() []BodyLayout {
 	return []BodyLayout{
