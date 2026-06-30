@@ -4,6 +4,15 @@ package contracts
 type ExportDeckInput struct {
 	// DeckID addresses the deck by stable ID or slug.
 	DeckID string `json:"deckId"`
+	// Autofit opts into auto density-fit before rendering (R10.11). When
+	// true, the export grows container-bearing slides (grid, two_column,
+	// bento, table, card_section) to fill the body frame so content-light
+	// slides don't read sparse — it only redistributes existing leftover
+	// slack, so it can never cause overflow. Off by default: a false (or
+	// omitted) Autofit renders byte-identical to pre-R10.11 exports. This
+	// flag is the entry point for the broader R10.11 autofit ladder; today
+	// it applies the fill pass only.
+	Autofit bool `json:"autofit,omitempty"`
 }
 
 // ExportStats is the structured render summary for one exported deck.

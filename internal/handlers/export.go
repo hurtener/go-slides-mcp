@@ -11,6 +11,7 @@ import (
 
 	"github.com/hurtener/dockyard/runtime/tool"
 
+	"github.com/hurtener/go-slides-mcp/internal/autofit"
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/exportstore"
 	"github.com/hurtener/go-slides-mcp/internal/raster"
@@ -36,6 +37,9 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 	established := brandSoulEstablished(stored.SoulID) && resolvedOK
 
 	doc := contracts.SlideDoc{Title: stored.Title, Chrome: mapChrome(stored.Chrome), Slides: append([]contracts.Slide(nil), stored.Slides...)}
+	if in.Autofit {
+		doc = autofit.Fill(doc)
+	}
 	resolver := raster.NewStoreResolver(h.deps.Assets)
 	path, stats, err := exportstore.ExportWithResolver(h.deps.Workspace, stored.ID, doc, deckSoul, resolver)
 	if err != nil {

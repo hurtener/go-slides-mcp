@@ -3,6 +3,9 @@
   "properties": {
     "deckId": {
       "type": "string"
+    },
+    "autofit": {
+      "type": "boolean"
     }
   },
   "required": [
