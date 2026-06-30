@@ -674,6 +674,13 @@ export interface CreateDeckOutput {
    */
   soulId?: string;
   /**
+   * BrandSoulEstablished reports whether the deck is on a real brand soul
+   * rather than the built-in Deckard White default (R8.8). False means the
+   * deck is on the built-in default soul, not a brand soul — run
+   * bootstrap_soul to establish one.
+   */
+  brandSoulEstablished: boolean;
+  /**
    * Slides is the ordered preview summary of the deck's slides.
    */
   slides?: SlideSummary[];
@@ -1255,6 +1262,19 @@ export interface ExportDeckOutput {
    * ResourceURI is the readable deck:// resource URI for the exported .pptx file.
    */
   resourceUri: string;
+  /**
+   * SoulID is the design soul actually used to render the export (R8.8):
+   * the deck's stored SoulID when it resolves to a brand soul, otherwise
+   * the built-in Deckard White default id.
+   */
+  soulId?: string;
+  /**
+   * BrandSoulEstablished reports whether the export rendered on a real
+   * brand soul rather than the built-in Deckard White default (R8.8).
+   * False means the deck rendered on the default soul — run bootstrap_soul
+   * to establish a brand soul before exporting.
+   */
+  brandSoulEstablished: boolean;
   /**
    * Stats is the render summary for the export.
    */
@@ -2623,6 +2643,13 @@ export interface DeckPreviewOutput {
    * Deck is the deck-level summary.
    */
   deck: DeckSummary;
+  /**
+   * BrandSoulEstablished reports whether the previewed deck is on a real
+   * brand soul rather than the built-in Deckard White default (R8.8).
+   * False means the deck renders in the built-in default soul — run
+   * bootstrap_soul to establish a brand soul.
+   */
+  brandSoulEstablished: boolean;
   /**
    * Slides are the per-slide thumbnail descriptors in deck order.
    */

@@ -72,6 +72,11 @@ type DeckPreviewOutput struct {
 	Brand AppBrand `json:"brand"`
 	// Deck is the deck-level summary.
 	Deck DeckSummary `json:"deck"`
+	// BrandSoulEstablished reports whether the previewed deck is on a real
+	// brand soul rather than the built-in Deckard White default (R8.8).
+	// False means the deck renders in the built-in default soul — run
+	// bootstrap_soul to establish a brand soul.
+	BrandSoulEstablished bool `json:"brandSoulEstablished"`
 	// Slides are the per-slide thumbnail descriptors in deck order.
 	Slides []SlidePreview `json:"slides,omitempty"`
 	// ResourceURI is the deck:// export resource for the [download] action.

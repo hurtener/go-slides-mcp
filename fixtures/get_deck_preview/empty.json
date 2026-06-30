@@ -7,6 +7,7 @@
     "state": "empty",
     "message": "This deck has no slides yet.",
     "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
-    "deck": { "deckId": "deck_blank", "title": "Untitled deck", "slideCount": 0, "soulId": "deckard-white" }
+    "deck": { "deckId": "deck_blank", "title": "Untitled deck", "slideCount": 0, "soulId": "deckard-white" },
+    "brandSoulEstablished": false
   }
 }

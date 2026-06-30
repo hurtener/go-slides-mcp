@@ -7,6 +7,12 @@
     "resourceUri": {
       "type": "string"
     },
+    "soulId": {
+      "type": "string"
+    },
+    "brandSoulEstablished": {
+      "type": "boolean"
+    },
     "stats": {
       "type": "object",
       "properties": {
@@ -36,6 +42,7 @@
   "required": [
     "path",
     "resourceUri",
+    "brandSoulEstablished",
     "stats"
   ],
   "additionalProperties": false

@@ -7,6 +7,7 @@
     "state": "error",
     "message": "Deck \"deck_missing\" not found.",
     "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
-    "deck": { "deckId": "deck_missing", "title": "", "slideCount": 0 }
+    "deck": { "deckId": "deck_missing", "title": "", "slideCount": 0 },
+    "brandSoulEstablished": false
   }
 }

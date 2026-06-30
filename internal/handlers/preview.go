@@ -47,7 +47,8 @@ func (h *handlers) getDeckPreview(_ context.Context, in contracts.DeckPreviewInp
 			SlideCount: len(stored.Slides),
 			SoulID:     stored.SoulID,
 		},
-		ResourceURI: exportstore.DeckResourceURI(stored.ID),
+		BrandSoulEstablished: brandSoulEstablished(stored.SoulID),
+		ResourceURI:          exportstore.DeckResourceURI(stored.ID),
 	}
 	if len(stored.Slides) == 0 {
 		out.State = "empty"

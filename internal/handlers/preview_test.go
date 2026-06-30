@@ -1,10 +1,49 @@
 package handlers
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
+
+// TestGetDeckPreviewBrandSoulSignal proves R8.8: previewing a deck on the
+// built-in default soul reports BrandSoulEstablished == false; previewing a
+// deck on a real brand soul reports true.
+func TestGetDeckPreviewBrandSoulSignal(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	defaultDeck, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Default Soul Deck"})
+	if err != nil {
+		t.Fatalf("createDeck (default): %v", err)
+	}
+	defaultPreview, err := h.getDeckPreview(ctx, contracts.DeckPreviewInput{DeckID: defaultDeck.Structured.DeckID})
+	if err != nil {
+		t.Fatalf("getDeckPreview (default): %v", err)
+	}
+	if defaultPreview.Structured.BrandSoulEstablished {
+		t.Fatal("getDeckPreview (default soul) BrandSoulEstablished = true, want false")
+	}
+
+	brandSoul := soul.DeckardWhite()
+	brandSoul.ID = "soul_acme"
+	if err := h.deps.Souls.Put(brandSoul); err != nil {
+		t.Fatalf("Souls.Put: %v", err)
+	}
+	brandDeck, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Brand Soul Deck", SoulID: "soul_acme"})
+	if err != nil {
+		t.Fatalf("createDeck (brand): %v", err)
+	}
+	brandPreview, err := h.getDeckPreview(ctx, contracts.DeckPreviewInput{DeckID: brandDeck.Structured.DeckID})
+	if err != nil {
+		t.Fatalf("getDeckPreview (brand): %v", err)
+	}
+	if !brandPreview.Structured.BrandSoulEstablished {
+		t.Fatal("getDeckPreview (brand soul) BrandSoulEstablished = false, want true")
+	}
+}
 
 // TestNodeToThumbRecursesGridOfCards proves Phase 12 D1: a Grid of Cards no
 // longer flattens to a count — each card's header (Text) and body text survive

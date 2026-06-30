@@ -24,11 +24,16 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 	}
 
 	deckSoul := soul.DeckardWhite()
+	effectiveSoulID := soul.DeckardWhiteID
+	resolvedOK := false
 	if stored.SoulID != "" {
 		if resolved, ok := h.deps.Souls.Get(stored.SoulID); ok {
 			deckSoul = resolved
+			effectiveSoulID = stored.SoulID
+			resolvedOK = true
 		}
 	}
+	established := brandSoulEstablished(stored.SoulID) && resolvedOK
 
 	doc := contracts.SlideDoc{Title: stored.Title, Chrome: mapChrome(stored.Chrome), Slides: append([]contracts.Slide(nil), stored.Slides...)}
 	resolver := raster.NewStoreResolver(h.deps.Assets)
@@ -37,11 +42,17 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 		return tool.Result[contracts.ExportDeckOutput]{}, err
 	}
 	out := contracts.ExportDeckOutput{
-		Path:        path,
-		ResourceURI: exportstore.DeckResourceURI(stored.ID),
-		Stats:       contracts.ExportStats{Slides: stats.Slides, Shapes: stats.Shapes, Warnings: append([]string(nil), stats.Warnings...)},
+		Path:                 path,
+		ResourceURI:          exportstore.DeckResourceURI(stored.ID),
+		SoulID:               effectiveSoulID,
+		BrandSoulEstablished: established,
+		Stats:                contracts.ExportStats{Slides: stats.Slides, Shapes: stats.Shapes, Warnings: append([]string(nil), stats.Warnings...)},
 	}
-	return tool.Result[contracts.ExportDeckOutput]{Text: fmt.Sprintf("Exported deck %q to %s.", deckLabel(stored), out.Path), Structured: out}, nil
+	text := fmt.Sprintf("Exported deck %q to %s.", deckLabel(stored), out.Path)
+	if !established {
+		text = fmt.Sprintf("Exported deck %q to %s. %s", deckLabel(stored), out.Path, noBrandSoulNotice)
+	}
+	return tool.Result[contracts.ExportDeckOutput]{Text: text, Structured: out}, nil
 }
 
 func (h *handlers) listResources(_ context.Context, _ contracts.ListResourcesInput) (tool.Result[contracts.ListResourcesOutput], error) {

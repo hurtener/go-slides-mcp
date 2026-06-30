@@ -7,6 +7,7 @@
     "state": "ready",
     "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
     "deck": { "deckId": "deck_big", "title": "Annual Review", "slideCount": 12, "soulId": "deckard-white" },
+    "brandSoulEstablished": false,
     "resourceUri": "deck://export/deck_big.pptx",
     "slides": [
       { "id": "b1", "index": 0, "layout": "cover", "title": "Annual Review", "nodes": [ { "kind": "hero", "text": "Annual Review", "detail": "2026" } ] },

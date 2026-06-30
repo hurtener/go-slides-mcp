@@ -60,6 +60,9 @@
       ],
       "additionalProperties": false
     },
+    "brandSoulEstablished": {
+      "type": "boolean"
+    },
     "slides": {
       "type": [
         "null",
@@ -142,7 +145,8 @@
   "required": [
     "state",
     "brand",
-    "deck"
+    "deck",
+    "brandSoulEstablished"
   ],
   "additionalProperties": false
 }

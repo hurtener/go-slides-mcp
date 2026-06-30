@@ -16,6 +16,9 @@
     "soulId": {
       "type": "string"
     },
+    "brandSoulEstablished": {
+      "type": "boolean"
+    },
     "slides": {
       "type": [
         "null",
@@ -50,7 +53,8 @@
   "required": [
     "kind",
     "deckId",
-    "slug"
+    "slug",
+    "brandSoulEstablished"
   ],
   "additionalProperties": false
 }

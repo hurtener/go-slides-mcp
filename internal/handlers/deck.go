@@ -17,15 +17,21 @@ func (h *handlers) createDeck(_ context.Context, in contracts.CreateDeckInput) (
 	if err != nil {
 		return tool.Result[contracts.CreateDeckOutput]{}, err
 	}
+	established := brandSoulEstablished(stored.SoulID)
 	out := contracts.CreateDeckOutput{
-		Kind:   contracts.DeckKindDeck,
-		DeckID: stored.ID,
-		Slug:   stored.Slug,
-		Title:  stored.Title,
-		SoulID: stored.SoulID,
-		Slides: slideSummaries(stored),
+		Kind:                 contracts.DeckKindDeck,
+		DeckID:               stored.ID,
+		Slug:                 stored.Slug,
+		Title:                stored.Title,
+		SoulID:               stored.SoulID,
+		BrandSoulEstablished: established,
+		Slides:               slideSummaries(stored),
 	}
-	return tool.Result[contracts.CreateDeckOutput]{Text: fmt.Sprintf("Created deck %q (%s).", deckLabel(stored), stored.ID), Structured: out}, nil
+	text := fmt.Sprintf("Created deck %q (%s).", deckLabel(stored), stored.ID)
+	if !established {
+		text = fmt.Sprintf("Created deck %q (%s). %s", deckLabel(stored), stored.ID, noBrandSoulNotice)
+	}
+	return tool.Result[contracts.CreateDeckOutput]{Text: text, Structured: out}, nil
 }
 
 func (h *handlers) listDecks(_ context.Context, _ contracts.ListDecksInput) (tool.Result[contracts.ListDecksOutput], error) {

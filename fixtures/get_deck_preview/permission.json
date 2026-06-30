@@ -7,6 +7,7 @@
     "state": "permission",
     "message": "You do not have permission to preview this deck.",
     "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
-    "deck": { "deckId": "deck_restricted", "title": "Restricted deck", "slideCount": 0 }
+    "deck": { "deckId": "deck_restricted", "title": "Restricted deck", "slideCount": 0 },
+    "brandSoulEstablished": false
   }
 }
