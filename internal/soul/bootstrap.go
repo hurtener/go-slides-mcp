@@ -80,7 +80,6 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 			return nil, fmt.Errorf("soul: bootstrap accent: %w", err)
 		}
 		s.Theme.Colors.Surfaces[pptx.ColorAccent] = accent
-		s.Theme.Colors.Text[pptx.TextAccent] = derivedTextAccent(accent)
 	}
 	if p.AccentAlt != "" {
 		accentAlt, err := parseHexColor(p.AccentAlt)
@@ -88,7 +87,6 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 			return nil, fmt.Errorf("soul: bootstrap accentAlt: %w", err)
 		}
 		s.Theme.Colors.Surfaces[pptx.ColorAccentAlt] = accentAlt
-		s.Theme.Colors.Text[pptx.TextAccentAlt] = derivedTextAccent(accentAlt)
 	}
 	if p.AccentWarm != "" {
 		accentWarm, err := parseHexColor(p.AccentWarm)
@@ -129,6 +127,8 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 			return nil, err
 		}
 	}
+
+	deriveAccentText(s, p)
 
 	s.ID = id
 	s.Name = name
@@ -217,6 +217,91 @@ func applyDarkPalette(s *Soul, p *DarkPalette) error {
 		s.Theme.DarkColors = dp
 	}
 	return nil
+}
+
+// deriveAccentText is the final bootstrap pass (R8.6): it WCAG-contrast-checks
+// the accent/accentAlt text colors against the resolved canvas, for both the
+// light and (when present) dark variant, and replaces them with a legible
+// derivation ONLY when the caller actually overrode that accent surface and
+// did not also supply an explicit text override for it. A name-only bootstrap
+// (no accent set) never reaches the derivation branch, so DeckardWhite's
+// hand-tuned text accent stays byte-identical; a soul with no dark palette
+// leaves s.Theme.DarkColors nil, so no dark text is invented.
+func deriveAccentText(s *Soul, p BootstrapParams) {
+	type accentSpec struct {
+		key      string
+		textRole pptx.TextColorRole
+		surfRole pptx.ColorRole
+	}
+	specs := []accentSpec{
+		{"accent", pptx.TextAccent, pptx.ColorAccent},
+		{"accentAlt", pptx.TextAccentAlt, pptx.ColorAccentAlt},
+	}
+
+	canvas := s.Theme.Colors.Surfaces[pptx.ColorCanvas]
+	for _, spec := range specs {
+		if accentSurfaceSet(p, spec.key) && !paletteTextSet(p, spec.key) {
+			s.Theme.Colors.Text[spec.textRole] = legibleAccentText(s.Theme.Colors.Surfaces[spec.surfRole], canvas)
+		}
+	}
+
+	if s.Theme.DarkColors == nil {
+		return
+	}
+	darkCanvas := s.Theme.DarkColors.Surfaces[pptx.ColorCanvas]
+	if darkCanvas == "" {
+		darkCanvas = pptx.RGB("111827") // engine-pinned dark canvas default
+	}
+	for _, spec := range specs {
+		if darkTextSet(p, spec.key) {
+			continue
+		}
+		darkAccent := s.Theme.DarkColors.Surfaces[spec.surfRole]
+		if darkAccent == "" {
+			darkAccent = s.Theme.Colors.Surfaces[spec.surfRole] // fall back to the light accent
+		}
+		s.Theme.DarkColors.Text[spec.textRole] = legibleAccentText(darkAccent, darkCanvas)
+	}
+}
+
+// accentSurfaceSet reports whether the caller overrode the accent surface for
+// key ("accent" or "accentAlt"), via the dedicated field or via Palette.Surfaces.
+func accentSurfaceSet(p BootstrapParams, key string) bool {
+	switch key {
+	case "accent":
+		if p.Accent != "" {
+			return true
+		}
+	case "accentAlt":
+		if p.AccentAlt != "" {
+			return true
+		}
+	}
+	if p.Palette == nil {
+		return false
+	}
+	_, ok := p.Palette.Surfaces[key]
+	return ok
+}
+
+// paletteTextSet reports whether the caller supplied an explicit light text
+// override for key via Palette.Text.
+func paletteTextSet(p BootstrapParams, key string) bool {
+	if p.Palette == nil {
+		return false
+	}
+	_, ok := p.Palette.Text[key]
+	return ok
+}
+
+// darkTextSet reports whether the caller supplied an explicit dark text
+// override for key via DarkPalette.DarkText.
+func darkTextSet(p BootstrapParams, key string) bool {
+	if p.DarkPalette == nil {
+		return false
+	}
+	_, ok := p.DarkPalette.DarkText[key]
+	return ok
 }
 
 func sortedPaletteKeys(m map[string]string) []string {

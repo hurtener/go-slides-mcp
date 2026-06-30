@@ -5,6 +5,7 @@ import (
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
+	"github.com/hurtener/pptx-go/pptx"
 )
 
 // darkSlideDoc returns a minimal doc with one VariantDark slide, used to
@@ -49,6 +50,48 @@ func TestRenderSoulDarkPaletteOverridesCanvas(t *testing.T) {
 	}
 	if got := string(stats.Colors[0].Canvas); got != navyCanvas {
 		t.Errorf("resolved dark canvas = %q, want %q", got, navyCanvas)
+	}
+}
+
+// lightSlideDoc returns a minimal doc with one default-variant (light) slide.
+func lightSlideDoc() contracts.SlideDoc {
+	return contracts.SlideDoc{
+		Title: "Light Accent Text Coverage",
+		Slides: []contracts.Slide{
+			{
+				ID:     "light",
+				Layout: contracts.LayoutFullBleed,
+				Nodes:  []contracts.SlideNode{&contracts.Heading{Level: 1, Text: rt("Light slide")}},
+			},
+		},
+	}
+}
+
+// TestRenderSoulDerivedAccentTextReachesRender is the R8.6 acceptance: a soul
+// bootstrapped with an accent surface override resolves its render-time
+// TextAccent to the soul's WCAG-derived legible value, not a raw scale.
+func TestRenderSoulDerivedAccentTextReachesRender(t *testing.T) {
+	t.Parallel()
+
+	const paleAccent = "F5DEB3"
+	s, err := soul.Bootstrap(soul.BootstrapParams{
+		Name:    "Pale Brand",
+		Palette: &soul.Palette{Surfaces: map[string]string{"accent": paleAccent}},
+	})
+	if err != nil {
+		t.Fatalf("soul.Bootstrap() error = %v", err)
+	}
+	wantTextAccent := s.Theme.Colors.Text[pptx.TextAccent]
+
+	_, stats, err := Render(lightSlideDoc(), s)
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+	if len(stats.Colors) != 1 {
+		t.Fatalf("stats.Colors len = %d, want 1", len(stats.Colors))
+	}
+	if got := stats.Colors[0].TextAccent; got != wantTextAccent {
+		t.Errorf("rendered TextAccent = %q, want soul-derived %q", got, wantTextAccent)
 	}
 }
 

@@ -3,11 +3,11 @@ package soul
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
 	"github.com/hurtener/pptx-go/pptx"
+	"github.com/hurtener/pptx-go/scene"
 )
 
 // TokenOverride targets one soul token category/name pair with a string value.
@@ -169,26 +169,13 @@ func parsePointValue(s string) (float64, error) {
 	return value, nil
 }
 
-func derivedTextAccent(accent pptx.RGB) pptx.RGB {
-	red := scaleHexChannel(string(accent)[0:2])
-	green := scaleHexChannel(string(accent)[2:4])
-	blue := scaleHexChannel(string(accent)[4:6])
-	return pptx.RGB(red + green + blue)
-}
-
-func scaleHexChannel(hex string) string {
-	value, err := strconv.ParseInt(hex, 16, 64)
-	if err != nil {
-		return strings.ToUpper(hex)
-	}
-	scaled := int(math.Round(float64(value) * 0.78))
-	if scaled < 0 {
-		scaled = 0
-	}
-	if scaled > 255 {
-		scaled = 255
-	}
-	return fmt.Sprintf("%02X", scaled)
+// legibleAccentText derives a WCAG-contrast-aware accent text color: accent
+// nudged (hue-preserving, deterministic) until it clears 4.5:1 against bg, or
+// returned unchanged if it already does. See scene.LegibleTextOn (D-026): a
+// mechanism, not an automatic render-path behavior — the soul calls it once
+// per bootstrap to derive a legible accent text color per variant.
+func legibleAccentText(accent, bg pptx.RGB) pptx.RGB {
+	return scene.LegibleTextOn(accent, bg, 45)
 }
 
 func surfaceRole(token string) (pptx.ColorRole, bool) {
