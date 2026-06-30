@@ -102,9 +102,50 @@ func applyOverride(s *Soul, override TokenOverride) error {
 		}
 		s.Extensions[token] = string(rgb)
 		return nil
+	case "darkSurface":
+		role, ok := surfaceRole(token)
+		if !ok {
+			return fmt.Errorf("soul: unknown dark surface token %q", token)
+		}
+		rgb, err := parseHexColor(value)
+		if err != nil {
+			return fmt.Errorf("soul: darkSurface %q: %w", token, err)
+		}
+		ensureDarkColors(s).Surfaces[role] = rgb
+		return nil
+	case "darkText":
+		role, ok := textRole(token)
+		if !ok {
+			return fmt.Errorf("soul: unknown dark text token %q", token)
+		}
+		rgb, err := parseHexColor(value)
+		if err != nil {
+			return fmt.Errorf("soul: darkText %q: %w", token, err)
+		}
+		ensureDarkColors(s).Text[role] = rgb
+		return nil
 	default:
 		return fmt.Errorf("soul: unknown override category %q", category)
 	}
+}
+
+// ensureDarkColors lazily allocates s.Theme.DarkColors (and its maps) and
+// returns it. The engine has its own unexported equivalent; the soul package
+// defines its own since it cannot call the engine's.
+func ensureDarkColors(s *Soul) *pptx.DarkPalette {
+	if s.Theme.DarkColors == nil {
+		s.Theme.DarkColors = &pptx.DarkPalette{
+			Surfaces: make(map[pptx.ColorRole]pptx.RGB),
+			Text:     make(map[pptx.TextColorRole]pptx.RGB),
+		}
+	}
+	if s.Theme.DarkColors.Surfaces == nil {
+		s.Theme.DarkColors.Surfaces = make(map[pptx.ColorRole]pptx.RGB)
+	}
+	if s.Theme.DarkColors.Text == nil {
+		s.Theme.DarkColors.Text = make(map[pptx.TextColorRole]pptx.RGB)
+	}
+	return s.Theme.DarkColors
 }
 
 func parseHexColor(s string) (pptx.RGB, error) {

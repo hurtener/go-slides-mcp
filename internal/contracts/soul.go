@@ -45,6 +45,25 @@ type BootstrapSoulInput struct {
 	// text, and extension token in one call. Unset keys inherit Deckard White
 	// byte-for-byte; an unknown key is a typed error.
 	Palette *BootstrapPalette `json:"palette,omitempty"`
+	// DarkPalette is an optional soul-driven VariantDark color override set.
+	// Unset leaves every VariantDark slide on the engine's pinned neutral-gray
+	// dark default, byte-identical.
+	DarkPalette *BootstrapDarkPalette `json:"darkPalette,omitempty"`
+}
+
+// BootstrapDarkPalette is an optional brand dark-mode color override set for
+// bootstrap_soul (R8.3). Each map is keyed by the same token names
+// refine_soul validates; an unset map leaves the corresponding VariantDark
+// roles on the engine's pinned neutral-gray default.
+type BootstrapDarkPalette struct {
+	// DarkSurfaces maps surface-role tokens to six-digit hex strings for
+	// VariantDark slides. Valid keys: canvas, surface, surfaceAlt, accent,
+	// accentAlt, accentWarm, success, warning, error, info.
+	DarkSurfaces map[string]string `json:"darkSurfaces,omitempty"`
+	// DarkText maps text-role tokens to six-digit hex strings for VariantDark
+	// slides. Valid keys: primary, secondary, tertiary, inverse, muted,
+	// accent, accentAlt, success, warning, error.
+	DarkText map[string]string `json:"darkText,omitempty"`
 }
 
 // BootstrapPalette is a complete optional brand color palette for
@@ -78,7 +97,10 @@ type BootstrapSoulOutput struct {
 
 // SoulOverride is one targeted refine instruction.
 type SoulOverride struct {
-	// Category is the override family understood by the soul refiner.
+	// Category is the override family understood by the soul refiner: surface,
+	// text, space, radius, extension, darkSurface, or darkText. darkSurface and
+	// darkText target the same token names as surface/text but apply to the
+	// VariantDark color override set (R8.3) instead of the light theme.
 	Category string `json:"category"`
 	// Token is the token name within the selected category.
 	Token string `json:"token"`

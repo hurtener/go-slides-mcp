@@ -33,6 +33,18 @@ type BootstrapParams struct {
 	// Palette is an optional complete color palette covering every surface,
 	// text, and extension token in one call.
 	Palette *Palette
+	// DarkPalette is an optional soul-driven VariantDark color override set (R8.3).
+	DarkPalette *DarkPalette
+}
+
+// DarkPalette is an optional soul-driven VariantDark color override set (R8.3).
+// Each map is keyed by the SAME token names Refine validates; the values become
+// pptx.Theme.DarkColors, which the engine overlays over its pinned neutral-gray
+// dark default so a brand renders its own deep dark side (e.g. navy). Unset =>
+// the engine keeps its pinned gray, byte-identical.
+type DarkPalette struct {
+	DarkSurfaces map[string]string // surface-role token -> 6-digit hex
+	DarkText     map[string]string // text-role token -> 6-digit hex
 }
 
 // Palette is a complete optional color palette for Bootstrap. Each map is keyed
@@ -112,6 +124,11 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 			return nil, err
 		}
 	}
+	if p.DarkPalette != nil {
+		if err := applyDarkPalette(s, p.DarkPalette); err != nil {
+			return nil, err
+		}
+	}
 
 	s.ID = id
 	s.Name = name
@@ -162,6 +179,42 @@ func applyPalette(s *Soul, p *Palette) error {
 			s.Extensions = make(map[string]string)
 		}
 		s.Extensions[token] = string(rgb)
+	}
+	return nil
+}
+
+// applyDarkPalette writes every supplied dark-palette token into a new
+// pptx.DarkPalette and assigns it to s.Theme.DarkColors. An all-empty p
+// leaves s.Theme.DarkColors nil, byte-identical to no dark palette at all.
+func applyDarkPalette(s *Soul, p *DarkPalette) error {
+	dp := &pptx.DarkPalette{
+		Surfaces: make(map[pptx.ColorRole]pptx.RGB, len(p.DarkSurfaces)),
+		Text:     make(map[pptx.TextColorRole]pptx.RGB, len(p.DarkText)),
+	}
+	for _, token := range sortedPaletteKeys(p.DarkSurfaces) {
+		role, ok := surfaceRole(token)
+		if !ok {
+			return fmt.Errorf("soul: bootstrap dark palette: unknown surface token %q", token)
+		}
+		rgb, err := parseHexColor(p.DarkSurfaces[token])
+		if err != nil {
+			return fmt.Errorf("soul: bootstrap dark palette surface %q: %w", token, err)
+		}
+		dp.Surfaces[role] = rgb
+	}
+	for _, token := range sortedPaletteKeys(p.DarkText) {
+		role, ok := textRole(token)
+		if !ok {
+			return fmt.Errorf("soul: bootstrap dark palette: unknown text token %q", token)
+		}
+		rgb, err := parseHexColor(p.DarkText[token])
+		if err != nil {
+			return fmt.Errorf("soul: bootstrap dark palette text %q: %w", token, err)
+		}
+		dp.Text[role] = rgb
+	}
+	if len(dp.Surfaces) > 0 || len(dp.Text) > 0 {
+		s.Theme.DarkColors = dp
 	}
 	return nil
 }

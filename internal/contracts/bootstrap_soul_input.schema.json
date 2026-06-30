@@ -51,6 +51,27 @@
         }
       },
       "additionalProperties": false
+    },
+    "darkPalette": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "darkSurfaces": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "darkText": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [

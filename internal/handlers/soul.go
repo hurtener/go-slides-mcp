@@ -22,6 +22,13 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 			Extensions: in.Palette.Extensions,
 		}
 	}
+	var darkPalette *soul.DarkPalette
+	if in.DarkPalette != nil {
+		darkPalette = &soul.DarkPalette{
+			DarkSurfaces: in.DarkPalette.DarkSurfaces,
+			DarkText:     in.DarkPalette.DarkText,
+		}
+	}
 	bootstrapped, err := soul.Bootstrap(soul.BootstrapParams{
 		Name:        in.Name,
 		Description: in.Description,
@@ -32,6 +39,7 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 		BodyFont:    in.BodyFont,
 		MonoFont:    in.MonoFont,
 		Palette:     palette,
+		DarkPalette: darkPalette,
 	})
 	if err != nil {
 		return tool.Result[contracts.BootstrapSoulOutput]{}, err

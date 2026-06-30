@@ -3269,6 +3269,32 @@ export interface BootstrapSoulInput {
    * byte-for-byte; an unknown key is a typed error.
    */
   palette?: BootstrapPalette;
+  /**
+   * DarkPalette is an optional soul-driven VariantDark color override set.
+   * Unset leaves every VariantDark slide on the engine's pinned neutral-gray
+   * dark default, byte-identical.
+   */
+  darkPalette?: BootstrapDarkPalette;
+}
+/**
+ * BootstrapDarkPalette is an optional brand dark-mode color override set for
+ * bootstrap_soul (R8.3). Each map is keyed by the same token names
+ * refine_soul validates; an unset map leaves the corresponding VariantDark
+ * roles on the engine's pinned neutral-gray default.
+ */
+export interface BootstrapDarkPalette {
+  /**
+   * DarkSurfaces maps surface-role tokens to six-digit hex strings for
+   * VariantDark slides. Valid keys: canvas, surface, surfaceAlt, accent,
+   * accentAlt, accentWarm, success, warning, error, info.
+   */
+  darkSurfaces?: { [key: string]: string};
+  /**
+   * DarkText maps text-role tokens to six-digit hex strings for VariantDark
+   * slides. Valid keys: primary, secondary, tertiary, inverse, muted,
+   * accent, accentAlt, success, warning, error.
+   */
+  darkText?: { [key: string]: string};
 }
 /**
  * BootstrapPalette is a complete optional brand color palette for
@@ -3320,7 +3346,10 @@ export interface BootstrapSoulOutput {
  */
 export interface SoulOverride {
   /**
-   * Category is the override family understood by the soul refiner.
+   * Category is the override family understood by the soul refiner: surface,
+   * text, space, radius, extension, darkSurface, or darkText. darkSurface and
+   * darkText target the same token names as surface/text but apply to the
+   * VariantDark color override set (R8.3) instead of the light theme.
    */
   category: string;
   /**

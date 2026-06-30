@@ -154,6 +154,40 @@ var textTokens = map[string]struct{}{
 	"accent": {}, "accentAlt": {}, "success": {}, "warning": {}, "error": {},
 }
 
+func TestBootstrapDarkPaletteSetsDarkColors(t *testing.T) {
+	s, err := Bootstrap(BootstrapParams{
+		Name: "Acme",
+		DarkPalette: &DarkPalette{
+			DarkSurfaces: map[string]string{"canvas": "0A1622"},
+			DarkText:     map[string]string{"primary": "F5F1E8"},
+		},
+	})
+	if err != nil {
+		fatalBootstrap(t, err)
+	}
+	if s.Theme.DarkColors == nil {
+		t.Fatal("DarkColors = nil, want non-nil")
+	}
+	if got := s.Theme.DarkColors.Surfaces[pptx.ColorCanvas]; got != "0A1622" {
+		t.Fatalf("DarkColors.Surfaces[ColorCanvas] = %q, want 0A1622", got)
+	}
+	if got := s.Theme.DarkColors.Text[pptx.TextPrimary]; got != "F5F1E8" {
+		t.Fatalf("DarkColors.Text[TextPrimary] = %q, want F5F1E8", got)
+	}
+}
+
+func TestBootstrapNilOrEmptyDarkPaletteLeavesDarkColorsNil(t *testing.T) {
+	for _, p := range []*DarkPalette{nil, {}} {
+		s, err := Bootstrap(BootstrapParams{Name: "x", DarkPalette: p})
+		if err != nil {
+			fatalBootstrap(t, err)
+		}
+		if s.Theme.DarkColors != nil {
+			t.Fatalf("DarkColors = %+v, want nil for %+v", s.Theme.DarkColors, p)
+		}
+	}
+}
+
 func fatalBootstrap(t *testing.T, err error) {
 	t.Helper()
 	t.Fatal(err)
