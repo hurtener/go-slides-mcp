@@ -27,6 +27,8 @@ github.com/hurtener/pptx-go v0.0.0-20260620004525-5184cfbb7fce h1:BRazXaEQ1PbRP3
 github.com/hurtener/pptx-go v0.0.0-20260620004525-5184cfbb7fce/go.mod h1:C1wEXxTgSWHvSDh8tMr8L5JxtS3r5dfo2HbeonPzdiQ=
 github.com/hurtener/pptx-go v0.0.0-20260621161051-2313f2b94865 h1:hUf6CyKQI8PTQteNs7bQP4Lz0xAM+MXLfcJa1hfhqCs=
 github.com/hurtener/pptx-go v0.0.0-20260621161051-2313f2b94865/go.mod h1:C1wEXxTgSWHvSDh8tMr8L5JxtS3r5dfo2HbeonPzdiQ=
+github.com/hurtener/pptx-go v0.0.0-20260630190133-5e99663afa14 h1:XNOfaDtJgUoxOUMrndIVKsvm29RHeL3TS0kU0658BjE=
+github.com/hurtener/pptx-go v0.0.0-20260630190133-5e99663afa14/go.mod h1:C1wEXxTgSWHvSDh8tMr8L5JxtS3r5dfo2HbeonPzdiQ=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/modelcontextprotocol/go-sdk v1.6.0 h1:PPLS3kn7WtOEnR+Af4X5H96SG0qSab8R/ZQT/HkhPkY=
