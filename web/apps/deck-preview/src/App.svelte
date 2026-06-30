@@ -36,6 +36,10 @@
     deck: DeckSummary;
     slides?: SlidePreview[];
     resourceUri?: string;
+    // Whether a brand soul has been bootstrapped for this deck. `false` means
+    // the deck is rendering on the built-in default soul; missing/true means
+    // a brand soul is established (or unknown — don't flag it).
+    brandSoulEstablished?: boolean;
   }
 
   let rootEl = $state<HTMLDivElement | undefined>(undefined);
@@ -137,6 +141,9 @@
         <div class="titles">
           <h1>{payload.deck.title || 'Untitled deck'}</h1>
           <span class="meta">{payload.deck.slideCount} slide{payload.deck.slideCount === 1 ? '' : 's'}</span>
+          {#if payload.brandSoulEstablished === false}
+            <span class="soul-badge" title="This deck renders in the built-in Deckard White soul. Bootstrap a brand soul to make it in-brand.">Default soul · no brand established</span>
+          {/if}
         </div>
         <div class="tools">
           <button type="button" class="icon primary" data-tip="Download .pptx" aria-label="Download .pptx" onclick={download}>{@html ICON_DOWNLOAD}</button>
@@ -181,6 +188,18 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .meta { font-size: var(--app-text-xs); color: var(--app-text-muted); white-space: nowrap; flex: 0 0 auto; }
+
+  /* informational hint, not an alarm: low-contrast warning tint, pill-shaped */
+  .soul-badge {
+    font-size: var(--app-text-xs);
+    color: var(--app-warning);
+    background: color-mix(in srgb, var(--app-warning) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--app-warning) 22%, transparent);
+    border-radius: var(--app-radius-pill);
+    padding: 2px 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
 
   .tools { display: flex; align-items: center; gap: var(--app-space-2); flex: 0 0 auto; }
 
