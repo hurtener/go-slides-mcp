@@ -24,6 +24,33 @@
     },
     "monoFont": {
       "type": "string"
+    },
+    "palette": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "surfaces": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "text": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [

@@ -41,6 +41,27 @@ type BootstrapSoulInput struct {
 	BodyFont string `json:"bodyFont,omitempty"`
 	// MonoFont overrides the mono and code font family.
 	MonoFont string `json:"monoFont,omitempty"`
+	// Palette is an optional complete color palette covering every surface,
+	// text, and extension token in one call. Unset keys inherit Deckard White
+	// byte-for-byte; an unknown key is a typed error.
+	Palette *BootstrapPalette `json:"palette,omitempty"`
+}
+
+// BootstrapPalette is a complete optional brand color palette for
+// bootstrap_soul. Each map is keyed by the same token names refine_soul
+// validates.
+type BootstrapPalette struct {
+	// Surfaces maps surface-role tokens to six-digit hex strings. Valid keys:
+	// canvas, surface, surfaceAlt, accent, accentAlt, accentWarm, success,
+	// warning, error, info.
+	Surfaces map[string]string `json:"surfaces,omitempty"`
+	// Text maps text-role tokens to six-digit hex strings. Valid keys: primary,
+	// secondary, tertiary, inverse, muted, accent, accentAlt, success, warning,
+	// error.
+	Text map[string]string `json:"text,omitempty"`
+	// Extensions maps non-native extension tokens to six-digit hex strings.
+	// Valid keys: border, borderStrong, accentSoft.
+	Extensions map[string]string `json:"extensions,omitempty"`
 }
 
 // BootstrapSoulOutput is the structured result for bootstrap_soul.

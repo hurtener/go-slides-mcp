@@ -14,6 +14,14 @@ import (
 )
 
 func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulInput) (tool.Result[contracts.BootstrapSoulOutput], error) {
+	var palette *soul.Palette
+	if in.Palette != nil {
+		palette = &soul.Palette{
+			Surfaces:   in.Palette.Surfaces,
+			Text:       in.Palette.Text,
+			Extensions: in.Palette.Extensions,
+		}
+	}
 	bootstrapped, err := soul.Bootstrap(soul.BootstrapParams{
 		Name:        in.Name,
 		Description: in.Description,
@@ -23,6 +31,7 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 		HeadingFont: in.HeadingFont,
 		BodyFont:    in.BodyFont,
 		MonoFont:    in.MonoFont,
+		Palette:     palette,
 	})
 	if err != nil {
 		return tool.Result[contracts.BootstrapSoulOutput]{}, err

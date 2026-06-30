@@ -3,6 +3,7 @@ package soul
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -29,6 +30,19 @@ type BootstrapParams struct {
 	BodyFont string
 	// MonoFont overrides the mono and code families.
 	MonoFont string
+	// Palette is an optional complete color palette covering every surface,
+	// text, and extension token in one call.
+	Palette *Palette
+}
+
+// Palette is a complete optional color palette for Bootstrap. Each map is keyed
+// by the SAME token names Refine validates (surfaceRole/textRole); an Extensions
+// map carries the non-native tokens (border/borderStrong/accentSoft). Unset keys
+// inherit DeckardWhite byte-for-byte; an unknown key is a typed error.
+type Palette struct {
+	Surfaces   map[string]string // surface-role token -> 6-digit hex
+	Text       map[string]string // text-role token -> 6-digit hex
+	Extensions map[string]string // extension token -> 6-digit hex
 }
 
 // Bootstrap seeds a complete soul from p, inheriting every unset token from
@@ -93,6 +107,12 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 		}
 	}
 
+	if p.Palette != nil {
+		if err := applyPalette(s, p.Palette); err != nil {
+			return nil, err
+		}
+	}
+
 	s.ID = id
 	s.Name = name
 	s.Status = "ready"
@@ -103,6 +123,56 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 	}
 
 	return s, nil
+}
+
+// applyPalette writes every supplied palette token onto s.Theme/s.Extensions,
+// in sorted key order per map, for stable error reporting.
+func applyPalette(s *Soul, p *Palette) error {
+	for _, token := range sortedPaletteKeys(p.Surfaces) {
+		role, ok := surfaceRole(token)
+		if !ok {
+			return fmt.Errorf("soul: bootstrap palette: unknown surface token %q", token)
+		}
+		rgb, err := parseHexColor(p.Surfaces[token])
+		if err != nil {
+			return fmt.Errorf("soul: bootstrap palette surface %q: %w", token, err)
+		}
+		s.Theme.Colors.Surfaces[role] = rgb
+	}
+	for _, token := range sortedPaletteKeys(p.Text) {
+		role, ok := textRole(token)
+		if !ok {
+			return fmt.Errorf("soul: bootstrap palette: unknown text token %q", token)
+		}
+		rgb, err := parseHexColor(p.Text[token])
+		if err != nil {
+			return fmt.Errorf("soul: bootstrap palette text %q: %w", token, err)
+		}
+		s.Theme.Colors.Text[role] = rgb
+	}
+	for _, token := range sortedPaletteKeys(p.Extensions) {
+		if token == "" {
+			return fmt.Errorf("soul: bootstrap palette: unknown extension token %q", token)
+		}
+		rgb, err := parseHexColor(p.Extensions[token])
+		if err != nil {
+			return fmt.Errorf("soul: bootstrap palette extension %q: %w", token, err)
+		}
+		if s.Extensions == nil {
+			s.Extensions = make(map[string]string)
+		}
+		s.Extensions[token] = string(rgb)
+	}
+	return nil
+}
+
+func sortedPaletteKeys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	return keys
 }
 
 func slugify(s string) string {

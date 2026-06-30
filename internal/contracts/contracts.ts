@@ -3263,6 +3263,36 @@ export interface BootstrapSoulInput {
    * MonoFont overrides the mono and code font family.
    */
   monoFont?: string;
+  /**
+   * Palette is an optional complete color palette covering every surface,
+   * text, and extension token in one call. Unset keys inherit Deckard White
+   * byte-for-byte; an unknown key is a typed error.
+   */
+  palette?: BootstrapPalette;
+}
+/**
+ * BootstrapPalette is a complete optional brand color palette for
+ * bootstrap_soul. Each map is keyed by the same token names refine_soul
+ * validates.
+ */
+export interface BootstrapPalette {
+  /**
+   * Surfaces maps surface-role tokens to six-digit hex strings. Valid keys:
+   * canvas, surface, surfaceAlt, accent, accentAlt, accentWarm, success,
+   * warning, error, info.
+   */
+  surfaces?: { [key: string]: string};
+  /**
+   * Text maps text-role tokens to six-digit hex strings. Valid keys: primary,
+   * secondary, tertiary, inverse, muted, accent, accentAlt, success, warning,
+   * error.
+   */
+  text?: { [key: string]: string};
+  /**
+   * Extensions maps non-native extension tokens to six-digit hex strings.
+   * Valid keys: border, borderStrong, accentSoft.
+   */
+  extensions?: { [key: string]: string};
 }
 /**
  * BootstrapSoulOutput is the structured result for bootstrap_soul.
