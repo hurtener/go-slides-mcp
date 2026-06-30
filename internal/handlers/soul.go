@@ -29,6 +29,17 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 			DarkText:     in.DarkPalette.DarkText,
 		}
 	}
+	var gradients []soul.GradientSpec
+	if len(in.Gradients) > 0 {
+		gradients = make([]soul.GradientSpec, len(in.Gradients))
+		for i, g := range in.Gradients {
+			stops := make([]soul.GradientStop, len(g.Stops))
+			for j, st := range g.Stops {
+				stops[j] = soul.GradientStop{Pos: st.Pos, ColorHex: st.ColorHex, ColorRole: st.ColorRole}
+			}
+			gradients[i] = soul.GradientSpec{Name: g.Name, Stops: stops, Angle: g.Angle, Radial: g.Radial}
+		}
+	}
 	bootstrapped, err := soul.Bootstrap(soul.BootstrapParams{
 		Name:        in.Name,
 		Description: in.Description,
@@ -40,6 +51,7 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 		MonoFont:    in.MonoFont,
 		Palette:     palette,
 		DarkPalette: darkPalette,
+		Gradients:   gradients,
 	})
 	if err != nil {
 		return tool.Result[contracts.BootstrapSoulOutput]{}, err

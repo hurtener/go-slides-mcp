@@ -35,6 +35,48 @@ type BootstrapParams struct {
 	Palette *Palette
 	// DarkPalette is an optional soul-driven VariantDark color override set (R8.3).
 	DarkPalette *DarkPalette
+	// Gradients is an optional set of named brand gradients (R8.5), each
+	// registered on the soul's theme under its Name and requested at render
+	// time by a slide Background's GradientName. Unset/nil leaves
+	// s.Theme.Gradients nil, byte-identical to today.
+	Gradients []GradientSpec
+}
+
+// GradientSpec is a named brand gradient (R8.5) for Bootstrap. Stops are an
+// ordered 2..8 list; each stop's color is either a pinned hex (ColorHex,
+// variant-independent) or a surface role (ColorRole, follows the variant) —
+// exactly one. Radial picks a radial wash; otherwise Angle (deg, clockwise
+// from the positive x-axis) drives a linear gradient.
+type GradientSpec struct {
+	// Name is the gradient's stable identifier, requested by a slide
+	// Background's GradientName. Must be non-empty and unique within one
+	// Bootstrap call.
+	Name string
+	// Stops is the ordered 2..8 color-stop list, each Pos strictly ascending
+	// in [0,1].
+	Stops []GradientStop
+	// Angle is the linear gradient angle in degrees clockwise from the
+	// positive x-axis. Ignored when Radial is true.
+	Angle int
+	// Radial selects a radial wash from the centre outward instead of a
+	// linear gradient.
+	Radial bool
+}
+
+// GradientStop is one color stop in a GradientSpec. Exactly one of ColorHex
+// (a pinned 6-digit hex, variant-independent) or ColorRole (a surface-role
+// token that follows the active theme variant) must be set.
+type GradientStop struct {
+	// Pos is the stop position along the gradient axis, in [0,1].
+	Pos float64
+	// ColorHex pins the stop to an exact 6-digit hex color (no '#'),
+	// unaffected by a light/dark variant swap. Mutually exclusive with
+	// ColorRole.
+	ColorHex string
+	// ColorRole names a surface-role token (the same names surfaceRole
+	// validates) whose resolved color follows the active theme variant.
+	// Mutually exclusive with ColorHex.
+	ColorRole string
 }
 
 // DarkPalette is an optional soul-driven VariantDark color override set (R8.3).
@@ -127,6 +169,9 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 			return nil, err
 		}
 	}
+	if err := applyGradients(s, p.Gradients); err != nil {
+		return nil, err
+	}
 
 	deriveAccentText(s, p)
 
@@ -215,6 +260,70 @@ func applyDarkPalette(s *Soul, p *DarkPalette) error {
 	}
 	if len(dp.Surfaces) > 0 || len(dp.Text) > 0 {
 		s.Theme.DarkColors = dp
+	}
+	return nil
+}
+
+// applyGradients validates and registers each named brand gradient (R8.5)
+// onto s.Theme.Gradients. An empty/nil specs leaves s.Theme.Gradients nil,
+// byte-identical to today. Gradients are bootstrap-only (D-105/R8.5); there
+// is intentionally no refine_soul path for them — a structured stop list
+// does not fit the flat category/token/value refine shape.
+func applyGradients(s *Soul, specs []GradientSpec) error {
+	if len(specs) == 0 {
+		return nil
+	}
+	seen := make(map[string]bool, len(specs))
+	for _, spec := range specs {
+		name := strings.TrimSpace(spec.Name)
+		if name == "" {
+			return fmt.Errorf("soul: bootstrap gradient %q: name must be non-empty", spec.Name)
+		}
+		if seen[name] {
+			return fmt.Errorf("soul: bootstrap gradient %q: duplicate name", name)
+		}
+		seen[name] = true
+
+		if len(spec.Stops) < 2 || len(spec.Stops) > 8 {
+			return fmt.Errorf("soul: bootstrap gradient %q: must have 2..8 stops, got %d", name, len(spec.Stops))
+		}
+		stops := make([]pptx.GradientStop, len(spec.Stops))
+		prevPos := -1.0
+		for i, st := range spec.Stops {
+			if st.Pos < 0 || st.Pos > 1 {
+				return fmt.Errorf("soul: bootstrap gradient %q: stop %d pos %v out of [0,1]", name, i, st.Pos)
+			}
+			if st.Pos <= prevPos {
+				return fmt.Errorf("soul: bootstrap gradient %q: stop %d pos %v not strictly ascending", name, i, st.Pos)
+			}
+			prevPos = st.Pos
+
+			hasHex := st.ColorHex != ""
+			hasRole := st.ColorRole != ""
+			if hasHex == hasRole {
+				return fmt.Errorf("soul: bootstrap gradient %q: stop %d must set exactly one of ColorHex/ColorRole", name, i)
+			}
+			var color pptx.Color
+			if hasHex {
+				rgb, err := parseHexColor(st.ColorHex)
+				if err != nil {
+					return fmt.Errorf("soul: bootstrap gradient %q: stop %d: %w", name, i, err)
+				}
+				color = rgb
+			} else {
+				role, ok := surfaceRole(st.ColorRole)
+				if !ok {
+					return fmt.Errorf("soul: bootstrap gradient %q: stop %d: unknown surface role %q", name, i, st.ColorRole)
+				}
+				color = pptx.TokenColor(role)
+			}
+			stops[i] = pptx.GradientStop{Pos: st.Pos, Color: color}
+		}
+
+		if s.Theme.Gradients == nil {
+			s.Theme.Gradients = map[string]pptx.GradientSpec{}
+		}
+		s.Theme.Gradients[name] = pptx.GradientSpec{Stops: stops, Angle: spec.Angle, Radial: spec.Radial}
 	}
 	return nil
 }

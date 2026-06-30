@@ -64,4 +64,13 @@ type Background struct {
 	// AssetID is the asset reference for a full-bleed picture background
 	// (kind == "asset"). Resolved via the registered asset store.
 	AssetID string `json:"assetId,omitempty"`
+	// GradientName, when set (kind == "gradient"), requests a named brand
+	// gradient registered on the active soul (bootstrap_soul's "gradients",
+	// R8.5) instead of the legacy Gradient role pair: its own stop list,
+	// angle, and linear/radial flag win, and its stops may pin exact brand
+	// hues or follow the active light/dark variant. A name not found on the
+	// soul renders without a background fill (a warning is recorded) rather
+	// than failing. Empty (the default) uses the legacy Gradient/Angle path,
+	// byte-identical to today.
+	GradientName string `json:"gradientName,omitempty"`
 }

@@ -3275,6 +3275,66 @@ export interface BootstrapSoulInput {
    * dark default, byte-identical.
    */
   darkPalette?: BootstrapDarkPalette;
+  /**
+   * Gradients is an optional set of named brand gradients (R8.5). Each is
+   * registered on the soul under its Name and requested at slide-authoring
+   * time by Background.gradientName. Unset/empty leaves the soul with no
+   * named gradients, byte-identical to today. Bootstrap-only: there is no
+   * refine_soul path for gradients (a structured stop list does not fit the
+   * flat category/token/value refine shape).
+   */
+  gradients?: BootstrapGradient[];
+}
+/**
+ * BootstrapGradient is one named brand gradient definition for bootstrap_soul
+ * (R8.5), requested at slide-authoring time by a Background's gradientName.
+ */
+export interface BootstrapGradient {
+  /**
+   * Name is the gradient's stable identifier (e.g. "heroDark"), requested
+   * by a slide Background's gradientName. Must be non-empty and unique
+   * among the gradients in one bootstrap_soul call.
+   */
+  name: string;
+  /**
+   * Stops is the ordered color-stop list (2..8 stops), each Pos strictly
+   * ascending in [0,1] (0 = gradient start, 1 = gradient end).
+   */
+  stops: BootstrapGradientStop[];
+  /**
+   * Angle is the linear gradient angle in degrees clockwise from the
+   * positive x-axis (0° = left-to-right, 90° = top-to-bottom). Ignored
+   * when Radial is true.
+   */
+  angle?: number /* int */;
+  /**
+   * Radial selects a radial wash from the slide centre outward instead of
+   * a linear gradient; when true, Angle is ignored.
+   */
+  radial?: boolean;
+}
+/**
+ * BootstrapGradientStop is one color stop within a BootstrapGradient. Exactly
+ * one of ColorHex or ColorRole must be set per stop.
+ */
+export interface BootstrapGradientStop {
+  /**
+   * Pos is the stop position along the gradient axis, in [0,1].
+   */
+  pos: number /* float64 */;
+  /**
+   * ColorHex pins this stop to an exact six-digit hex color (no '#'),
+   * unaffected by a light/dark variant swap. Mutually exclusive with
+   * ColorRole — set exactly one per stop.
+   */
+  colorHex?: string;
+  /**
+   * ColorRole names a surface-role token (canvas, surface, surfaceAlt,
+   * accent, accentAlt, accentWarm, success, warning, error, info) whose
+   * resolved color follows the active theme/variant. Mutually exclusive
+   * with ColorHex — set exactly one per stop.
+   */
+  colorRole?: string;
 }
 /**
  * BootstrapDarkPalette is an optional brand dark-mode color override set for
@@ -3952,4 +4012,15 @@ export interface Background {
    * (kind == "asset"). Resolved via the registered asset store.
    */
   assetId?: string;
+  /**
+   * GradientName, when set (kind == "gradient"), requests a named brand
+   * gradient registered on the active soul (bootstrap_soul's "gradients",
+   * R8.5) instead of the legacy Gradient role pair: its own stop list,
+   * angle, and linear/radial flag win, and its stops may pin exact brand
+   * hues or follow the active light/dark variant. A name not found on the
+   * soul renders without a background fill (a warning is recorded) rather
+   * than failing. Empty (the default) uses the legacy Gradient/Angle path,
+   * byte-identical to today.
+   */
+  gradientName?: string;
 }

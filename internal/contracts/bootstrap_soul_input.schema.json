@@ -72,6 +72,55 @@
         }
       },
       "additionalProperties": false
+    },
+    "gradients": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "stops": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "pos": {
+                  "type": "number"
+                },
+                "colorHex": {
+                  "type": "string"
+                },
+                "colorRole": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pos"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "angle": {
+            "type": "integer"
+          },
+          "radial": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "stops"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [
