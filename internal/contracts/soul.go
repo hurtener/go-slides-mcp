@@ -137,6 +137,36 @@ type BootstrapSoulOutput struct {
 	TokenCount int `json:"tokenCount"`
 }
 
+// BootstrapSoulFromTemplateInput is the typed input for
+// bootstrap_soul_from_template (R8.2): it extracts a complete brand soul from
+// a brand .pptx kit's own theme (colors + fonts), so a deck can render in the
+// brand's own palette without hand-typing every hex.
+type BootstrapSoulFromTemplateInput struct {
+	// Name is the required soul name and the source of the stored soul id.
+	Name string `json:"name"`
+	// Description is an optional one-line soul summary.
+	Description string `json:"description,omitempty"`
+	// Path is the filesystem path to the brand .pptx kit whose theme (colors +
+	// fonts) seeds the soul. The file must exist and be a .pptx.
+	Path string `json:"path"`
+}
+
+// BootstrapSoulFromTemplateOutput is the structured result for
+// bootstrap_soul_from_template.
+type BootstrapSoulFromTemplateOutput struct {
+	// SoulID is the stored soul identifier.
+	SoulID string `json:"soulId"`
+	// Name is the stored soul name.
+	Name string `json:"name"`
+	// Status is the stored soul lifecycle state.
+	Status SoulStatus `json:"status,omitempty"`
+	// TokenCount is the number of flattened resolved design tokens in the soul.
+	TokenCount int `json:"tokenCount"`
+	// ExtractedColors summarizes the key resolved brand colors pulled from the
+	// template theme (role -> 6-digit hex), for agent review before building.
+	ExtractedColors map[string]string `json:"extractedColors,omitempty"`
+}
+
 // SoulOverride is one targeted refine instruction.
 type SoulOverride struct {
 	// Category is the override family understood by the soul refiner: surface,

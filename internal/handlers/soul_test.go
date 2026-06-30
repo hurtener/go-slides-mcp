@@ -1,8 +1,15 @@
 package handlers
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"io"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/hurtener/pptx-go/pptx"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -89,6 +96,127 @@ func TestGetSoulIncludesDeckardWhiteStyleGuide(t *testing.T) {
 	if len(got.Structured.StyleGuide.Do) == 0 || len(got.Structured.StyleGuide.Dont) == 0 {
 		t.Fatalf("getSoul style guide = %+v, want do/dont guidance", got.Structured.StyleGuide)
 	}
+}
+
+func TestBootstrapSoulFromTemplateExtractsBrandAccent(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	theme := pptx.NewTheme(pptx.WithAccent("DB2777"), pptx.WithFonts("Georgia", "Verdana"))
+	path := writeBrandPPTXFixture(t, theme)
+
+	got, err := h.bootstrapSoulFromTemplate(ctx, contracts.BootstrapSoulFromTemplateInput{Name: "Acme", Path: path})
+	if err != nil {
+		t.Fatalf("bootstrapSoulFromTemplate: %v", err)
+	}
+	if got.Structured.SoulID != "acme" {
+		t.Fatalf("SoulID = %q, want acme", got.Structured.SoulID)
+	}
+	if got.Structured.ExtractedColors["accent"] != "DB2777" {
+		t.Fatalf("ExtractedColors[accent] = %q, want DB2777", got.Structured.ExtractedColors["accent"])
+	}
+	if _, ok := h.deps.Souls.Get("acme"); !ok {
+		t.Fatal("soul \"acme\" not found in store after bootstrap_soul_from_template")
+	}
+}
+
+func TestBootstrapSoulFromTemplateMissingPath(t *testing.T) {
+	h := testHandlers()
+	_, err := h.bootstrapSoulFromTemplate(context.Background(), contracts.BootstrapSoulFromTemplateInput{Name: "Acme", Path: filepath.Join(t.TempDir(), "missing.pptx")})
+	if err == nil {
+		t.Fatal("expected error for missing brand template path")
+	}
+}
+
+func TestBootstrapSoulFromTemplateRejectsNonPPTX(t *testing.T) {
+	h := testHandlers()
+	path := filepath.Join(t.TempDir(), "brand.txt")
+	if err := os.WriteFile(path, []byte("not a pptx"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err := h.bootstrapSoulFromTemplate(context.Background(), contracts.BootstrapSoulFromTemplateInput{Name: "Acme", Path: path})
+	if err == nil {
+		t.Fatal("expected error for non-.pptx brand template path")
+	}
+}
+
+func TestBootstrapSoulFromTemplateRejectsEmptyName(t *testing.T) {
+	h := testHandlers()
+	path := filepath.Join(t.TempDir(), "brand.pptx")
+	if err := os.WriteFile(path, []byte("irrelevant"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err := h.bootstrapSoulFromTemplate(context.Background(), contracts.BootstrapSoulFromTemplateInput{Name: "  ", Path: path})
+	if err == nil {
+		t.Fatal("expected error for empty name")
+	}
+}
+
+// brandThemePartName is the package-relative entry pptx-go writes the active
+// theme's OOXML scheme to (ppt/theme/theme1.xml); see writeBrandPPTXFixture.
+const brandThemePartName = "ppt/theme/theme1.xml"
+
+// writeBrandPPTXFixture builds a minimal, valid .pptx in t.TempDir() whose
+// theme1.xml carries theme's color scheme + fonts, mimicking a real brand kit
+// authored in PowerPoint (R8.2's source material). pptx.New(pptx.WithTheme)
+// alone is not enough: WithTheme only drives in-process token resolution for
+// rendering, it does not persist into the written theme1.xml part (that part
+// is seeded once, at New(), from the engine's fixed scaffold). So this builds
+// a normal scaffolded deck, then swaps the theme1.xml zip entry for the bytes
+// pptx.Theme.ThemeXML() produces for the caller's theme — the same OOXML
+// shape NewFromBytes' theme codec reads on open (see themecodec_test.go's
+// TestThemeRoundTripOOXML for the same round-trip via theme.ThemePart
+// directly). Returns the written file's path.
+func writeBrandPPTXFixture(t *testing.T, theme *pptx.Theme) string {
+	t.Helper()
+
+	pres := pptx.New()
+	pres.AddSlide()
+	data, err := pres.WriteToBytes()
+	if err != nil {
+		t.Fatalf("WriteToBytes: %v", err)
+	}
+	themeXML, err := theme.ThemeXML()
+	if err != nil {
+		t.Fatalf("ThemeXML: %v", err)
+	}
+
+	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		t.Fatalf("zip.NewReader: %v", err)
+	}
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+	for _, f := range r.File {
+		rc, err := f.Open()
+		if err != nil {
+			t.Fatalf("open zip entry %s: %v", f.Name, err)
+		}
+		content, err := io.ReadAll(rc)
+		_ = rc.Close()
+		if err != nil {
+			t.Fatalf("read zip entry %s: %v", f.Name, err)
+		}
+		if f.Name == brandThemePartName {
+			content = themeXML
+		}
+		fw, err := w.Create(f.Name)
+		if err != nil {
+			t.Fatalf("create zip entry %s: %v", f.Name, err)
+		}
+		if _, err := fw.Write(content); err != nil {
+			t.Fatalf("write zip entry %s: %v", f.Name, err)
+		}
+	}
+	if err := w.Close(); err != nil {
+		t.Fatalf("zip.Writer.Close: %v", err)
+	}
+
+	path := filepath.Join(t.TempDir(), "brand.pptx")
+	if err := os.WriteFile(path, buf.Bytes(), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	return path
 }
 
 func tokenValue(tokens []contracts.TokenEntry, layer contracts.TokenLayer, name string) string {

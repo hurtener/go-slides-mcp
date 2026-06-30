@@ -131,6 +131,12 @@ func RegisterTools(srv *server.Server, deps ToolDeps) error {
 		Register(srv); err != nil {
 		return err
 	}
+	if err := tool.New[contracts.BootstrapSoulFromTemplateInput, contracts.BootstrapSoulFromTemplateOutput]("bootstrap_soul_from_template").
+		Describe("Bootstrap one complete design soul by extracting the theme (colors + fonts) from a brand .pptx kit.").
+		Handler(h.bootstrapSoulFromTemplate).
+		Register(srv); err != nil {
+		return err
+	}
 	if err := tool.New[contracts.RefineSoulInput, contracts.RefineSoulOutput]("refine_soul").
 		Describe("Refine one stored soul with targeted token overrides.").
 		Handler(h.refineSoul).

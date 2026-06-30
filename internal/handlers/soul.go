@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -12,6 +15,10 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
+
+// maxBrandTemplateBytes bounds a brand .pptx kit read by
+// bootstrap_soul_from_template (64 MiB).
+const maxBrandTemplateBytes = 64 << 20
 
 func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulInput) (tool.Result[contracts.BootstrapSoulOutput], error) {
 	var palette *soul.Palette
@@ -62,6 +69,67 @@ func (h *handlers) bootstrapSoul(_ context.Context, in contracts.BootstrapSoulIn
 	tokens := flattenTokens(bootstrapped)
 	out := contracts.BootstrapSoulOutput{SoulID: bootstrapped.ID, Name: bootstrapped.Name, Status: contracts.SoulStatus(bootstrapped.Status), TokenCount: len(tokens)}
 	return tool.Result[contracts.BootstrapSoulOutput]{Text: fmt.Sprintf("Bootstrapped soul %q (%s).", bootstrapped.Name, bootstrapped.ID), Structured: out}, nil
+}
+
+func (h *handlers) bootstrapSoulFromTemplate(_ context.Context, in contracts.BootstrapSoulFromTemplateInput) (tool.Result[contracts.BootstrapSoulFromTemplateOutput], error) {
+	name := strings.TrimSpace(in.Name)
+	if name == "" {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: bootstrap-from-template requires a non-empty name")
+	}
+	path := strings.TrimSpace(in.Path)
+	if path == "" {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: bootstrap-from-template requires a non-empty path")
+	}
+	if !strings.EqualFold(filepath.Ext(path), ".pptx") {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: bootstrap-from-template path %q must be a .pptx file", path)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: brand template not found at %q", path)
+		}
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: read brand template: %w", err)
+	}
+	if len(data) > maxBrandTemplateBytes {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: brand template %q is %d bytes, exceeds the %d byte limit", path, len(data), maxBrandTemplateBytes)
+	}
+
+	pres, err := pptx.NewFromBytes(data)
+	if err != nil {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: open brand template: %w", err)
+	}
+	theme := pres.Theme()
+	if theme == nil {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, fmt.Errorf("soul: brand template %q has no theme", path)
+	}
+
+	bootstrapped, err := soul.FromTemplate(name, in.Description, theme)
+	if err != nil {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, err
+	}
+	if err := h.deps.Souls.Put(bootstrapped); err != nil {
+		return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{}, err
+	}
+
+	tokens := flattenTokens(bootstrapped)
+	out := contracts.BootstrapSoulFromTemplateOutput{
+		SoulID:     bootstrapped.ID,
+		Name:       bootstrapped.Name,
+		Status:     contracts.SoulStatus(bootstrapped.Status),
+		TokenCount: len(tokens),
+		ExtractedColors: map[string]string{
+			"canvas":      string(bootstrapped.Theme.ResolveColor(pptx.ColorCanvas)),
+			"surface":     string(bootstrapped.Theme.ResolveColor(pptx.ColorSurface)),
+			"surfaceAlt":  string(bootstrapped.Theme.ResolveColor(pptx.ColorSurfaceAlt)),
+			"accent":      string(bootstrapped.Theme.ResolveColor(pptx.ColorAccent)),
+			"accentAlt":   string(bootstrapped.Theme.ResolveColor(pptx.ColorAccentAlt)),
+			"accentWarm":  string(bootstrapped.Theme.ResolveColor(pptx.ColorAccentWarm)),
+			"primaryText": string(bootstrapped.Theme.ResolveTextColor(pptx.TextPrimary)),
+		},
+	}
+	text := fmt.Sprintf("Extracted brand soul %q (%s) from %s.", bootstrapped.Name, bootstrapped.ID, filepath.Base(path))
+	return tool.Result[contracts.BootstrapSoulFromTemplateOutput]{Text: text, Structured: out}, nil
 }
 
 func (h *handlers) refineSoul(_ context.Context, in contracts.RefineSoulInput) (tool.Result[contracts.RefineSoulOutput], error) {

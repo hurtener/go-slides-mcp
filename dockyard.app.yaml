@@ -110,6 +110,11 @@ tools:
     input: internal/contracts.BootstrapSoulInput
     output: internal/contracts.BootstrapSoulOutput
     task_support: forbidden
+  - name: bootstrap_soul_from_template
+    description: Bootstrap one complete design soul by extracting the theme (colors + fonts) from a brand .pptx kit.
+    input: internal/contracts.BootstrapSoulFromTemplateInput
+    output: internal/contracts.BootstrapSoulFromTemplateOutput
+    task_support: forbidden
   - name: refine_soul
     description: Refine one stored soul with targeted token overrides.
     input: internal/contracts.RefineSoulInput

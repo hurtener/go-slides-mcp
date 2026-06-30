@@ -3440,6 +3440,54 @@ export interface BootstrapSoulOutput {
   tokenCount: number /* int */;
 }
 /**
+ * BootstrapSoulFromTemplateInput is the typed input for
+ * bootstrap_soul_from_template (R8.2): it extracts a complete brand soul from
+ * a brand .pptx kit's own theme (colors + fonts), so a deck can render in the
+ * brand's own palette without hand-typing every hex.
+ */
+export interface BootstrapSoulFromTemplateInput {
+  /**
+   * Name is the required soul name and the source of the stored soul id.
+   */
+  name: string;
+  /**
+   * Description is an optional one-line soul summary.
+   */
+  description?: string;
+  /**
+   * Path is the filesystem path to the brand .pptx kit whose theme (colors +
+   * fonts) seeds the soul. The file must exist and be a .pptx.
+   */
+  path: string;
+}
+/**
+ * BootstrapSoulFromTemplateOutput is the structured result for
+ * bootstrap_soul_from_template.
+ */
+export interface BootstrapSoulFromTemplateOutput {
+  /**
+   * SoulID is the stored soul identifier.
+   */
+  soulId: string;
+  /**
+   * Name is the stored soul name.
+   */
+  name: string;
+  /**
+   * Status is the stored soul lifecycle state.
+   */
+  status?: SoulStatus;
+  /**
+   * TokenCount is the number of flattened resolved design tokens in the soul.
+   */
+  tokenCount: number /* int */;
+  /**
+   * ExtractedColors summarizes the key resolved brand colors pulled from the
+   * template theme (role -> 6-digit hex), for agent review before building.
+   */
+  extractedColors?: { [key: string]: string};
+}
+/**
  * SoulOverride is one targeted refine instruction.
  */
 export interface SoulOverride {
