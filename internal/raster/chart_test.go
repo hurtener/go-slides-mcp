@@ -48,6 +48,101 @@ func TestRasterizeChartDeterministic(t *testing.T) {
 	}
 }
 
+// TestRasterizeChartNilStyleByteIdentical asserts the nil-Style path (the
+// default for every chart compiled before R14.2, and every chart compiled
+// with an empty SoulID after it) renders byte-identical to itself across
+// bar/pie/line — i.e. adding the Style field did not perturb the existing
+// default rasterization.
+func TestRasterizeChartNilStyleByteIdentical(t *testing.T) {
+	cases := map[string]ChartSpec{
+		"bar":  barSpec(),
+		"pie":  {Type: ChartPie, Title: "Pie", Labels: []string{"X", "Y"}, Series: []Series{{Values: []float64{1, 2}}}},
+		"line": {Type: ChartLine, Title: "Line", Series: []Series{{Name: "a", Values: []float64{1, 3, 2, 5}}}},
+	}
+	for name, spec := range cases {
+		t.Run(name, func(t *testing.T) {
+			spec.Style = nil
+			a, err := RasterizeChart(spec)
+			if err != nil {
+				t.Fatalf("RasterizeChart(%s): %v", name, err)
+			}
+			b, err := RasterizeChart(spec)
+			if err != nil {
+				t.Fatalf("RasterizeChart(%s): %v", name, err)
+			}
+			if !bytes.Equal(a, b) {
+				t.Fatalf("RasterizeChart(%s) with nil Style not stable across identical calls", name)
+			}
+		})
+	}
+}
+
+func brandStyle() *ChartStyle {
+	return &ChartStyle{SeriesColors: []string{"2563EB", "F97316", "16A34A"}}
+}
+
+func altBrandStyle() *ChartStyle {
+	return &ChartStyle{SeriesColors: []string{"9333EA", "DC2626", "0EA5E9"}}
+}
+
+func TestRasterizeChartBrandStyleDiffersFromDefault(t *testing.T) {
+	specs := map[string]ChartSpec{
+		"bar":  barSpec(),
+		"pie":  {Type: ChartPie, Title: "Pie", Labels: []string{"X", "Y"}, Series: []Series{{Values: []float64{1, 2}}}},
+		"line": {Type: ChartLine, Title: "Line", Series: []Series{{Name: "a", Values: []float64{1, 3, 2, 5}}}},
+	}
+	for name, spec := range specs {
+		t.Run(name, func(t *testing.T) {
+			def, err := RasterizeChart(spec)
+			if err != nil {
+				t.Fatalf("RasterizeChart(%s) default: %v", name, err)
+			}
+			styled := spec
+			styled.Style = brandStyle()
+			brand, err := RasterizeChart(styled)
+			if err != nil {
+				t.Fatalf("RasterizeChart(%s) styled: %v", name, err)
+			}
+			if bytes.Equal(def, brand) {
+				t.Fatalf("RasterizeChart(%s): styled output identical to default, want different bytes", name)
+			}
+		})
+	}
+}
+
+func TestRasterizeChartDifferentPalettesDiffer(t *testing.T) {
+	spec := barSpec()
+	spec.Style = brandStyle()
+	a, err := RasterizeChart(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	spec.Style = altBrandStyle()
+	b, err := RasterizeChart(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Equal(a, b) {
+		t.Fatal("RasterizeChart: two different palettes produced identical bytes")
+	}
+}
+
+func TestRasterizeChartBrandStyleDeterministic(t *testing.T) {
+	spec := barSpec()
+	spec.Style = brandStyle()
+	a, err := RasterizeChart(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := RasterizeChart(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(a, b) {
+		t.Fatal("RasterizeChart with a brand Style not deterministic across identical specs")
+	}
+}
+
 func TestRasterizeChartErrors(t *testing.T) {
 	cases := map[string]ChartSpec{
 		"bad-type":     {Type: "scatter", Labels: []string{"A"}, Series: []Series{{Values: []float64{1}}}},
