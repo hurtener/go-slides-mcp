@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"strings"
@@ -64,6 +65,60 @@ func TestExportHandlersProducePathAndResourceMetadata(t *testing.T) {
 	}
 	if resolved.Structured.Path != exported.Structured.Path {
 		t.Fatalf("getResource path = %q, want %q", resolved.Structured.Path, exported.Structured.Path)
+	}
+}
+
+// TestExportDeckSectionVariantRendersDarkSlide proves R14.14: a section
+// carrying a Variant override is resolved onto its member slide (which sets
+// no explicit Variant) before export, producing different rendered bytes
+// than a plain export of the same deck without the section override.
+func TestExportDeckSectionVariantRendersDarkSlide(t *testing.T) {
+	h := testHandlers()
+	h.deps.Workspace = t.TempDir()
+	ctx := context.Background()
+
+	created, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Section Theme"})
+	if err != nil {
+		t.Fatalf("createDeck: %v", err)
+	}
+	stored, _, err := h.deps.Store.AddSlide(created.Structured.DeckID, testSlide("Deep Dive"), nil)
+	if err != nil {
+		t.Fatalf("store AddSlide: %v", err)
+	}
+	slideID := stored.Slides[0].ID
+
+	baseline, err := h.exportDeck(ctx, contracts.ExportDeckInput{DeckID: stored.ID})
+	if err != nil {
+		t.Fatalf("exportDeck baseline: %v", err)
+	}
+	baselineBytes, err := os.ReadFile(baseline.Structured.Path)
+	if err != nil {
+		t.Fatalf("os.ReadFile(baseline path): %v", err)
+	}
+
+	if _, err := h.setDeckSections(ctx, contracts.SetDeckSectionsInput{
+		DeckID: stored.ID,
+		Sections: []contracts.DeckSection{
+			{Name: "Deep Dive", SlideIDs: []string{slideID}, Variant: contracts.VariantDark},
+		},
+	}); err != nil {
+		t.Fatalf("setDeckSections: %v", err)
+	}
+
+	darkened, err := h.exportDeck(ctx, contracts.ExportDeckInput{DeckID: stored.ID})
+	if err != nil {
+		t.Fatalf("exportDeck darkened: %v", err)
+	}
+	darkenedBytes, err := os.ReadFile(darkened.Structured.Path)
+	if err != nil {
+		t.Fatalf("os.ReadFile(darkened path): %v", err)
+	}
+
+	if bytes.Equal(baselineBytes, darkenedBytes) {
+		t.Fatal("section Variant override did not change export bytes")
+	}
+	if _, err := pptx.NewFromBytes(darkenedBytes); err != nil {
+		t.Fatalf("pptx.NewFromBytes(darkened) error = %v", err)
 	}
 }
 

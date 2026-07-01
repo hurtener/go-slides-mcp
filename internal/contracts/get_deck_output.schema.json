@@ -50,6 +50,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "variant": {
+            "type": "string"
+          },
+          "archetype": {
+            "type": "string"
           }
         },
         "additionalProperties": false

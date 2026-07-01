@@ -655,6 +655,20 @@ export interface DeckSection {
    * SlideIDs is the ordered set of slide IDs in the section.
    */
   slideIds?: string[];
+  /**
+   * Variant is a section-scoped theme variant default (R14.14): applied to
+   * every slide in the section that sets no explicit Variant of its own —
+   * an explicit per-slide Variant always wins. Empty (the default) applies
+   * no override, keeping export byte-identical to a section-free deck.
+   */
+  variant?: Variant;
+  /**
+   * Archetype is a section-scoped decoration archetype default (R14.14):
+   * applied to every slide in the section that sets no explicit Archetype
+   * of its own — an explicit per-slide Archetype always wins. Empty (the
+   * default) applies no override.
+   */
+  archetype?: SlideArchetype;
 }
 /**
  * CreateDeckOutput is the structured result for create_deck.

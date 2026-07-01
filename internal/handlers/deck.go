@@ -108,7 +108,12 @@ func mapChrome(chrome deck.Chrome) contracts.DeckChrome {
 func mapSections(sections []deck.Section) []contracts.DeckSection {
 	out := make([]contracts.DeckSection, 0, len(sections))
 	for _, section := range sections {
-		out = append(out, contracts.DeckSection{Name: section.Name, SlideIDs: append([]string(nil), section.SlideIDs...)})
+		out = append(out, contracts.DeckSection{
+			Name:      section.Name,
+			SlideIDs:  append([]string(nil), section.SlideIDs...),
+			Variant:   contracts.Variant(section.Variant),
+			Archetype: contracts.SlideArchetype(section.Archetype),
+		})
 	}
 	return out
 }
@@ -116,7 +121,12 @@ func mapSections(sections []deck.Section) []contracts.DeckSection {
 func unmapSections(sections []contracts.DeckSection) []deck.Section {
 	out := make([]deck.Section, 0, len(sections))
 	for _, section := range sections {
-		out = append(out, deck.Section{Name: section.Name, SlideIDs: append([]string(nil), section.SlideIDs...)})
+		out = append(out, deck.Section{
+			Name:      section.Name,
+			SlideIDs:  append([]string(nil), section.SlideIDs...),
+			Variant:   string(section.Variant),
+			Archetype: string(section.Archetype),
+		})
 	}
 	return out
 }
