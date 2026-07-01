@@ -94,9 +94,11 @@ func TestDeckardWhiteGolden(t *testing.T) {
 
 func TestSoulCloneIndependent(t *testing.T) {
 	s := DeckardWhite()
+	s.IconSet = map[string]string{"brandmark": "<svg/>"}
 	c := s.Clone()
 	c.Theme.Colors.Surfaces[pptx.ColorAccent] = "000000"
 	c.Extensions["border"] = "ZZZZZZ"
+	c.IconSet["brandmark"] = "<svg mutated/>"
 	c.Name = "Mutated"
 	c.StyleGuide.Do[0] = "changed"
 
@@ -105,6 +107,9 @@ func TestSoulCloneIndependent(t *testing.T) {
 	}
 	if s.Extensions["border"] != "E0D5CA" {
 		t.Error("clone mutated the source extensions")
+	}
+	if s.IconSet["brandmark"] != "<svg/>" {
+		t.Error("clone mutated the source icon set")
 	}
 	if s.Name != "Deckard White" {
 		t.Error("clone mutated the source name")

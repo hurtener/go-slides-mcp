@@ -186,6 +186,15 @@ type RefineSoulInput struct {
 	SoulID string `json:"soulId"`
 	// Overrides is the ordered set of token overrides to apply.
 	Overrides []SoulOverride `json:"overrides,omitempty"`
+	// Icons is an optional set of brand glyphs to bind to the soul (R14.16):
+	// glyph-name -> single-path SVG string. Each SVG is validated against the
+	// icon translator's single-path/solid-fill constraints (D-040/D-005); a
+	// bad glyph is rejected with a typed error naming it and the call fails
+	// before any change is persisted. A bound glyph resolves ahead of the
+	// curated set for every Card/Flow/Milestone/etc. icon reference across
+	// this soul's renders. Only single-color icons are supported — a
+	// duotone/two-tone icon is a pptx-go engine gap, not modeled here.
+	Icons map[string]string `json:"icons,omitempty"`
 }
 
 // RefineSoulOutput is the structured result for refine_soul.

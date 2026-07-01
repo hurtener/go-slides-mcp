@@ -3,6 +3,8 @@ package soul
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -127,6 +129,41 @@ func applyOverride(s *Soul, override TokenOverride) error {
 	default:
 		return fmt.Errorf("soul: unknown override category %q", category)
 	}
+}
+
+// ApplyIcons returns a clone of s with icons merged into its brand IconSet
+// (R14.16): copy-on-write, existing entries plus icons, new wins. Each new
+// SVG is validated with scene.ValidateIcon (the same single-path/solid-fill
+// translator constraints AddIcon enforces, D-040/D-005); on the first
+// invalid glyph, ApplyIcons returns a typed error naming it and applies no
+// change. Empty/nil icons leaves the soul unchanged (still cloned, per the
+// Refine convention).
+func ApplyIcons(s *Soul, icons map[string]string) (*Soul, error) {
+	if s == nil {
+		return nil, fmt.Errorf("soul: apply-icons requires a non-nil soul")
+	}
+	clone := s.Clone()
+	if len(icons) == 0 {
+		return clone, nil
+	}
+
+	names := make([]string, 0, len(icons))
+	for name := range icons {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	merged := make(map[string]string, len(clone.IconSet)+len(icons))
+	maps.Copy(merged, clone.IconSet)
+	for _, name := range names {
+		svg := icons[name]
+		if err := scene.ValidateIcon([]byte(svg)); err != nil {
+			return nil, fmt.Errorf("soul: icon %q: %w", name, err)
+		}
+		merged[name] = svg
+	}
+	clone.IconSet = merged
+	return clone, nil
 }
 
 // ensureDarkColors lazily allocates s.Theme.DarkColors (and its maps) and

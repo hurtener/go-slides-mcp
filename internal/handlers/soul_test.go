@@ -80,6 +80,75 @@ func TestRefineSoulChangesToken(t *testing.T) {
 	}
 }
 
+// validIconSVG mirrors pptx-go's known-good icon fixture
+// (scene/icons_validate_test.go): a single-path triangle that satisfies the
+// icon translator subset (D-040).
+const validIconSVG = `<svg viewBox="0 0 24 24"><path d="M12 2 L22 22 L2 22 Z"/></svg>`
+
+// arcIconSVG uses an elliptical arc path command, which the translator
+// rejects — the known-bad fixture from the same pptx-go test file.
+const arcIconSVG = `<svg viewBox="0 0 24 24"><path d="M0 0 A5 5 0 0 1 10 10"/></svg>`
+
+// TestRefineSoulBindsIcon asserts that refine_soul's Icons field binds a
+// valid brand glyph to the stored soul (R14.16) and surfaces a note in Text.
+func TestRefineSoulBindsIcon(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	bootstrapped, err := h.bootstrapSoul(ctx, contracts.BootstrapSoulInput{Name: "Icon Soul"})
+	if err != nil {
+		t.Fatalf("bootstrapSoul: %v", err)
+	}
+
+	refined, err := h.refineSoul(ctx, contracts.RefineSoulInput{
+		SoulID: bootstrapped.Structured.SoulID,
+		Icons:  map[string]string{"brandmark": validIconSVG},
+	})
+	if err != nil {
+		t.Fatalf("refineSoul: %v", err)
+	}
+	if refined.Text == "" {
+		t.Error("refineSoul with icons returned no Text note")
+	}
+
+	stored, ok := h.deps.Souls.Get(bootstrapped.Structured.SoulID)
+	if !ok {
+		t.Fatal("stored soul not found after refineSoul")
+	}
+	if stored.IconSet["brandmark"] != validIconSVG {
+		t.Fatalf("stored soul IconSet[brandmark] = %q, want %q", stored.IconSet["brandmark"], validIconSVG)
+	}
+}
+
+// TestRefineSoulRejectsInvalidIcon asserts that refine_soul returns a typed
+// error (no panic) when an Icons entry fails scene.ValidateIcon, and does
+// not persist the change.
+func TestRefineSoulRejectsInvalidIcon(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	bootstrapped, err := h.bootstrapSoul(ctx, contracts.BootstrapSoulInput{Name: "Bad Icon Soul"})
+	if err != nil {
+		t.Fatalf("bootstrapSoul: %v", err)
+	}
+
+	_, err = h.refineSoul(ctx, contracts.RefineSoulInput{
+		SoulID: bootstrapped.Structured.SoulID,
+		Icons:  map[string]string{"bad-glyph": arcIconSVG},
+	})
+	if err == nil {
+		t.Fatal("refineSoul with an invalid icon: error = nil, want a typed validation error")
+	}
+
+	stored, ok := h.deps.Souls.Get(bootstrapped.Structured.SoulID)
+	if !ok {
+		t.Fatal("stored soul not found after refineSoul")
+	}
+	if len(stored.IconSet) != 0 {
+		t.Fatalf("stored soul IconSet = %v, want unchanged/empty after a rejected refine", stored.IconSet)
+	}
+}
+
 func TestGetSoulIncludesDeckardWhiteStyleGuide(t *testing.T) {
 	h := testHandlers()
 

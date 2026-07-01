@@ -147,12 +147,22 @@ func (h *handlers) refineSoul(_ context.Context, in contracts.RefineSoulInput) (
 	if err != nil {
 		return tool.Result[contracts.RefineSoulOutput]{}, err
 	}
+	if len(in.Icons) > 0 {
+		refined, err = soul.ApplyIcons(refined, in.Icons)
+		if err != nil {
+			return tool.Result[contracts.RefineSoulOutput]{}, err
+		}
+	}
 	if err := h.deps.Souls.Put(refined); err != nil {
 		return tool.Result[contracts.RefineSoulOutput]{}, err
 	}
 	tokens := flattenTokens(refined)
 	out := contracts.RefineSoulOutput{SoulID: refined.ID, Changed: changed, TokenCount: len(tokens)}
-	return tool.Result[contracts.RefineSoulOutput]{Text: fmt.Sprintf("Refined soul %q with %d override(s).", refined.ID, len(changed)), Structured: out}, nil
+	text := fmt.Sprintf("Refined soul %q with %d override(s).", refined.ID, len(changed))
+	if len(in.Icons) > 0 {
+		text = fmt.Sprintf("%s Bound %d brand glyph(s).", text, len(in.Icons))
+	}
+	return tool.Result[contracts.RefineSoulOutput]{Text: text, Structured: out}, nil
 }
 
 func (h *handlers) listSouls(_ context.Context, in contracts.ListSoulsInput) (tool.Result[contracts.ListSoulsOutput], error) {

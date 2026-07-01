@@ -2,6 +2,7 @@ package render
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
@@ -94,6 +95,21 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolv
 	opts := []scene.RenderOption{scene.WithWorkers(workers)}
 	if resolver != nil {
 		opts = append(opts, scene.WithAssetResolver(resolver))
+	}
+	// R14.16: register each brand glyph in the soul's IconSet so every
+	// Card/Flow/Milestone/etc. icon reference resolves from the brand set
+	// before the curated set. Sorted name order keeps registration (and thus
+	// the rendered bytes) deterministic. An empty/nil IconSet appends nothing
+	// — byte-identical to a soul without the field.
+	if len(s.IconSet) > 0 {
+		names := make([]string, 0, len(s.IconSet))
+		for name := range s.IconSet {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			opts = append(opts, scene.WithIconExtension(name, []byte(s.IconSet[name])))
+		}
 	}
 	sceneStats, err := scene.Render(pres, sc, opts...)
 	if err != nil {
