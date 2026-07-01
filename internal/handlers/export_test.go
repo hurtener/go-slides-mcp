@@ -233,6 +233,50 @@ func TestExportDeckAutofitFalseLeavesStoredSlideUnchanged(t *testing.T) {
 	}
 }
 
+// overflowingSlide stacks far more Hero nodes than the body region can hold
+// (mirrors render's overflowingDoc fixture), guaranteeing at least one
+// overflow LayoutWarning so the export path's Autofit=true wiring — Fill,
+// then autofit.Remediate driven by real render.RenderWithAssets output —
+// exercises a real (not faked) overflow signal end to end.
+func overflowingSlide() contracts.Slide {
+	nodes := make([]contracts.SlideNode, 0, 8)
+	for i := 0; i < 8; i++ {
+		nodes = append(nodes, &contracts.Hero{Title: "Overflow driver"})
+	}
+	return contracts.Slide{Layout: contracts.LayoutTitleContent, Nodes: nodes}
+}
+
+// TestExportDeckAutofitTrueRemediatesOverflowingDeck proves R10-C wiring: an
+// export with Autofit=true on a deck whose slide overflows still succeeds and
+// renders a valid .pptx (Fill + the remediation ladder run against the real
+// render pipeline, capped at 2 rungs, never erroring even if the ladder can't
+// fully clear the overflow).
+func TestExportDeckAutofitTrueRemediatesOverflowingDeck(t *testing.T) {
+	h := testHandlers()
+	h.deps.Workspace = t.TempDir()
+	ctx := context.Background()
+
+	created, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Overflow Deck"})
+	if err != nil {
+		t.Fatalf("createDeck: %v", err)
+	}
+	if _, _, err := h.deps.Store.AddSlide(created.Structured.DeckID, overflowingSlide(), nil); err != nil {
+		t.Fatalf("store AddSlide: %v", err)
+	}
+
+	exported, err := h.exportDeck(ctx, contracts.ExportDeckInput{DeckID: created.Structured.DeckID, Autofit: true})
+	if err != nil {
+		t.Fatalf("exportDeck (autofit, overflowing): %v", err)
+	}
+	buf, err := os.ReadFile(exported.Structured.Path)
+	if err != nil {
+		t.Fatalf("os.ReadFile(export path): %v", err)
+	}
+	if _, err := pptx.NewFromBytes(buf); err != nil {
+		t.Fatalf("pptx.NewFromBytes() error = %v", err)
+	}
+}
+
 func TestGetResourceMissingReturnsFoundFalse(t *testing.T) {
 	h := testHandlers()
 	h.deps.Workspace = t.TempDir()
