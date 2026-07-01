@@ -57,6 +57,7 @@ var Archetypes = []Fixture{
 	{"focal-card", focalCardDoc},
 	{"scrim-cover", scrimCoverDoc},
 	{"timeline", timelineDoc},
+	{"datamark-kpi", dataMarkKPIDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -473,6 +474,36 @@ func timelineDoc() contracts.SlideDoc {
 				Bands: []contracts.TimelineBand{
 					{From: 0, To: 0.5, Label: "Build", Fill: contracts.ColorSurfaceAlt},
 					{From: 0.5, To: 1, Label: "Launch", Fill: contracts.ColorAccentAlt},
+				},
+			},
+		},
+	})
+}
+
+// dataMarkKPIDoc exercises the DataMark node (R14.8, D-122): a 3-card KPI
+// row, one DataMark per card body — a donut, a bar, and a bar group. Kept to
+// one native-geometry mark per card (mirrors cardGridDoc's one-node-per-cell
+// shape) so it stays clear of the safe area (INV-2 zero-overflow, strict).
+func dataMarkKPIDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — DataMark KPI", contracts.Slide{
+		ID:        "datamark-kpi",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("This Quarter's Marks")},
+			&contracts.Grid{
+				Columns: 3,
+				Gap:     contracts.SpaceMD,
+				Cells: []contracts.SlideNode{
+					&contracts.Card{Header: "Uptime", Body: []contracts.SlideNode{
+						&contracts.DataMark{Kind: contracts.DataMarkDonut, Value: 0.92, Label: "92%"},
+					}},
+					&contracts.Card{Header: "Capacity", Body: []contracts.SlideNode{
+						&contracts.DataMark{Kind: contracts.DataMarkBar, Value: 0.6, Label: "60%"},
+					}},
+					&contracts.Card{Header: "Trend", Body: []contracts.SlideNode{
+						&contracts.DataMark{Kind: contracts.DataMarkBars, Values: []float64{0.3, 0.6, 0.9, 0.5}},
+					}},
 				},
 			},
 		},

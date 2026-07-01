@@ -229,6 +229,19 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			},
 		}, true
 
+	case KindDataMark:
+		// DataMark (R14.8, D-122): Kind "bars" so both Value and Values are
+		// meaningful in the same example (Value is used by bar/donut/gauge;
+		// Values by bars/sparkline), covering every field on round-trip.
+		return &DataMark{
+			Kind:        DataMarkBars,
+			Value:       0.6,
+			Values:      []float64{0.2, 0.6, 0.9},
+			Orientation: FlowHorizontal,
+			Color:       ColorAccent,
+			Label:       "Q3",
+		}, true
+
 	default:
 		return nil, false
 	}

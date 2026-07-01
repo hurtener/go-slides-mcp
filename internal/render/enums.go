@@ -183,6 +183,26 @@ func mapFlowOrientation(orientation contracts.FlowOrientation) scene.FlowOrienta
 	return scene.FlowHorizontal
 }
 
+// mapDataMarkKind maps the product DataMarkKind string enum to the engine's
+// int enum (R14.8, D-122). The empty string ("" — unset) maps to the
+// engine's zero value DataMarkBar, mirroring the engine default.
+func mapDataMarkKind(kind contracts.DataMarkKind) scene.DataMarkKind {
+	switch kind {
+	case contracts.DataMarkBars:
+		return scene.DataMarkBars
+	case contracts.DataMarkSparkline:
+		return scene.DataMarkSparkline
+	case contracts.DataMarkDonut:
+		return scene.DataMarkDonut
+	case contracts.DataMarkGauge:
+		return scene.DataMarkGauge
+	case contracts.DataMarkBar:
+		fallthrough
+	default:
+		return scene.DataMarkBar
+	}
+}
+
 func mapConnectorKind(kind contracts.ConnectorKind) scene.ConnectorKind {
 	switch kind {
 	case contracts.ConnectorArrowDashed:

@@ -129,6 +129,12 @@ func ValidateNodeEnums(n SlideNode) error {
 				checkEnum(fmt.Sprintf("bands[%d].fill", i), "ColorRole", b.Fill, AllowedColorRole(), true),
 			)
 		}
+	case *DataMark:
+		errs = append(errs,
+			checkEnum("markKind", "DataMarkKind", v.Kind, AllowedDataMarkKind(), true),
+			checkEnum("orientation", "FlowOrientation", v.Orientation, AllowedFlowOrientation(), true),
+			checkEnum("color", "ColorRole", v.Color, AllowedColorRole(), true),
+		)
 	}
 	return errors.Join(errs...)
 }
