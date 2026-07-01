@@ -83,6 +83,10 @@ type Card struct {
 	// (D-054) — e.g. "01", "Q4", or a section number. Omit (=empty string)
 	// to draw no watermark.
 	Watermark string `json:"watermark,omitempty"`
+	// Backdrop is a decoration drawn behind the card's box before its fill
+	// (R13.10) — a focal glow/halo that tracks the card; typically a
+	// center-anchored, bleeding `radial_glow`. nil = none, byte-identical.
+	Backdrop *Decoration `json:"backdrop,omitempty"`
 }
 
 func (Card) slideNodeKind() Kind { return KindCard }
@@ -110,6 +114,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 		HeaderFill  ColorRole         `json:"headerFill,omitempty"`
 		StatusDot   ColorRole         `json:"statusDot,omitempty"`
 		Watermark   string            `json:"watermark,omitempty"`
+		Backdrop    *Decoration       `json:"backdrop,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -134,6 +139,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 	c.HeaderFill = r.HeaderFill
 	c.StatusDot = r.StatusDot
 	c.Watermark = r.Watermark
+	c.Backdrop = r.Backdrop
 	return nil
 }
 

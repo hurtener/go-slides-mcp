@@ -65,6 +65,7 @@ func TestValidateNodeRules(t *testing.T) {
 		{"decoration-asset", &contracts.Decoration{Kind: contracts.DecorationAsset}, "needs an assetId"},
 		{"decoration-kind", &contracts.Decoration{}, "want one of"},
 		{"decoration-opacity", &contracts.Decoration{Kind: contracts.DecorationPreset, Preset: "p", Opacity: 2}, "opacity"},
+		{"decoration-text-empty", &contracts.Decoration{Kind: contracts.DecorationText}, "needs non-empty text"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

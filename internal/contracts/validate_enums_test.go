@@ -50,6 +50,7 @@ func TestValidateNodeEnumsKnownGood(t *testing.T) {
 		{"stat-delta-neutral", &contracts.Stat{Value: "98%", Label: "NPS", Delta: "±0", DeltaTone: contracts.DeltaNeutral}},
 		{"decoration-preset", &contracts.Decoration{Kind: contracts.DecorationPreset}},
 		{"decoration-asset", &contracts.Decoration{Kind: contracts.DecorationAsset}},
+		{"decoration-text", &contracts.Decoration{Kind: contracts.DecorationText, Text: "03"}},
 		{"decoration-layer-bg", &contracts.Decoration{Kind: contracts.DecorationPreset, Layer: contracts.LayerBackground}},
 		{"decoration-layer-fg", &contracts.Decoration{Kind: contracts.DecorationPreset, Layer: contracts.LayerForeground}},
 		{"decoration-anchor", &contracts.Decoration{Kind: contracts.DecorationPreset, Anchor: contracts.AnchorCenter}},
@@ -161,6 +162,7 @@ func TestValidateNodeEnumsBadValues(t *testing.T) {
 		// DecorationKind — empty string is also invalid (required)
 		{"decoration-kind-empty", &contracts.Decoration{}, "want one of"},
 		{"decoration-kind-bad", &contracts.Decoration{Kind: "pattern"}, "want one of"},
+		{"decoration-kind-glow-bad", &contracts.Decoration{Kind: "glow"}, "want one of"},
 		// Layer
 		{"layer-bad", &contracts.Decoration{Kind: contracts.DecorationPreset, Layer: "middle"}, "want one of"},
 		// Anchor

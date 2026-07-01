@@ -223,6 +223,10 @@ func validateDecoration(d *contracts.Decoration) error {
 		if d.AssetID == "" {
 			errs = append(errs, errors.New("decoration: asset kind needs an assetId"))
 		}
+	case contracts.DecorationText:
+		if d.Text == "" {
+			errs = append(errs, errors.New("decoration: text kind needs non-empty text"))
+		}
 	}
 	if d.Opacity < 0 || d.Opacity > 1 {
 		errs = append(errs, fmt.Errorf("decoration: opacity %.3f out of [0,1]", d.Opacity))

@@ -264,7 +264,7 @@ func (ConnectorKind) allowedStrings() []string { return stringsFrom(AllowedConne
 // AllowedDecorationKind returns the closed set of DecorationKind values.
 func AllowedDecorationKind() []DecorationKind {
 	return []DecorationKind{
-		DecorationPreset, DecorationAsset,
+		DecorationPreset, DecorationAsset, DecorationText,
 	}
 }
 

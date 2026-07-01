@@ -319,12 +319,50 @@ func mapCrop(c contracts.Crop) scene.Crop {
 }
 
 // mapDecorationKind converts the wire-level DecorationKind string to the scene
-// enum (preset vs asset).
+// enum (preset, asset, or text — R13.9).
 func mapDecorationKind(kind contracts.DecorationKind) scene.DecorationKind {
-	if kind == contracts.DecorationAsset {
+	switch kind {
+	case contracts.DecorationAsset:
 		return scene.DecorationAsset
+	case contracts.DecorationText:
+		return scene.DecorationText
+	default:
+		return scene.DecorationPreset
 	}
-	return scene.DecorationPreset
+}
+
+// mapDecoration converts a product Decoration to the engine's scene.Decoration
+// 1:1. Extracted so both the *contracts.Decoration node case in scene.go and
+// mapDecorationPtr (Card.Backdrop, R13.10) share one mapping — no logic
+// change, byte-identical to the previously-inline version.
+func mapDecoration(n contracts.Decoration) scene.Decoration {
+	return scene.Decoration{
+		Kind:     mapDecorationKind(n.Kind),
+		Preset:   n.Preset,
+		AssetID:  scene.AssetID(n.AssetID),
+		Layer:    mapLayer(n.Layer),
+		Anchor:   mapAnchor(n.Anchor),
+		Offset:   mapPosition(n.Offset),
+		Size:     mapSize(n.Size),
+		Bleed:    n.Bleed,
+		Opacity:  n.Opacity,
+		Rotation: n.Rotation,
+		Color:    mapColorRolePtr(n.Color),
+		Pitch:    pptx.Pt(n.Pitch),
+		Text:     n.Text,
+		FontSize: n.FontSize,
+	}
+}
+
+// mapDecorationPtr maps an optional product Decoration to the engine,
+// nil-safe (R13.10, Card.Backdrop). nil stays nil — byte-identical to a card
+// with no backdrop.
+func mapDecorationPtr(d *contracts.Decoration) *scene.Decoration {
+	if d == nil {
+		return nil
+	}
+	m := mapDecoration(*d)
+	return &m
 }
 
 // mapLayer converts the wire-level Layer string to the scene enum

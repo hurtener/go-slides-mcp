@@ -53,6 +53,8 @@ var Archetypes = []Fixture{
 	{"closing", closingDoc},
 	{"dashboard", dashboardDoc},
 	{"cover-mesh", coverMeshDoc},
+	{"watermark-content", watermarkContentDoc},
+	{"focal-card", focalCardDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -346,6 +348,73 @@ func dashboardDoc() contracts.SlideDoc {
 					&contracts.Card{Header: "Reliability", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("99.98% uptime.")}}}},
 					&contracts.Card{Header: "Speed", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("400ms median.")}}}},
 					&contracts.Card{Header: "Scale", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("3x throughput.")}}}},
+				},
+			},
+		},
+	})
+}
+
+// watermarkContentDoc is a content slide carrying a DecorationText "03"
+// background watermark plus a starfield scatter preset with Pitch and a
+// neutral Color (R13.9 corpus accept case). Asset-free.
+func watermarkContentDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Watermark Content", contracts.Slide{
+		ID:        "watermark-content",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Decoration{
+				Kind:  contracts.DecorationText,
+				Text:  "03",
+				Layer: contracts.LayerBackground,
+			},
+			&contracts.Decoration{
+				Kind:   contracts.DecorationPreset,
+				Preset: "starfield",
+				Layer:  contracts.LayerBackground,
+				Color:  contracts.ColorSurfaceAlt,
+				Pitch:  24,
+				Bleed:  true,
+			},
+			&contracts.Heading{Level: 2, Text: rt("Section Three")},
+			&contracts.Prose{Paragraphs: []contracts.RichText{
+				rt("A watermark and a starfield scatter both render behind body content."),
+			}},
+		},
+	})
+}
+
+// focalCardDoc is a 3-card row where the center card carries a radial_glow
+// Backdrop (R13.10 corpus accept case). Asset-free.
+func focalCardDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Focal Card", contracts.Slide{
+		ID:        "focal-card",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Featured Plan")},
+			&contracts.Grid{
+				Columns: 3,
+				Gap:     contracts.SpaceMD,
+				Cells: []contracts.SlideNode{
+					&contracts.Card{Header: "Starter", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("For small teams.")}},
+					}},
+					&contracts.Card{
+						Header: "Business",
+						Backdrop: &contracts.Decoration{
+							Kind:   contracts.DecorationPreset,
+							Preset: "radial_glow",
+							Anchor: contracts.AnchorCenter,
+							Bleed:  true,
+						},
+						Body: []contracts.SlideNode{
+							&contracts.Prose{Paragraphs: []contracts.RichText{rt("Our most popular plan.")}},
+						},
+					},
+					&contracts.Card{Header: "Enterprise", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("Custom scale.")}},
+					}},
 				},
 			},
 		},
