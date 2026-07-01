@@ -145,6 +145,10 @@ func ValidateNodeEnums(n SlideNode) error {
 		errs = append(errs,
 			checkEnum("orientation", "FlowOrientation", v.Orientation, AllowedFlowOrientation(), true),
 		)
+	case *LogoWall:
+		errs = append(errs,
+			checkEnum("tone", "LogoToneKind", v.Tone, AllowedLogoToneKind(), true),
+		)
 	}
 	return errors.Join(errs...)
 }

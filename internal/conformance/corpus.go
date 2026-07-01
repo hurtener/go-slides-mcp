@@ -46,6 +46,7 @@ var Archetypes = []Fixture{
 	{"stat-strip", statStripDoc},
 	{"two-column", twoColumnDoc},
 	{"quote", quoteDoc},
+	{"quote-testimonial", quoteTestimonialDoc},
 	{"flow", flowDoc},
 	{"comparison-table", comparisonTableDoc},
 	{"bento", bentoDoc},
@@ -225,6 +226,26 @@ func quoteDoc() contracts.SlideDoc {
 			&contracts.Quote{
 				Text:        rt("The best way to predict the future is to invent it."),
 				Attribution: "Alan Kay",
+			},
+		},
+	})
+}
+
+// quoteTestimonialDoc exercises the Quote testimonial enrichment (R14.5,
+// D-120): Mark + structured attribution (Name/Role/Company), asset-free (no
+// avatar/logo AssetID — the corpus stays asset-free per its scope note).
+func quoteTestimonialDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Quote Testimonial", contracts.Slide{
+		ID:        "quote-testimonial",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Quote{
+				Text:               rt("Deckard cut our deck-build time from days to minutes."),
+				Mark:               true,
+				AttributionName:    "Priya Natarajan",
+				AttributionRole:    "VP Marketing",
+				AttributionCompany: "Northwind Labs",
 			},
 		},
 	})
