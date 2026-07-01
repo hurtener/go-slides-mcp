@@ -124,6 +124,10 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateTimeline(v)...)
 	case *contracts.DataMark:
 		errs = append(errs, validateDataMark(v)...)
+	case *contracts.Quadrant:
+		errs = append(errs, validateQuadrant(v)...)
+	case *contracts.Tree:
+		errs = append(errs, validateTree(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -298,6 +302,37 @@ func validateDataMark(d *contracts.DataMark) []error {
 		if d.Value < 0 || d.Value > 1 {
 			errs = append(errs, fmt.Errorf("data_mark: value %g out of [0,1]", d.Value))
 		}
+	}
+	return errs
+}
+
+// validateQuadrant checks structural constraints for the Quadrant node
+// (R14.9, D-124), mirroring the engine's scene.ValidateScene rules: at
+// least one plotted item, and every Item's X/Y in [0,1].
+func validateQuadrant(q *contracts.Quadrant) []error {
+	var errs []error
+	if len(q.Items) == 0 {
+		errs = append(errs, errors.New("quadrant: needs at least one item"))
+	}
+	for i, it := range q.Items {
+		if it.X < 0 || it.X > 1 {
+			errs = append(errs, fmt.Errorf("quadrant: items[%d] x %g out of [0,1]", i, it.X))
+		}
+		if it.Y < 0 || it.Y > 1 {
+			errs = append(errs, fmt.Errorf("quadrant: items[%d] y %g out of [0,1]", i, it.Y))
+		}
+	}
+	return errs
+}
+
+// validateTree checks structural constraints for the Tree node (R14.10,
+// D-127), mirroring the engine's scene.ValidateScene rules: the root needs
+// a label. Depth/breadth clamping past the safe area is the engine's
+// render-time warn, not a Stage-1 hard error.
+func validateTree(t *contracts.Tree) []error {
+	var errs []error
+	if t.Root.Label == "" {
+		errs = append(errs, errors.New("tree: root needs a label"))
 	}
 	return errs
 }
