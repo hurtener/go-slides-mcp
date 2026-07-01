@@ -43,6 +43,12 @@ const (
 	KindBento Kind = "bento"
 )
 
+// Node kind added in R14.4 — the Timeline / roadmap node (D-119), mirroring
+// pptx-go's scene.Timeline.
+const (
+	KindTimeline Kind = "timeline"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

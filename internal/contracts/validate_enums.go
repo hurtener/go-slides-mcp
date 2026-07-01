@@ -123,6 +123,12 @@ func ValidateNodeEnums(n SlideNode) error {
 		errs = append(errs,
 			checkEnum("deltaTone", "DeltaTone", v.DeltaTone, AllowedDeltaTone(), true),
 		)
+	case *Timeline:
+		for i, b := range v.Bands {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("bands[%d].fill", i), "ColorRole", b.Fill, AllowedColorRole(), true),
+			)
+		}
 	}
 	return errors.Join(errs...)
 }

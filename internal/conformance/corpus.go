@@ -34,10 +34,10 @@ func rt(text string) contracts.RichText {
 
 // Archetypes is the corpus registry (R14.19): one entry per professional deck
 // archetype expressible with today's node vocabulary (see the scope note in
-// corpus.go's package doc — timeline/org-chart/quadrant/funnel/agenda/
-// logo-wall/RTL nodes are not built yet and are NOT stubbed in here). Every
-// entry uses only native, asset-free nodes so a fixture render never depends
-// on an AssetResolver.
+// corpus.go's package doc — org-chart/quadrant/funnel/agenda/logo-wall/RTL
+// nodes are not built yet and are NOT stubbed in here; timeline landed in
+// R14.4). Every entry uses only native, asset-free nodes so a fixture render
+// never depends on an AssetResolver.
 var Archetypes = []Fixture{
 	{"cover", coverDoc},
 	{"section", sectionDoc},
@@ -56,6 +56,7 @@ var Archetypes = []Fixture{
 	{"watermark-content", watermarkContentDoc},
 	{"focal-card", focalCardDoc},
 	{"scrim-cover", scrimCoverDoc},
+	{"timeline", timelineDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -446,6 +447,33 @@ func scrimCoverDoc() contracts.SlideDoc {
 				Eyebrow:  "FY26 Board Review",
 				Title:    "The State of the Platform",
 				Subtitle: "A quarterly look at growth, reliability, and what's next",
+			},
+		},
+	})
+}
+
+// timelineDoc exercises the Timeline node (R14.4, D-119): a single-lane
+// roadmap of 4 milestones overlaid with 2 phase bands. Kept modest (4
+// milestones, staggered labels only) so it stays clear of the safe-area
+// (INV-2 zero-overflow, strict).
+func timelineDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Timeline", contracts.Slide{
+		ID:        "timeline",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Roadmap")},
+			&contracts.Timeline{
+				Milestones: []contracts.Milestone{
+					{Position: 0, Label: "Kickoff", Detail: "Scope locked", AccentIndex: 0},
+					{Position: 0.33, Label: "Alpha", Detail: "Internal dogfood", AccentIndex: 1},
+					{Position: 0.66, Label: "Beta", Detail: "External pilot", AccentIndex: 2},
+					{Position: 1, Label: "GA", Detail: "General availability", AccentIndex: 0},
+				},
+				Bands: []contracts.TimelineBand{
+					{From: 0, To: 0.5, Label: "Build", Fill: contracts.ColorSurfaceAlt},
+					{From: 0.5, To: 1, Label: "Launch", Fill: contracts.ColorAccentAlt},
+				},
 			},
 		},
 	})
