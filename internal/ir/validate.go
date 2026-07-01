@@ -122,6 +122,8 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateDecoration(v))
 	case *contracts.Timeline:
 		errs = append(errs, validateTimeline(v)...)
+	case *contracts.DataMark:
+		errs = append(errs, validateDataMark(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -270,6 +272,31 @@ func validateTimeline(t *contracts.Timeline) []error {
 	for i, b := range t.Bands {
 		if b.From < 0 || b.From > 1 || b.To < 0 || b.To > 1 || b.From > b.To {
 			errs = append(errs, fmt.Errorf("timeline: band[%d] span [%g,%g] invalid (need 0<=from<=to<=1)", i, b.From, b.To))
+		}
+	}
+	return errs
+}
+
+// validateDataMark applies the DataMark node's structural Stage-1 rules
+// (R14.8, D-122), mirroring the engine's scene.ValidateScene rules: an
+// empty Kind defaults to "bar" (the engine's zero value). Bar/donut/gauge
+// use Value, which must be in [0,1]; bars/sparkline use Values, which must
+// have at least one entry, each in [0,1].
+func validateDataMark(d *contracts.DataMark) []error {
+	var errs []error
+	switch d.Kind {
+	case contracts.DataMarkBars, contracts.DataMarkSparkline:
+		if len(d.Values) == 0 {
+			errs = append(errs, errors.New("data_mark: bars/sparkline requires at least one value"))
+		}
+		for i, val := range d.Values {
+			if val < 0 || val > 1 {
+				errs = append(errs, fmt.Errorf("data_mark: values[%d] (%g) out of [0,1]", i, val))
+			}
+		}
+	default: // "" (default), DataMarkBar, DataMarkDonut, DataMarkGauge
+		if d.Value < 0 || d.Value > 1 {
+			errs = append(errs, fmt.Errorf("data_mark: value %g out of [0,1]", d.Value))
 		}
 	}
 	return errs

@@ -1575,6 +1575,11 @@ export const KindBento: Kind = "bento";
  */
 export const KindTimeline: Kind = "timeline";
 /**
+ * Node kind added in R14.8 — the DataMark native-vector micro-chart node
+ * (D-122), mirroring pptx-go's scene.DataMark.
+ */
+export const KindDataMark: Kind = "data_mark";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -1851,6 +1856,73 @@ export interface CardSection {
    * Body is the section body children (must be non-empty).
    */
   body?: SlideNode[];
+}
+/**
+ * DataMarkKind selects a DataMark's render shape (mirrors pptx-go's
+ * scene.DataMarkKind, an int enum — the product mirror is a string enum per
+ * the D-054-adjacent "string enum, not int" convention).
+ */
+export type DataMarkKind = string;
+/**
+ * DataMarkBar is a single progress/capacity bar: a track + a fill to Value.
+ */
+export const DataMarkBar: DataMarkKind = "bar";
+/**
+ * DataMarkBars is a small bar group, one bar per Values entry.
+ */
+export const DataMarkBars: DataMarkKind = "bars";
+/**
+ * DataMarkSparkline is a polyline through Values (a trend line).
+ */
+export const DataMarkSparkline: DataMarkKind = "sparkline";
+/**
+ * DataMarkDonut is a single-value ring (Value 0..1) with a centered label.
+ */
+export const DataMarkDonut: DataMarkKind = "donut";
+/**
+ * DataMarkGauge is a single-value speedometer arc (Value 0..1) with a label.
+ */
+export const DataMarkGauge: DataMarkKind = "gauge";
+/**
+ * DataMark is a native (no-raster) micro-chart (R14.8, D-122): a crisp,
+ * brand-colored vector data mark drawn entirely from preset shapes — a
+ * progress bar, a small bar group, a sparkline, a donut, or a gauge. It is
+ * driven by numeric values in [0,1] and theme colors, sizes to its box, and
+ * embeds in a Card/Bento cell. Mirror of pptx-go's scene.DataMark. Pure
+ * integer-EMU geometry → byte-identical across renders/worker counts; no
+ * AssetResolver. The JSON field for the variant is "markKind" (not "kind",
+ * which is the node discriminator — CONVENTIONS §2, same pattern as
+ * Decoration's "decorationKind").
+ */
+export interface DataMark {
+  /**
+   * Kind selects the mark shape (bar/bars/sparkline/donut/gauge). Empty
+   * defaults to "bar" at render time.
+   */
+  markKind?: DataMarkKind;
+  /**
+   * Value is the single fraction in [0,1] for bar/donut/gauge.
+   */
+  value?: number /* float64 */;
+  /**
+   * Values are the per-element fractions in [0,1] for bars/sparkline.
+   */
+  values?: number /* float64 */[];
+  /**
+   * Orientation selects a horizontal (default) or vertical bar. Ignored by
+   * bars/sparkline/donut/gauge.
+   */
+  orientation?: FlowOrientation;
+  /**
+   * Color overrides the mark's color role; empty defaults to the accent
+   * (the track is always the surface-alt role).
+   */
+  color?: ColorRole;
+  /**
+   * Label is an optional inline caption (drawn to the right of a
+   * horizontal bar, or centered for donut/gauge).
+   */
+  label?: string;
 }
 /**
  * DecorationKind selects a decoration's render path (mirrors pptx-go's

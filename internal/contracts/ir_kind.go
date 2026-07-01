@@ -49,6 +49,12 @@ const (
 	KindTimeline Kind = "timeline"
 )
 
+// Node kind added in R14.8 — the DataMark native-vector micro-chart node
+// (D-122), mirroring pptx-go's scene.DataMark.
+const (
+	KindDataMark Kind = "data_mark"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

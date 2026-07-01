@@ -127,6 +127,15 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone), AutoFit: n.AutoFit, Number: n.Number, Format: mapNumberFormat(n.Format)}
 	case *contracts.Timeline:
 		return scene.Timeline{Milestones: mapMilestones(n.Milestones), Lanes: mapTimelineLanes(n.Lanes), Bands: mapTimelineBands(n.Bands)}
+	case *contracts.DataMark:
+		return scene.DataMark{
+			Kind:        mapDataMarkKind(n.Kind),
+			Value:       n.Value,
+			Values:      n.Values,
+			Orientation: mapFlowOrientation(n.Orientation),
+			Color:       mapColorRolePtr(n.Color),
+			Label:       n.Label,
+		}
 	default:
 		return nil
 	}

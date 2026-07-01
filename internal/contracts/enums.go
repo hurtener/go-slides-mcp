@@ -286,6 +286,19 @@ func (DecorationKind) allowedStrings() []string {
 	return stringsFrom(AllowedDecorationKind())
 }
 
+// AllowedDataMarkKind returns the closed set of DataMarkKind wire values
+// (R14.8, D-122). ENUM DRIFT GUARD: every DataMarkKind const above must be
+// listed here — a missing value silently rejects a valid wire value.
+func AllowedDataMarkKind() []DataMarkKind {
+	return []DataMarkKind{
+		DataMarkBar, DataMarkBars, DataMarkSparkline, DataMarkDonut, DataMarkGauge,
+	}
+}
+
+// allowedStrings returns the closed set of DataMarkKind wire values as plain
+// strings — for inclusion in an error message.
+func (DataMarkKind) allowedStrings() []string { return stringsFrom(AllowedDataMarkKind()) }
+
 // AllowedLayer returns the closed set of Layer wire values.
 func AllowedLayer() []Layer {
 	return []Layer{
