@@ -55,6 +55,7 @@ var Archetypes = []Fixture{
 	{"cover-mesh", coverMeshDoc},
 	{"watermark-content", watermarkContentDoc},
 	{"focal-card", focalCardDoc},
+	{"scrim-cover", scrimCoverDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -416,6 +417,35 @@ func focalCardDoc() contracts.SlideDoc {
 						&contracts.Prose{Paragraphs: []contracts.RichText{rt("Custom scale.")}},
 					}},
 				},
+			},
+		},
+	})
+}
+
+// scrimCoverDoc is a cover slide whose Background is a solid color with a
+// gradient Scrim overlay (R14.1) — the corpus's product-level accept case
+// for Background.Scrim over a color background (no asset needed: a scrim
+// applies over any drawn background kind). Asset-free like every other
+// archetype fixture in this file.
+func scrimCoverDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Scrim Cover", contracts.Slide{
+		ID:        "scrim-cover",
+		Archetype: contracts.ArchetypeCover,
+		Layout:    contracts.LayoutCover,
+		Background: &contracts.Background{
+			Kind:  contracts.BackgroundColor,
+			Color: contracts.ColorAccent,
+			Scrim: &contracts.Scrim{
+				Color:    contracts.ColorCanvas,
+				Opacity:  0.5,
+				Gradient: true,
+			},
+		},
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{
+				Eyebrow:  "FY26 Board Review",
+				Title:    "The State of the Platform",
+				Subtitle: "A quarterly look at growth, reliability, and what's next",
 			},
 		},
 	})

@@ -107,6 +107,8 @@ func ValidateNodeEnums(n SlideNode) error {
 		errs = append(errs,
 			checkEnum("frame", "FrameKind", v.Frame, AllowedFrameKind(), true),
 			checkEnum("fit", "Fit", v.Fit, AllowedFit(), true),
+			checkEnum("cornerRadius", "RadiusRole", v.CornerRadius, AllowedRadiusRole(), true),
+			checkEnum("elevation", "ElevationRole", v.Elevation, AllowedElevationRole(), true),
 		)
 	case *Table:
 		for i, h := range v.Headers {
@@ -158,6 +160,15 @@ func ValidateSlideEnums(s Slide) error {
 			errs = append(errs,
 				checkEnum(fmt.Sprintf("background.mesh[%d].anchor", i), "Anchor", mg.Anchor, AllowedAnchor(), true),
 				checkEnum(fmt.Sprintf("background.mesh[%d].color", i), "ColorRole", mg.Color, AllowedColorRole(), true))
+		}
+		if s.Background.Scrim != nil {
+			errs = append(errs,
+				checkEnum("background.scrim.color", "ColorRole", s.Background.Scrim.Color, AllowedColorRole(), true))
+		}
+		if s.Background.Duotone != nil {
+			errs = append(errs,
+				checkEnum("background.duotone.shadow", "ColorRole", s.Background.Duotone.Shadow, AllowedColorRole(), true),
+				checkEnum("background.duotone.highlight", "ColorRole", s.Background.Duotone.Highlight, AllowedColorRole(), true))
 		}
 	}
 	return errors.Join(errs...)

@@ -31,10 +31,11 @@ func ValidateSlide(s contracts.Slide) error {
 }
 
 // validateBackground checks the structural constraints of a background's
-// multi-stop gradient and mesh glows (R13.2/R13.3/R13.4), mirroring the
-// engine's degrade-to-warning rules but enforced as a hard Stage-1 error
-// (precedent: validateTableStyle). A nil background, or one with empty
-// Stops/Mesh, produces no error — the byte-identical opt-out.
+// multi-stop gradient, mesh glows (R13.2/R13.3/R13.4), and scrim overlay
+// (R14.1), mirroring the engine's degrade-to-warning rules but enforced as a
+// hard Stage-1 error (precedent: validateTableStyle). A nil background, or
+// one with empty Stops/Mesh/Scrim, produces no error — the byte-identical
+// opt-out.
 func validateBackground(b *contracts.Background) []error {
 	if b == nil {
 		return nil
@@ -61,6 +62,11 @@ func validateBackground(b *contracts.Background) []error {
 		}
 		if mg.Alpha < 0 || mg.Alpha > 1 {
 			errs = append(errs, fmt.Errorf("background: mesh[%d] alpha %v out of [0,1]", i, mg.Alpha))
+		}
+	}
+	if b.Scrim != nil {
+		if b.Scrim.Opacity < 0 || b.Scrim.Opacity > 1 {
+			errs = append(errs, fmt.Errorf("background: scrim opacity %v out of [0,1]", b.Scrim.Opacity))
 		}
 	}
 	return errs

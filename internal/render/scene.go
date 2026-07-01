@@ -74,12 +74,14 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.SectionDivider{Eyebrow: n.Eyebrow, Label: n.Label, Align: mapHAlign(n.Align)}
 	case *contracts.Image:
 		return scene.Image{
-			AssetID:   scene.AssetID(n.AssetID),
-			Alt:       n.Alt,
-			Frame:     mapFrameKind(n.Frame),
-			FrameName: n.FrameName,
-			Crop:      mapCrop(n.Crop),
-			Fit:       mapFit(n.Fit),
+			AssetID:      scene.AssetID(n.AssetID),
+			Alt:          n.Alt,
+			Frame:        mapFrameKind(n.Frame),
+			FrameName:    n.FrameName,
+			Crop:         mapCrop(n.Crop),
+			Fit:          mapFit(n.Fit),
+			CornerRadius: mapRadiusRole(n.CornerRadius),
+			Elevation:    mapElevationRole(n.Elevation),
 		}
 	case *contracts.CodeBlock:
 		return scene.CodeBlock{AssetID: scene.AssetID(n.AssetID), Language: n.Language, Caption: n.Caption}
@@ -117,6 +119,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			StatusDot:   mapColorRolePtr(n.StatusDot),
 			Watermark:   n.Watermark,
 			Backdrop:    mapDecorationPtr(n.Backdrop),
+			ImageFill:   scene.AssetID(n.ImageFill),
 		}
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}

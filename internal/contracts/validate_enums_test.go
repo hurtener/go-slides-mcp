@@ -56,6 +56,8 @@ func TestValidateNodeEnumsKnownGood(t *testing.T) {
 		{"decoration-anchor", &contracts.Decoration{Kind: contracts.DecorationPreset, Anchor: contracts.AnchorCenter}},
 		{"image-frame-browser", &contracts.Image{AssetID: "a", Frame: contracts.FrameBrowser}},
 		{"image-fit-fill", &contracts.Image{AssetID: "a", Fit: contracts.FitFill}},
+		{"image-corner-radius-lg", &contracts.Image{AssetID: "a", CornerRadius: contracts.RadiusLG}},
+		{"image-elevation-raised", &contracts.Image{AssetID: "a", Elevation: contracts.ElevationRaised}},
 		{"hero-align", &contracts.Hero{Align: contracts.HAlignLeft}},
 		{"heading-align", &contracts.Heading{Level: 1, Align: contracts.HAlignRight}},
 		{"prose-align", &contracts.Prose{Align: contracts.HAlignCenter}},
@@ -99,6 +101,8 @@ func TestValidateNodeEnumsOptionalEmpty(t *testing.T) {
 		{"card-empty-fields", &contracts.Card{}},
 		{"image-empty-frame", &contracts.Image{AssetID: "a"}},
 		{"image-empty-fit", &contracts.Image{AssetID: "a"}},
+		{"image-empty-corner-radius", &contracts.Image{AssetID: "a"}},
+		{"image-empty-elevation", &contracts.Image{AssetID: "a"}},
 		{"heading-empty-align", &contracts.Heading{Level: 1}},
 		{"hero-empty-align", &contracts.Hero{}},
 		{"richtext-empty-type-role", &contracts.Heading{Level: 1, Text: contracts.RichText{{Text: "x"}}}},
@@ -171,6 +175,9 @@ func TestValidateNodeEnumsBadValues(t *testing.T) {
 		{"frame-bad", &contracts.Image{AssetID: "a", Frame: "tablet"}, "want one of"},
 		// Fit
 		{"fit-bad", &contracts.Image{AssetID: "a", Fit: "contain"}, "want one of"},
+		// RadiusRole (image cornerRadius) — "xxl" is not a valid wire value
+		{"corner-radius-bad", &contracts.Image{AssetID: "a", CornerRadius: "xxl"}, "want one of"},
+		{"corner-radius-field", &contracts.Image{AssetID: "a", CornerRadius: "xxl"}, "cornerRadius"},
 		// HAlign on leaf
 		{"halign-bad", &contracts.Hero{Align: "justify"}, "want one of"},
 		// TypeRole in RichText
@@ -217,6 +224,8 @@ func TestValidateSlideEnumsKnownGood(t *testing.T) {
 		{"background-asset", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundAsset}}},
 		{"background-radial", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0, Color: contracts.ColorAccent}, {Pos: 1, Color: contracts.ColorSurface}}}}},
 		{"background-mesh", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: contracts.AnchorTopLeft, Color: contracts.ColorAccent, Radius: 120, Alpha: 0.1}}}}},
+		{"background-scrim", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Color: contracts.ColorAccent, Scrim: &contracts.Scrim{Color: contracts.ColorCanvas, Opacity: 0.5}}}},
+		{"background-duotone", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundAsset, Duotone: &contracts.Duotone{Shadow: contracts.ColorAccent, Highlight: contracts.ColorSurface}}}},
 		{"empty-slide", contracts.Slide{}},
 	}
 	for _, tc := range cases {
@@ -259,6 +268,12 @@ func TestValidateSlideEnumsBadValues(t *testing.T) {
 		{"bg-mesh-anchor-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: "middle", Color: contracts.ColorAccent}}}}, "want one of"},
 		// Background Mesh ColorRole
 		{"bg-mesh-color-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: contracts.AnchorCenter, Color: "red"}}}}, "want one of"},
+		// Background Scrim ColorRole
+		{"bg-scrim-color-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Scrim: &contracts.Scrim{Color: "red"}}}, "want one of"},
+		{"bg-scrim-color-field", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Scrim: &contracts.Scrim{Color: "red"}}}, "background.scrim.color"},
+		// Background Duotone ColorRole
+		{"bg-duotone-shadow-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundAsset, Duotone: &contracts.Duotone{Shadow: "red"}}}, "want one of"},
+		{"bg-duotone-highlight-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundAsset, Duotone: &contracts.Duotone{Highlight: "red"}}}, "want one of"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

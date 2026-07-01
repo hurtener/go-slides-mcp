@@ -87,6 +87,11 @@ type Card struct {
 	// (R13.10) — a focal glow/halo that tracks the card; typically a
 	// center-anchored, bleeding `radial_glow`. nil = none, byte-identical.
 	Backdrop *Decoration `json:"backdrop,omitempty"`
+	// ImageFill fills the card surface with a cover-fit photo (resolved via
+	// the registered asset store) instead of the solid Fill — the
+	// image-as-surface treatment for photographic cards (R14.1). "" = solid,
+	// byte-identical to a pre-R14.1 card.
+	ImageFill AssetID `json:"imageFill,omitempty"`
 }
 
 func (Card) slideNodeKind() Kind { return KindCard }
@@ -115,6 +120,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 		StatusDot   ColorRole         `json:"statusDot,omitempty"`
 		Watermark   string            `json:"watermark,omitempty"`
 		Backdrop    *Decoration       `json:"backdrop,omitempty"`
+		ImageFill   AssetID           `json:"imageFill,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -140,6 +146,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 	c.StatusDot = r.StatusDot
 	c.Watermark = r.Watermark
 	c.Backdrop = r.Backdrop
+	c.ImageFill = r.ImageFill
 	return nil
 }
 
