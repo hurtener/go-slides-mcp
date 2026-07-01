@@ -9,12 +9,27 @@ import (
 	"github.com/hurtener/pptx-go/scene"
 )
 
+// LayoutWarning is a structured, per-warning mirror of one entry in Warnings
+// (R10.11): the same slide/node/message triple the engine records, kept
+// structured so a caller (the export remediation ladder) can group and act on
+// warnings by SlideID without parsing the formatted string in Warnings.
+type LayoutWarning struct {
+	SlideID string
+	Node    string
+	Message string
+}
+
 // Stats is the render summary returned alongside the rendered PPTX bytes.
 type Stats struct {
 	Slides   int
 	Shapes   int
 	Assets   int
 	Warnings []string
+	// LayoutWarnings is the structured form of Warnings (R10.11), one entry
+	// per warning, carrying SlideID/Node/Message separately. Additive: it
+	// mirrors Warnings 1:1 in the same order and never replaces it — existing
+	// callers that consume Warnings are unaffected.
+	LayoutWarnings []LayoutWarning
 	// Colors are the per-slide resolved canvas/surface/primary-text RGBs the
 	// engine rendered each slide with (R7, scene.Stats.Colors). In scene order.
 	// VariantDark slides carry their derived dark palette here, not the soul's
@@ -102,14 +117,17 @@ func mapDocChrome(c contracts.DeckChrome) scene.Chrome {
 
 func statsFromScene(s scene.Stats) Stats {
 	warnings := make([]string, 0, len(s.Warnings))
+	layoutWarnings := make([]LayoutWarning, 0, len(s.Warnings))
 	for _, warning := range s.Warnings {
 		warnings = append(warnings, fmt.Sprintf("slide=%s node=%s: %s", warning.SlideID, warning.Node, warning.Message))
+		layoutWarnings = append(layoutWarnings, LayoutWarning{SlideID: warning.SlideID, Node: warning.Node, Message: warning.Message})
 	}
 	return Stats{
-		Slides:   s.Slides,
-		Shapes:   s.Shapes,
-		Assets:   s.Assets,
-		Warnings: warnings,
-		Colors:   s.Colors,
+		Slides:         s.Slides,
+		Shapes:         s.Shapes,
+		Assets:         s.Assets,
+		Warnings:       warnings,
+		LayoutWarnings: layoutWarnings,
+		Colors:         s.Colors,
 	}
 }
