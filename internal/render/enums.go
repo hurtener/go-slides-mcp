@@ -488,6 +488,36 @@ func mapNumberFormat(f *contracts.NumberFormat) *scene.NumberFormat {
 	}
 }
 
+// mapTableStyle converts a contracts.TableStyle pointer to a
+// scene.TableStyle pointer, copying the scalar fields 1:1 and mapping
+// HeaderGroups element-wise (R14.3, D-118). nil maps to nil, keeping a Table
+// with no Style byte-identical to the plain banded table.
+func mapTableStyle(s *contracts.TableStyle) *scene.TableStyle {
+	if s == nil {
+		return nil
+	}
+	return &scene.TableStyle{
+		HeaderFill:   s.HeaderFill,
+		Zebra:        s.Zebra,
+		HighlightCol: s.HighlightCol,
+		RowLabelCol:  s.RowLabelCol,
+		HeaderGroups: mapHeaderGroups(s.HeaderGroups),
+	}
+}
+
+// mapHeaderGroups converts contracts.HeaderGroup slices to scene.HeaderGroup
+// slices 1:1 (R14.3, D-118).
+func mapHeaderGroups(groups []contracts.HeaderGroup) []scene.HeaderGroup {
+	if groups == nil {
+		return nil
+	}
+	mapped := make([]scene.HeaderGroup, len(groups))
+	for i, g := range groups {
+		mapped[i] = scene.HeaderGroup{Label: g.Label, Span: g.Span}
+	}
+	return mapped
+}
+
 // mapBackground converts a contracts.Background to scene.Background.
 // The gradient slice is mapped to the engine's [2]pptx.ColorRole:
 //   - 0 roles → both stops are the zero ColorRole
