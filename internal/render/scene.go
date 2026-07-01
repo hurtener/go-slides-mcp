@@ -24,6 +24,7 @@ func mapSlide(slide contracts.Slide, idx int) scene.SceneSlide {
 		Variant:    mapVariant(slide.Variant),
 		Nodes:      mapNodes(slide.Nodes),
 		Notes:      mapRichText(slide.Notes),
+		Footnotes:  mapFootnotes(slide.Footnotes),
 		Section:    slide.Section,
 		PageNumber: idx + 1, // 1-based; engine default (0) would also resolve here
 	}
@@ -295,6 +296,19 @@ func mapTimelineBands(bands []contracts.TimelineBand) []scene.TimelineBand {
 	mapped := make([]scene.TimelineBand, len(bands))
 	for i, b := range bands {
 		mapped[i] = scene.TimelineBand{From: b.From, To: b.To, Label: b.Label, Fill: mapColorRole(b.Fill)}
+	}
+	return mapped
+}
+
+// mapFootnotes maps a slide's Footnotes (R14.12) — each a RichText
+// paragraph — into the scene's footnote lines, preserving nil vs. empty.
+func mapFootnotes(footnotes []contracts.RichText) []scene.RichText {
+	if footnotes == nil {
+		return nil
+	}
+	mapped := make([]scene.RichText, len(footnotes))
+	for i, footnote := range footnotes {
+		mapped[i] = mapRichText(footnote)
 	}
 	return mapped
 }

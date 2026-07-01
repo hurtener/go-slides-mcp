@@ -3267,6 +3267,15 @@ export interface Slide {
    * nested "style" object and every key is lowercase.
    */
   notes?: RichText;
+  /**
+   * Footnotes are slide-level source/citation/disclaimer lines (R14.12),
+   * each a RichText paragraph, rendered into a reserved band at the bottom
+   * of the slide (muted role; the body region shrinks to reserve the
+   * band). Lines past the engine's region cap are dropped and warned.
+   * Empty/nil (the default) draws no band — byte-identical to slides
+   * authored before R14.12.
+   */
+  footnotes?: RichText[];
 }
 /**
  * SlideDoc is the deck-of-slides wrapper: a title, deck-level chrome, and an
@@ -3660,6 +3669,12 @@ export interface TextRun {
    * omit it (the zero value) for the default token "primary".
    */
   color?: TextColor;
+  /**
+   * Superscript raises the run above the baseline at a reduced size — a
+   * footnote marker on a figure/stat (R14.12). False (the default) keeps
+   * the run on the baseline.
+   */
+  superscript?: boolean;
 }
 /**
  * RunStyle mirrors pptx-go's scene.RunStyle: typography role plus inline
@@ -3699,6 +3714,11 @@ export interface RunStyle {
    * Href is the link URL when Link is true.
    */
   Href: string;
+  /**
+   * Superscript raises the run above the baseline at a reduced size — a
+   * footnote marker on a figure/stat (R14.12).
+   */
+  Superscript: boolean;
 }
 /**
  * TextColor is a run color: either a soul-bound token role (the documented

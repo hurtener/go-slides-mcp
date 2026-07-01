@@ -42,6 +42,13 @@ type Slide struct {
 	// [{"text":"speak to "},{"text":"this point","bold":true}]. There is no
 	// nested "style" object and every key is lowercase.
 	Notes RichText `json:"notes,omitempty" jsonschema:"speaker notes as RichText: a JSON array of FLAT runs — [{\"text\":\"plain\"}] or [{\"text\":\"emphasis\",\"bold\":true,\"italic\":true,\"color\":{\"token\":\"accent\"}}]. There is NO nested style object and keys are lowercase (text, typeRole, bold, italic, underline, strike, code, link, href, color)."`
+	// Footnotes are slide-level source/citation/disclaimer lines (R14.12),
+	// each a RichText paragraph, rendered into a reserved band at the bottom
+	// of the slide (muted role; the body region shrinks to reserve the
+	// band). Lines past the engine's region cap are dropped and warned.
+	// Empty/nil (the default) draws no band — byte-identical to slides
+	// authored before R14.12.
+	Footnotes []RichText `json:"footnotes,omitempty" jsonschema:"slide-level source/citation/disclaimer lines: a JSON array of RichText paragraphs, each itself an array of FLAT runs — [[{\"text\":\"Source: internal telemetry, 2026.\"}]]. Rendered into a reserved band at the bottom of the slide; there is NO nested style object and keys are lowercase."`
 }
 
 // MarshalJSON routes Nodes through each child's MarshalJSON and Notes through
@@ -58,6 +65,7 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 		Section    string         `json:"section,omitempty"`
 		Nodes      []SlideNode    `json:"nodes,omitempty"`
 		Notes      RichText       `json:"notes,omitempty"`
+		Footnotes  []RichText     `json:"footnotes,omitempty"`
 	}
 	return json.Marshal(plain{
 		ID:         s.ID,
@@ -69,6 +77,7 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 		Section:    s.Section,
 		Nodes:      s.Nodes,
 		Notes:      s.Notes,
+		Footnotes:  s.Footnotes,
 	})
 }
 
@@ -85,6 +94,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 		Section    string            `json:"section,omitempty"`
 		Nodes      []json.RawMessage `json:"nodes,omitempty"`
 		Notes      RichText          `json:"notes,omitempty"`
+		Footnotes  []RichText        `json:"footnotes,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -103,6 +113,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	}
 	s.Nodes = nodes
 	s.Notes = r.Notes
+	s.Footnotes = r.Footnotes
 	return nil
 }
 

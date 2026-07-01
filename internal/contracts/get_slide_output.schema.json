@@ -202,6 +202,9 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              "superscript": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -210,6 +213,70 @@
             "additionalProperties": false
           },
           "description": "speaker notes as RichText: a JSON array of FLAT runs — [{\"text\":\"plain\"}] or [{\"text\":\"emphasis\",\"bold\":true,\"italic\":true,\"color\":{\"token\":\"accent\"}}]. There is NO nested style object and keys are lowercase (text, typeRole, bold, italic, underline, strike, code, link, href, color)."
+        },
+        "footnotes": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "typeRole": {
+                  "type": "string"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "italic": {
+                  "type": "boolean"
+                },
+                "underline": {
+                  "type": "boolean"
+                },
+                "strike": {
+                  "type": "boolean"
+                },
+                "code": {
+                  "type": "boolean"
+                },
+                "link": {
+                  "type": "boolean"
+                },
+                "href": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "literal": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "superscript": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "description": "slide-level source/citation/disclaimer lines: a JSON array of RichText paragraphs, each itself an array of FLAT runs — [[{\"text\":\"Source: internal telemetry, 2026.\"}]]. Rendered into a reserved band at the bottom of the slide; there is NO nested style object and keys are lowercase."
         }
       },
       "required": [

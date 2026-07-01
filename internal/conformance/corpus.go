@@ -63,6 +63,7 @@ var Archetypes = []Fixture{
 	{"org-tree", treeDoc},
 	{"funnel", funnelDoc},
 	{"cycle", cycleDoc},
+	{"footnotes-sources", footnotesSourcesDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -645,6 +646,43 @@ func cycleDoc() contracts.SlideDoc {
 					{Label: "Learn", Icon: "circle", AccentIndex: 1},
 				},
 			},
+		},
+	})
+}
+
+// footnotesSourcesDoc exercises slide-level Footnotes + the Superscript run
+// style (R14.12): two source/disclaimer lines pinned to the reserved bottom
+// band, plus a superscript marker run referencing them from a stat callout.
+// The footnote band shrinks the body region, so the body here stays modest
+// (a heading + a 2-up stat row + one short caption) to hold clear of the
+// safe area (INV-2 zero-overflow, strict). Asset-free like every other
+// archetype fixture in this file.
+func footnotesSourcesDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Footnotes & Sources", contracts.Slide{
+		ID:        "footnotes-sources",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Headline Results")},
+			&contracts.Grid{
+				Columns: 2,
+				Gap:     contracts.SpaceMD,
+				Cells: []contracts.SlideNode{
+					&contracts.Stat{Value: "$2.2M", Label: "ARR", Delta: "+18%", DeltaTone: contracts.DeltaUp},
+					&contracts.Stat{Value: "99.98%", Label: "Uptime", Delta: "+0.1pp", DeltaTone: contracts.DeltaUp},
+				},
+			},
+			&contracts.Prose{Paragraphs: []contracts.RichText{
+				{
+					{Text: "ARR figure includes one-time items"},
+					{Text: "1", Superscript: true},
+					{Text: "."},
+				},
+			}},
+		},
+		Footnotes: []contracts.RichText{
+			rt("Source: internal telemetry, 2026."),
+			rt("Note: figures unaudited; final numbers pending Q3 close."),
 		},
 	})
 }
