@@ -55,6 +55,18 @@ const (
 	KindDataMark Kind = "data_mark"
 )
 
+// Node kind added in R14.9 — the Quadrant 2x2 positioning map node (D-124),
+// mirroring pptx-go's scene.Quadrant.
+const (
+	KindQuadrant Kind = "quadrant"
+)
+
+// Node kind added in R14.10 — the Tree hierarchy/org-chart node (D-127),
+// mirroring pptx-go's scene.Tree.
+const (
+	KindTree Kind = "tree"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

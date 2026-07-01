@@ -1580,6 +1580,16 @@ export const KindTimeline: Kind = "timeline";
  */
 export const KindDataMark: Kind = "data_mark";
 /**
+ * Node kind added in R14.9 — the Quadrant 2x2 positioning map node (D-124),
+ * mirroring pptx-go's scene.Quadrant.
+ */
+export const KindQuadrant: Kind = "quadrant";
+/**
+ * Node kind added in R14.10 — the Tree hierarchy/org-chart node (D-127),
+ * mirroring pptx-go's scene.Tree.
+ */
+export const KindTree: Kind = "tree";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -2426,6 +2436,90 @@ export interface SectionDivider {
   align?: HAlign;
 }
 /**
+ * Quadrant is a 2x2 positioning map (R14.9, D-124): labeled X/Y axes with
+ * low/high end captions, optional per-quadrant tint + title, and items
+ * plotted at caller (x,y) coordinates in [0,1] (origin bottom-left). Axes,
+ * dividers, item dots, and labels draw as native shapes — no asset. Mirror
+ * of pptx-go's scene.Quadrant. Pure integer-EMU layout → byte-identical
+ * across renders/worker counts; a deck with no Quadrant is byte-identical
+ * (a new node, absent until used).
+ */
+export interface Quadrant {
+  /**
+   * AxisX carries the horizontal axis's low/high end captions.
+   */
+  axisX?: QuadrantAxis;
+  /**
+   * AxisY carries the vertical axis's low/high end captions.
+   */
+  axisY?: QuadrantAxis;
+  /**
+   * Quadrants are optional per-cell tint + title, indexed 0=top-left,
+   * 1=top-right, 2=bottom-left, 3=bottom-right. An empty Fill draws no
+   * tint for that cell.
+   */
+  quadrants?: QuadrantCell[];
+  /**
+   * Items are plotted points; X/Y in [0,1] with the origin at the
+   * bottom-left.
+   */
+  items?: QuadrantItem[];
+}
+/**
+ * QuadrantAxis is one axis's end captions (D-124).
+ */
+export interface QuadrantAxis {
+  /**
+   * LowLabel captions the axis's low (origin) end.
+   */
+  lowLabel?: string;
+  /**
+   * HighLabel captions the axis's high (far) end.
+   */
+  highLabel?: string;
+}
+/**
+ * QuadrantCell is an optional per-quadrant tint + title (D-124). Mirror of
+ * pptx-go's scene.QuadrantCell, whose Fill is a *ColorRole (nil = no tint);
+ * the product uses a plain ColorRole string where "" = no tint, mapped via
+ * mapColorRolePtr at render time.
+ */
+export interface QuadrantCell {
+  /**
+   * Title is the quadrant's caption, drawn inside the cell.
+   */
+  title?: string;
+  /**
+   * Fill is the quadrant's tint color role; "" draws no tint.
+   */
+  fill?: ColorRole;
+}
+/**
+ * QuadrantItem is a plotted point (D-124): X/Y in [0,1] (origin
+ * bottom-left), a Label, and an AccentIndex selecting the dot color from a
+ * pinned token cycle.
+ */
+export interface QuadrantItem {
+  /**
+   * X is the item's horizontal position, 0..1 (0 = left, 1 = right).
+   */
+  x: number /* float64 */;
+  /**
+   * Y is the item's vertical position, 0..1 (0 = bottom, 1 = top).
+   */
+  y: number /* float64 */;
+  /**
+   * Label is the item's caption drawn beside its plotted dot.
+   */
+  label?: string;
+  /**
+   * AccentIndex selects a soul-driven series accent color for the dot
+   * (0 = the first accent). A plain int passthrough — 0 is a real value
+   * (the first accent), not "unset".
+   */
+  accentIndex?: number /* int */;
+}
+/**
  * Quote is a block quotation with an optional attribution. Renders as native
  * PPTX shapes. Mirror of pptx-go's scene.Quote.
  */
@@ -2686,6 +2780,58 @@ export interface TimelineBand {
    * Fill is the band's surface color role (low-alpha).
    */
   fill?: ColorRole;
+}
+/**
+ * Tree is a hierarchy / org-chart / taxonomy node (R14.10, D-127): a root
+ * with children laid out as a balanced top-down (or left-right) tidy tree,
+ * with elbow connector edges between parent and children and soul-styled
+ * nodes. Native shapes — no asset. Mirror of pptx-go's scene.Tree. Pure
+ * integer-EMU layout → byte-identical across renders/worker counts;
+ * depth/breadth past the safe area clamp + warn at render time. A deck with
+ * no Tree is byte-identical (a new node, absent until used).
+ */
+export interface Tree {
+  /**
+   * Root is the tree's root node; its Children recurse to build the full
+   * hierarchy.
+   */
+  root: TreeNode;
+  /**
+   * Orientation selects a top-down (vertical, default) or left-right
+   * (horizontal) layout. Reuses the shared FlowOrientation enum.
+   */
+  orientation?: FlowOrientation;
+}
+/**
+ * TreeNode is one node in a Tree (D-127): a label + optional detail/icon,
+ * child nodes, and an AccentIndex selecting its border color from a pinned
+ * token cycle. Children are concrete TreeNode values (not the SlideNode
+ * interface), so the default JSON unmarshal recurses without a custom
+ * UnmarshalJSON.
+ */
+export interface TreeNode {
+  /**
+   * Label is the node's headline text.
+   */
+  label?: string;
+  /**
+   * Detail is optional supporting text under the label.
+   */
+  detail?: string;
+  /**
+   * Icon is an optional curated icon name drawn inside the node.
+   */
+  icon?: string;
+  /**
+   * Children are this node's child nodes, recursing to build the tree.
+   */
+  children?: TreeNode[];
+  /**
+   * AccentIndex selects a soul-driven series accent color for the node's
+   * border (0 = the first accent). A plain int passthrough — 0 is a real
+   * value (the first accent), not "unset".
+   */
+  accentIndex?: number /* int */;
 }
 /**
  * ColumnRatio names a left:right width split (mirrors pptx-go's

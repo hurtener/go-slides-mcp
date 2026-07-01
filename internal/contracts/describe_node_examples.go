@@ -242,6 +242,51 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Label:       "Q3",
 		}, true
 
+	case KindQuadrant:
+		// Quadrant (R14.9, D-124): both axes labeled, all 4 quadrants titled
+		// + tinted, and 2 items with every field, so the round-trip covers
+		// the fixed [4] array and every sub-struct field.
+		return &Quadrant{
+			AxisX: QuadrantAxis{LowLabel: "Low Effort", HighLabel: "High Effort"},
+			AxisY: QuadrantAxis{LowLabel: "Low Impact", HighLabel: "High Impact"},
+			Quadrants: [4]QuadrantCell{
+				{Title: "Quick Wins", Fill: ColorSurfaceAlt},
+				{Title: "Big Bets", Fill: ColorAccentAlt},
+				{Title: "Fill-Ins", Fill: ColorSurface},
+				{Title: "Money Pits", Fill: ColorAccentWarm},
+			},
+			Items: []QuadrantItem{
+				{X: 0.2, Y: 0.8, Label: "Onboarding revamp", AccentIndex: 0},
+				{X: 0.8, Y: 0.9, Label: "Platform rebuild", AccentIndex: 1},
+			},
+		}, true
+
+	case KindTree:
+		// Tree (R14.10, D-127): a root with 2 children, one nested a level
+		// deeper, covering Label/Detail/Icon/AccentIndex/Children at every
+		// depth on round-trip.
+		return &Tree{
+			Root: TreeNode{
+				Label:       "CEO",
+				Detail:      "Executive lead",
+				Icon:        "star",
+				AccentIndex: 0,
+				Children: []TreeNode{
+					{
+						Label:       "VP Engineering",
+						Detail:      "Platform + product",
+						Icon:        "diamond",
+						AccentIndex: 1,
+						Children: []TreeNode{
+							{Label: "Eng Manager", Detail: "Core platform team", Icon: "check", AccentIndex: 2},
+						},
+					},
+					{Label: "VP Sales", Detail: "Revenue + partnerships", Icon: "square", AccentIndex: 2},
+				},
+			},
+			Orientation: FlowVertical,
+		}, true
+
 	default:
 		return nil, false
 	}

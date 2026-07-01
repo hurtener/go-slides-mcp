@@ -136,8 +136,66 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Color:       mapColorRolePtr(n.Color),
 			Label:       n.Label,
 		}
+	case *contracts.Quadrant:
+		return scene.Quadrant{
+			AxisX:     mapQuadrantAxis(n.AxisX),
+			AxisY:     mapQuadrantAxis(n.AxisY),
+			Quadrants: mapQuadrantCells(n.Quadrants),
+			Items:     mapQuadrantItems(n.Items),
+		}
+	case *contracts.Tree:
+		return scene.Tree{Root: mapTreeNode(n.Root), Orientation: mapFlowOrientation(n.Orientation)}
 	default:
 		return nil
+	}
+}
+
+// mapQuadrantAxis maps a Quadrant axis's low/high end captions (R14.9,
+// D-124).
+func mapQuadrantAxis(a contracts.QuadrantAxis) scene.QuadrantAxis {
+	return scene.QuadrantAxis{LowLabel: a.LowLabel, HighLabel: a.HighLabel}
+}
+
+// mapQuadrantCells maps a Quadrant's fixed [4] per-cell tint + title array
+// (R14.9, D-124). The product's plain ColorRole string ("" = no tint) maps
+// through mapColorRolePtr to the engine's *ColorRole (nil = no tint).
+func mapQuadrantCells(cells [4]contracts.QuadrantCell) [4]scene.QuadrantCell {
+	var mapped [4]scene.QuadrantCell
+	for i, c := range cells {
+		mapped[i] = scene.QuadrantCell{Title: c.Title, Fill: mapColorRolePtr(c.Fill)}
+	}
+	return mapped
+}
+
+// mapQuadrantItems maps a Quadrant's plotted points (R14.9, D-124).
+func mapQuadrantItems(items []contracts.QuadrantItem) []scene.QuadrantItem {
+	if items == nil {
+		return nil
+	}
+	mapped := make([]scene.QuadrantItem, len(items))
+	for i, it := range items {
+		mapped[i] = scene.QuadrantItem{X: it.X, Y: it.Y, Label: it.Label, AccentIndex: it.AccentIndex}
+	}
+	return mapped
+}
+
+// mapTreeNode recursively maps a Tree node and its Children (R14.10, D-127).
+// TreeNode's children are concrete structs (not the SlideNode interface), so
+// this walks the tree directly rather than through mapNode/mapNodes.
+func mapTreeNode(n contracts.TreeNode) scene.TreeNode {
+	var children []scene.TreeNode
+	if n.Children != nil {
+		children = make([]scene.TreeNode, len(n.Children))
+		for i, c := range n.Children {
+			children[i] = mapTreeNode(c)
+		}
+	}
+	return scene.TreeNode{
+		Label:       n.Label,
+		Detail:      n.Detail,
+		Icon:        n.Icon,
+		Children:    children,
+		AccentIndex: n.AccentIndex,
 	}
 }
 

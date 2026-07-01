@@ -135,6 +135,16 @@ func ValidateNodeEnums(n SlideNode) error {
 			checkEnum("orientation", "FlowOrientation", v.Orientation, AllowedFlowOrientation(), true),
 			checkEnum("color", "ColorRole", v.Color, AllowedColorRole(), true),
 		)
+	case *Quadrant:
+		for i, cell := range v.Quadrants {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("quadrants[%d].fill", i), "ColorRole", cell.Fill, AllowedColorRole(), true),
+			)
+		}
+	case *Tree:
+		errs = append(errs,
+			checkEnum("orientation", "FlowOrientation", v.Orientation, AllowedFlowOrientation(), true),
+		)
 	}
 	return errors.Join(errs...)
 }

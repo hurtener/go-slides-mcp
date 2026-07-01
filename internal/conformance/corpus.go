@@ -58,6 +58,8 @@ var Archetypes = []Fixture{
 	{"scrim-cover", scrimCoverDoc},
 	{"timeline", timelineDoc},
 	{"datamark-kpi", dataMarkKPIDoc},
+	{"quadrant", quadrantDoc},
+	{"org-tree", treeDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -505,6 +507,75 @@ func dataMarkKPIDoc() contracts.SlideDoc {
 						&contracts.DataMark{Kind: contracts.DataMarkBars, Values: []float64{0.3, 0.6, 0.9, 0.5}},
 					}},
 				},
+			},
+		},
+	})
+}
+
+// quadrantDoc exercises the Quadrant node (R14.9, D-124): a labeled 2x2
+// prioritization map with all 4 quadrants titled + tinted and 5 plotted
+// items — a modest count that stays clear of the safe area (INV-2
+// zero-overflow, strict).
+func quadrantDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Quadrant", contracts.Slide{
+		ID:        "quadrant",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Prioritization Matrix")},
+			&contracts.Quadrant{
+				AxisX: contracts.QuadrantAxis{LowLabel: "Low Effort", HighLabel: "High Effort"},
+				AxisY: contracts.QuadrantAxis{LowLabel: "Low Impact", HighLabel: "High Impact"},
+				Quadrants: [4]contracts.QuadrantCell{
+					{Title: "Quick Wins", Fill: contracts.ColorSurfaceAlt},
+					{Title: "Big Bets", Fill: contracts.ColorAccentAlt},
+					{Title: "Fill-Ins", Fill: contracts.ColorSurface},
+					{Title: "Money Pits", Fill: contracts.ColorAccentWarm},
+				},
+				Items: []contracts.QuadrantItem{
+					{X: 0.15, Y: 0.85, Label: "Onboarding revamp", AccentIndex: 0},
+					{X: 0.8, Y: 0.9, Label: "Platform rebuild", AccentIndex: 1},
+					{X: 0.2, Y: 0.2, Label: "Docs polish", AccentIndex: 2},
+					{X: 0.75, Y: 0.15, Label: "Legacy migration", AccentIndex: 0},
+					{X: 0.5, Y: 0.5, Label: "API v2", AccentIndex: 1},
+				},
+			},
+		},
+	})
+}
+
+// treeDoc exercises the Tree node (R14.10, D-127): a shallow org chart —
+// root -> 3 children, one with 2 leaves — kept to modest depth/breadth so
+// the layout stays clear of the safe area (INV-2 zero-overflow, strict).
+func treeDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Org Tree", contracts.Slide{
+		ID:        "org-tree",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Org Structure")},
+			&contracts.Tree{
+				Root: contracts.TreeNode{
+					Label:       "CEO",
+					Detail:      "Executive lead",
+					Icon:        "star",
+					AccentIndex: 0,
+					Children: []contracts.TreeNode{
+						{
+							Label:       "VP Engineering",
+							Detail:      "Platform + product",
+							Icon:        "diamond",
+							AccentIndex: 1,
+							Children: []contracts.TreeNode{
+								{Label: "Eng Manager", Icon: "check", AccentIndex: 2},
+								{Label: "Staff Engineer", Icon: "circle", AccentIndex: 2},
+							},
+						},
+						{Label: "VP Sales", Detail: "Revenue + partnerships", Icon: "square", AccentIndex: 2},
+						{Label: "VP People", Detail: "Talent + culture", Icon: "triangle", AccentIndex: 1},
+					},
+				},
+				Orientation: contracts.FlowVertical,
 			},
 		},
 	})
