@@ -93,6 +93,7 @@ func ValidateNode(n contracts.SlideNode) error {
 			errs = append(errs, errors.New("image: empty assetId"))
 		}
 		errs = append(errs, cropErrs(v.Crop)...)
+		errs = append(errs, imageAnnotationErrs(v.Annotations)...)
 	case *contracts.Chart:
 		if v.AssetID == "" {
 			errs = append(errs, errors.New("chart: empty assetId"))
@@ -379,6 +380,28 @@ func cropErrs(c contracts.Crop) []error {
 	}
 	if c.Top+c.Bottom >= 1 {
 		errs = append(errs, errors.New("image: crop top+bottom must be < 1"))
+	}
+	return errs
+}
+
+// imageAnnotationErrs validates an Image's optional R14.17 annotation
+// overlay: every pin/highlight coordinate must be a fraction in [0,1] of the
+// image box. A nil Annotations is valid (no annotations to check).
+func imageAnnotationErrs(a *contracts.ImageAnnotations) []error {
+	if a == nil {
+		return nil
+	}
+	var errs []error
+	frac := func(v float64) bool { return v >= 0 && v <= 1 }
+	for i, p := range a.Pins {
+		if !frac(p.X) || !frac(p.Y) {
+			errs = append(errs, fmt.Errorf("image: annotation pin[%d] x/y out of [0,1]", i))
+		}
+	}
+	for i, h := range a.Highlights {
+		if !frac(h.X) || !frac(h.Y) || !frac(h.W) || !frac(h.H) {
+			errs = append(errs, fmt.Errorf("image: annotation highlight[%d] x/y/w/h out of [0,1]", i))
+		}
 	}
 	return errs
 }

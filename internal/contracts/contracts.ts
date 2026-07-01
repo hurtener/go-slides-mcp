@@ -2445,6 +2445,83 @@ export interface Image {
    * shadow — byte-identical to a pre-R13.11 Image.
    */
   elevation?: ElevationRole;
+  /**
+   * Annotations overlays numbered pins and/or highlight rectangles on the
+   * picture (R14.17). A nil Annotations (the zero value) emits nothing —
+   * byte-identical to a pre-R14.17 Image.
+   */
+  annotations?: ImageAnnotations;
+}
+/**
+ * ImageAnnotations is an optional overlay on an Image (R14.17): numbered
+ * pins at fractional coordinates and/or highlight rectangles around regions,
+ * each drawn as a native soul-styled shape over the picture. Mirror of
+ * pptx-go's scene.ImageAnnotations.
+ */
+export interface ImageAnnotations {
+  /**
+   * Pins are numbered callout markers placed at fractional coordinates of
+   * the image box, each with an optional off-pin caption.
+   */
+  pins?: ImagePin[];
+  /**
+   * Highlights are rectangles (fractions of the image box) outlined to
+   * draw attention to a region.
+   */
+  highlights?: ImageHighlight[];
+}
+/**
+ * ImagePin is a numbered callout marker at (X,Y) in [0,1] of the image box,
+ * with an optional caption drawn beside it and a leader line from the pin to
+ * it. Mirror of pptx-go's scene.ImagePin.
+ */
+export interface ImagePin {
+  /**
+   * X is the pin's horizontal position, a fraction [0,1] of the image box.
+   */
+  x: number /* float64 */;
+  /**
+   * Y is the pin's vertical position, a fraction [0,1] of the image box.
+   */
+  y: number /* float64 */;
+  /**
+   * Label is the pin's number/letter (e.g. "1").
+   */
+  label?: string;
+  /**
+   * Caption is an optional off-pin caption; empty means no caption/leader.
+   */
+  caption?: string;
+  /**
+   * AccentIndex selects the soul accent color for this pin.
+   */
+  accentIndex?: number /* int */;
+}
+/**
+ * ImageHighlight is a rectangle (fractions [0,1] of the image box) outlined
+ * to draw attention to a region. Mirror of pptx-go's scene.ImageHighlight.
+ */
+export interface ImageHighlight {
+  /**
+   * X is the highlight's left edge, a fraction [0,1] of the image box.
+   */
+  x: number /* float64 */;
+  /**
+   * Y is the highlight's top edge, a fraction [0,1] of the image box.
+   */
+  y: number /* float64 */;
+  /**
+   * W is the highlight's width, a fraction [0,1] of the image box.
+   */
+  w: number /* float64 */;
+  /**
+   * H is the highlight's height, a fraction [0,1] of the image box.
+   */
+  h: number /* float64 */;
+  /**
+   * AccentIndex selects the soul accent color for this highlight.
+   */
+  accentIndex?: number /* int */;
 }
 /**
  * CodeBlock is a source-code listing placed from a pre-rasterized image

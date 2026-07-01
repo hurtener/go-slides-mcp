@@ -374,6 +374,35 @@ func mapCrop(c contracts.Crop) scene.Crop {
 	return scene.Crop{Left: c.Left, Top: c.Top, Right: c.Right, Bottom: c.Bottom}
 }
 
+// mapImageAnnotations converts a product ImageAnnotations to the engine's
+// scene.ImageAnnotations 1:1 (R14.17). nil in -> nil out, so an Image with no
+// Annotations stays byte-identical to a pre-R14.17 Image.
+func mapImageAnnotations(a *contracts.ImageAnnotations) *scene.ImageAnnotations {
+	if a == nil {
+		return nil
+	}
+	out := &scene.ImageAnnotations{}
+	for _, p := range a.Pins {
+		out.Pins = append(out.Pins, scene.ImagePin{
+			X:           p.X,
+			Y:           p.Y,
+			Label:       p.Label,
+			Caption:     p.Caption,
+			AccentIndex: p.AccentIndex,
+		})
+	}
+	for _, h := range a.Highlights {
+		out.Highlights = append(out.Highlights, scene.ImageHighlight{
+			X:           h.X,
+			Y:           h.Y,
+			W:           h.W,
+			H:           h.H,
+			AccentIndex: h.AccentIndex,
+		})
+	}
+	return out
+}
+
 // mapDecorationKind converts the wire-level DecorationKind string to the scene
 // enum (preset, asset, or text — R13.9).
 func mapDecorationKind(kind contracts.DecorationKind) scene.DecorationKind {

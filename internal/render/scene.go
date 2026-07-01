@@ -93,6 +93,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Fit:          mapFit(n.Fit),
 			CornerRadius: mapRadiusRole(n.CornerRadius),
 			Elevation:    mapElevationRole(n.Elevation),
+			Annotations:  mapImageAnnotations(n.Annotations),
 		}
 	case *contracts.CodeBlock:
 		return scene.CodeBlock{AssetID: scene.AssetID(n.AssetID), Language: n.Language, Caption: n.Caption}
