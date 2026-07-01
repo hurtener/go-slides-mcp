@@ -60,6 +60,8 @@ var Archetypes = []Fixture{
 	{"datamark-kpi", dataMarkKPIDoc},
 	{"quadrant", quadrantDoc},
 	{"org-tree", treeDoc},
+	{"funnel", funnelDoc},
+	{"cycle", cycleDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -576,6 +578,51 @@ func treeDoc() contracts.SlideDoc {
 					},
 				},
 				Orientation: contracts.FlowVertical,
+			},
+		},
+	})
+}
+
+// funnelDoc exercises the Funnel node (R14.11, D-128): a 4-stage marketing
+// conversion funnel with a value caption on every stage — a modest count
+// that stays clear of the safe area (INV-2 zero-overflow, strict).
+func funnelDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Funnel", contracts.Slide{
+		ID:        "funnel",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Conversion Funnel")},
+			&contracts.Funnel{
+				Stages: []contracts.FunnelStage{
+					{Label: "Visitors", Value: "10,000", AccentIndex: 0},
+					{Label: "Signups", Value: "2,400", AccentIndex: 1},
+					{Label: "Trials", Value: "820", AccentIndex: 2},
+					{Label: "Customers", Value: "380", AccentIndex: 0},
+				},
+			},
+		},
+	})
+}
+
+// cycleDoc exercises the Cycle node (R14.11, D-128): a 5-stage lifecycle
+// loop with a curated icon on every stage — a modest count that stays clear
+// of the safe area (INV-2 zero-overflow, strict).
+func cycleDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Cycle", contracts.Slide{
+		ID:        "cycle",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Product Lifecycle")},
+			&contracts.Cycle{
+				Stages: []contracts.CycleStage{
+					{Label: "Discover", Icon: "star", AccentIndex: 0},
+					{Label: "Plan", Icon: "diamond", AccentIndex: 1},
+					{Label: "Build", Icon: "square", AccentIndex: 2},
+					{Label: "Ship", Icon: "check", AccentIndex: 0},
+					{Label: "Learn", Icon: "circle", AccentIndex: 1},
+				},
 			},
 		},
 	})

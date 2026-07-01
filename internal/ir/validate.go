@@ -128,6 +128,14 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateQuadrant(v)...)
 	case *contracts.Tree:
 		errs = append(errs, validateTree(v)...)
+	case *contracts.Funnel:
+		if len(v.Stages) == 0 {
+			errs = append(errs, errors.New("funnel: needs at least one stage"))
+		}
+	case *contracts.Cycle:
+		if len(v.Stages) == 0 {
+			errs = append(errs, errors.New("cycle: needs at least one stage"))
+		}
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))

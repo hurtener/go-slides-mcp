@@ -1589,6 +1589,14 @@ export const KindQuadrant: Kind = "quadrant";
  * mirroring pptx-go's scene.Tree.
  */
 export const KindTree: Kind = "tree";
+export const KindFunnel = "funnel";
+export const KindCycle = "cycle";
+/**
+ * Node kinds added in R14.11 — the Funnel (staged conversion diagram) and
+ * Cycle (closed-loop process diagram) nodes (D-128), mirroring pptx-go's
+ * scene.Funnel and scene.Cycle.
+ */
+export type Kind = typeof KindFunnel | typeof KindCycle;
 /**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
@@ -1868,6 +1876,39 @@ export interface CardSection {
   body?: SlideNode[];
 }
 /**
+ * Cycle is a closed-loop process diagram (R14.11, D-128): N stages placed
+ * evenly on a ring with directional connectors showing the loop. Native
+ * shapes; pure integer-EMU layout → byte-identical across renders/worker
+ * counts. Mirror of pptx-go's scene.Cycle. A deck with no Cycle is
+ * byte-identical (a new node, absent until used).
+ */
+export interface Cycle {
+  /**
+   * Stages are the ring's nodes, placed evenly around the loop in order.
+   */
+  stages?: CycleStage[];
+}
+/**
+ * CycleStage is one node on a Cycle ring (D-128): a label + optional
+ * curated icon + a soul-driven series accent color.
+ */
+export interface CycleStage {
+  /**
+   * Label is the stage's headline text.
+   */
+  label?: string;
+  /**
+   * Icon is an optional curated icon name drawn inside the stage node.
+   */
+  icon?: string;
+  /**
+   * AccentIndex selects a soul-driven series accent color for the stage
+   * node (0 = the first accent). A plain int passthrough — 0 is a real
+   * value (the first accent), not "unset".
+   */
+  accentIndex?: number /* int */;
+}
+/**
  * DataMarkKind selects a DataMark's render shape (mirrors pptx-go's
  * scene.DataMarkKind, an int enum — the product mirror is a string enum per
  * the D-054-adjacent "string enum, not int" convention).
@@ -2119,6 +2160,41 @@ export interface Flow {
    * Connector is the connector style between steps.
    */
   connector?: ConnectorKind;
+}
+/**
+ * Funnel is a staged conversion/drop-off diagram (R14.11, D-128): N stages
+ * rendered as progressively narrowing bands, top to bottom, each with a
+ * label and an optional value caption. Native shapes; pure integer-EMU
+ * layout → byte-identical across renders/worker counts. Mirror of pptx-go's
+ * scene.Funnel. A deck with no Funnel is byte-identical (a new node, absent
+ * until used).
+ */
+export interface Funnel {
+  /**
+   * Stages are the funnel's bands, top (widest) to bottom (narrowest).
+   */
+  stages?: FunnelStage[];
+}
+/**
+ * FunnelStage is one band of a Funnel (D-128): a label + optional value
+ * caption + a soul-driven series accent color.
+ */
+export interface FunnelStage {
+  /**
+   * Label is the stage's headline text.
+   */
+  label?: string;
+  /**
+   * Value is an optional caption (e.g. a count or percentage) drawn
+   * alongside the label.
+   */
+  value?: string;
+  /**
+   * AccentIndex selects a soul-driven series accent color for the stage
+   * band (0 = the first accent). A plain int passthrough — 0 is a real
+   * value (the first accent), not "unset".
+   */
+  accentIndex?: number /* int */;
 }
 /**
  * Grid lays out children in a column grid. Columns is 2..4; Cells length is a
