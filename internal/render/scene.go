@@ -2,7 +2,6 @@ package render
 
 import (
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
-	"github.com/hurtener/pptx-go/pptx"
 	"github.com/hurtener/pptx-go/scene"
 )
 
@@ -87,20 +86,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.Chart:
 		return scene.Chart{AssetID: scene.AssetID(n.AssetID), Caption: n.Caption}
 	case *contracts.Decoration:
-		return scene.Decoration{
-			Kind:     mapDecorationKind(n.Kind),
-			Preset:   n.Preset,
-			AssetID:  scene.AssetID(n.AssetID),
-			Layer:    mapLayer(n.Layer),
-			Anchor:   mapAnchor(n.Anchor),
-			Offset:   mapPosition(n.Offset),
-			Size:     mapSize(n.Size),
-			Bleed:    n.Bleed,
-			Opacity:  n.Opacity,
-			Rotation: n.Rotation,
-			Color:    mapColorRolePtr(n.Color),
-			Pitch:    pptx.Pt(n.Pitch),
-		}
+		return mapDecoration(*n)
 	case *contracts.TwoColumn:
 		return scene.TwoColumn{
 			Ratio:     mapColumnRatio(n.Ratio),
@@ -130,6 +116,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			HeaderFill:  mapColorRolePtr(n.HeaderFill),
 			StatusDot:   mapColorRolePtr(n.StatusDot),
 			Watermark:   n.Watermark,
+			Backdrop:    mapDecorationPtr(n.Backdrop),
 		}
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}

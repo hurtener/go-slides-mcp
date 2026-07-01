@@ -9,6 +9,9 @@ type DecorationKind string
 const (
 	DecorationPreset DecorationKind = "preset"
 	DecorationAsset  DecorationKind = "asset"
+	// DecorationText renders an oversized, low-opacity ghost number/word
+	// behind body content (R13.9) — e.g. a large "03" watermark.
+	DecorationText DecorationKind = "text"
 )
 
 // Layer selects a decoration's z-order layer (mirrors pptx-go's
@@ -59,6 +62,13 @@ type Decoration struct {
 	// at this pitch so a full-bleed texture keeps a consistent density
 	// (R13.7). 0 keeps the preset's legacy fixed count — byte-identical.
 	Pitch float64 `json:"pitch,omitempty"`
+	// Text is the watermark string for `decorationKind:"text"` (an oversized
+	// ghost number/word, e.g. "03") — R13.9. Required for text kind; ignored
+	// otherwise.
+	Text string `json:"text,omitempty"`
+	// FontSize is the watermark text size in POINTS for text kind (R13.9);
+	// 0 uses a box-height "fill the box" default. Ignored by other kinds.
+	FontSize float64 `json:"fontSize,omitempty"`
 }
 
 func (Decoration) slideNodeKind() Kind { return KindDecoration }

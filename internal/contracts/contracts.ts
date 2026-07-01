@@ -1818,6 +1818,12 @@ export interface Card {
    * to draw no watermark.
    */
   watermark?: string;
+  /**
+   * Backdrop is a decoration drawn behind the card's box before its fill
+   * (R13.10) — a focal glow/halo that tracks the card; typically a
+   * center-anchored, bleeding `radial_glow`. nil = none, byte-identical.
+   */
+  backdrop?: Decoration;
 }
 /**
  * CardSection is a top-level card accepting grids, two-columns, or nested
@@ -1848,6 +1854,11 @@ export const DecorationPreset: DecorationKind = "preset";
  * Decoration kinds (wire values per compose-a-scene).
  */
 export const DecorationAsset: DecorationKind = "asset";
+/**
+ * DecorationText renders an oversized, low-opacity ghost number/word
+ * behind body content (R13.9) — e.g. a large "03" watermark.
+ */
+export const DecorationText: DecorationKind = "text";
 /**
  * Layer selects a decoration's z-order layer (mirrors pptx-go's
  * scene.Layer).
@@ -1922,6 +1933,17 @@ export interface Decoration {
    * (R13.7). 0 keeps the preset's legacy fixed count — byte-identical.
    */
   pitch?: number /* float64 */;
+  /**
+   * Text is the watermark string for `decorationKind:"text"` (an oversized
+   * ghost number/word, e.g. "03") — R13.9. Required for text kind; ignored
+   * otherwise.
+   */
+  text?: string;
+  /**
+   * FontSize is the watermark text size in POINTS for text kind (R13.9);
+   * 0 uses a box-height "fill the box" default. Ignored by other kinds.
+   */
+  fontSize?: number /* float64 */;
 }
 /**
  * Divider is a horizontal rule with surrounding spacing. Renders as native
