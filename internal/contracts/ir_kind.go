@@ -75,6 +75,13 @@ const (
 	KindCycle  Kind = "cycle"
 )
 
+// Node kind added in R14.7 — the LogoWall (N-up grid of logo assets, with an
+// optional uniform recolor tone) node (D-125), mirroring pptx-go's
+// scene.LogoWall. Asset-bearing.
+const (
+	KindLogoWall Kind = "logo_wall"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

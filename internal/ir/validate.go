@@ -136,6 +136,8 @@ func ValidateNode(n contracts.SlideNode) error {
 		if len(v.Stages) == 0 {
 			errs = append(errs, errors.New("cycle: needs at least one stage"))
 		}
+	case *contracts.LogoWall:
+		errs = append(errs, validateLogoWall(v))
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -343,6 +345,23 @@ func validateTree(t *contracts.Tree) []error {
 		errs = append(errs, errors.New("tree: root needs a label"))
 	}
 	return errs
+}
+
+// validateLogoWall enforces LogoWall's structural rules (R14.7, D-125): at
+// least one logo, and every logo needs an AssetID (mirroring the engine's
+// warn-don't-fail behavior only for a resolvable-but-missing asset — an
+// empty AssetID is a Stage-1 hard error, not a render-time warning).
+func validateLogoWall(l *contracts.LogoWall) error {
+	var errs []error
+	if len(l.Logos) == 0 {
+		errs = append(errs, errors.New("logo_wall: needs at least one logo"))
+	}
+	for i, logo := range l.Logos {
+		if logo.AssetID == "" {
+			errs = append(errs, fmt.Errorf("logo_wall: logo[%d] empty assetId", i))
+		}
+	}
+	return errors.Join(errs...)
 }
 
 func cropErrs(c contracts.Crop) []error {

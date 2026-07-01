@@ -299,6 +299,18 @@ func AllowedDataMarkKind() []DataMarkKind {
 // strings — for inclusion in an error message.
 func (DataMarkKind) allowedStrings() []string { return stringsFrom(AllowedDataMarkKind()) }
 
+// AllowedLogoToneKind returns the closed set of LogoToneKind wire values
+// (R14.7, D-125). The empty string (LogoToneNone) is excluded from this list
+// but is accepted by the validator (acceptEmpty=true), mirroring the
+// AllowedColumnJoin pattern.
+func AllowedLogoToneKind() []LogoToneKind {
+	return []LogoToneKind{LogoToneNone, LogoToneMono, LogoToneBrand}
+}
+
+// allowedStrings returns the closed set of LogoToneKind wire values as plain
+// strings — for inclusion in an error message.
+func (LogoToneKind) allowedStrings() []string { return stringsFrom(AllowedLogoToneKind()) }
+
 // AllowedLayer returns the closed set of Layer wire values.
 func AllowedLayer() []Layer {
 	return []Layer{

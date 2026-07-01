@@ -1598,6 +1598,12 @@ export const KindCycle = "cycle";
  */
 export type Kind = typeof KindFunnel | typeof KindCycle;
 /**
+ * Node kind added in R14.7 — the LogoWall (N-up grid of logo assets, with an
+ * optional uniform recolor tone) node (D-125), mirroring pptx-go's
+ * scene.LogoWall. Asset-bearing.
+ */
+export const KindLogoWall: Kind = "logo_wall";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -2336,6 +2342,67 @@ export interface List {
   items?: ListItem[];
 }
 /**
+ * LogoToneKind selects a LogoWall's uniform recolor treatment (R14.7,
+ * D-125). The product mirror of pptx-go's scene.LogoToneKind (an int enum)
+ * is a string enum per the "string enum, not int" convention.
+ */
+export type LogoToneKind = string;
+/**
+ * LogoToneNone keeps each logo's natural colors.
+ */
+export const LogoToneNone: LogoToneKind = "";
+/**
+ * LogoToneMono recolors every logo to a brand-neutral two-tone so a
+ * mixed set reads as one cohesive, monochrome wall.
+ */
+export const LogoToneMono: LogoToneKind = "mono";
+/**
+ * LogoToneBrand recolors every logo to the accent two-tone.
+ */
+export const LogoToneBrand: LogoToneKind = "brand";
+/**
+ * LogoWall is an N-up grid of logo assets normalized to a common cell,
+ * optionally recolored to a uniform tone so a mixed-style set reads as one
+ * cohesive wall (R14.7, D-125). Each logo is contained (not cropped) and
+ * centered in its cell. Asset-bearing (resolved via the AssetResolver); a
+ * missing logo warns and is skipped. Mirror of pptx-go's scene.LogoWall. A
+ * deck with no LogoWall is byte-identical (a new node, absent until used).
+ */
+export interface LogoWall {
+  /**
+   * Logos are the wall's logo entries, in display order.
+   */
+  logos?: LogoEntry[];
+  /**
+   * Columns is the number of logos per row (>=1; 0 defaults to a pinned
+   * column count at render time).
+   */
+  columns?: number /* int */;
+  /**
+   * Tone selects the wall's uniform recolor treatment: "" (none) |
+   * "mono" | "brand". Empty = each logo keeps its natural colors.
+   */
+  tone?: LogoToneKind;
+  /**
+   * Caption is an optional heading ("Trusted by", "Integrates with").
+   */
+  caption?: string;
+}
+/**
+ * LogoEntry is one logo in a LogoWall (D-125): an asset reference + alt
+ * text.
+ */
+export interface LogoEntry {
+  /**
+   * AssetID references the logo image via the AssetResolver.
+   */
+  assetId?: AssetID;
+  /**
+   * Alt is the logo's accessible alt text.
+   */
+  alt?: string;
+}
+/**
  * Image is a picture placed from caller-supplied bytes resolved by
  * AssetID. Renders as a PPTX picture (D-011). Mirror of pptx-go's
  * scene.Image. Stage-1 validation: non-empty AssetID and crop bounds (each
@@ -2613,6 +2680,39 @@ export interface Quote {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+  /**
+   * Testimonial enrichments (R14.5, D-120). Each zero value omits its
+   * element, so a Quote with only Text+Attribution renders byte-for-byte
+   * as before. When any of these is set the enriched testimonial layout
+   * runs: an optional oversized quotation Mark behind the text, an
+   * optional rounded Avatar, a structured attribution (Name/Role/Company),
+   * and an optional customer Logo.
+   * Mark draws a large, low-emphasis quotation glyph behind the quote text.
+   */
+  mark?: boolean;
+  /**
+   * AvatarAssetID is the author's avatar (resolved via the AssetResolver,
+   * drawn as a rounded picture); "" = no avatar.
+   */
+  avatarAssetId?: AssetID;
+  /**
+   * AttributionName is the structured attribution's name; when set it
+   * supersedes the flat Attribution string in the enriched layout.
+   */
+  attributionName?: string;
+  /**
+   * AttributionRole is the structured attribution's role/title.
+   */
+  attributionRole?: string;
+  /**
+   * AttributionCompany is the structured attribution's company/org.
+   */
+  attributionCompany?: string;
+  /**
+   * LogoAssetID is the customer/brand logo (resolved via the
+   * AssetResolver); "" = no logo.
+   */
+  logoAssetId?: AssetID;
 }
 /**
  * DeltaTone selects the color direction of a Stat's delta (mirrors

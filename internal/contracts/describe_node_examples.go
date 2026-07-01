@@ -103,9 +103,18 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 		return &Divider{Spacing: SpaceMD}, true
 
 	case KindQuote:
+		// Quote testimonial enrichment (R14.5, D-120): Mark + AvatarAssetID +
+		// structured attribution (Name/Role/Company) + LogoAssetID, so the
+		// round-trip covers every field alongside the plain Text/Attribution.
 		return &Quote{
-			Text:        RichText{{Text: "The best way to predict the future is to invent it."}},
-			Attribution: "Alan Kay",
+			Text:               RichText{{Text: "The best way to predict the future is to invent it."}},
+			Attribution:        "Alan Kay",
+			Mark:               true,
+			AvatarAssetID:      "avatar-alan-kay",
+			AttributionName:    "Alan Kay",
+			AttributionRole:    "Computer Scientist",
+			AttributionCompany: "Xerox PARC",
+			LogoAssetID:        "logo-xerox-parc",
 		}, true
 
 	case KindChip:
@@ -308,6 +317,21 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 				{Label: "Ship", Icon: "check", AccentIndex: 2},
 				{Label: "Learn", Icon: "circle", AccentIndex: 0},
 			},
+		}, true
+
+	case KindLogoWall:
+		// LogoWall (R14.7, D-125): 3 logos with AssetID+Alt, a pinned
+		// 3-column grid, a mono tone, and a caption — covering every field
+		// on round-trip.
+		return &LogoWall{
+			Logos: []LogoEntry{
+				{AssetID: "logo-acme", Alt: "Acme Corp"},
+				{AssetID: "logo-globex", Alt: "Globex"},
+				{AssetID: "logo-initech", Alt: "Initech"},
+			},
+			Columns: 3,
+			Tone:    LogoToneMono,
+			Caption: "Trusted by",
 		}, true
 
 	default:

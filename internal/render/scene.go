@@ -59,7 +59,17 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.Divider:
 		return scene.Divider{Spacing: mapSpaceRole(n.Spacing)}
 	case *contracts.Quote:
-		return scene.Quote{Text: mapRichText(n.Text), Attribution: n.Attribution, Align: mapHAlign(n.Align)}
+		return scene.Quote{
+			Text:               mapRichText(n.Text),
+			Attribution:        n.Attribution,
+			Align:              mapHAlign(n.Align),
+			Mark:               n.Mark,
+			AvatarAssetID:      scene.AssetID(n.AvatarAssetID),
+			AttributionName:    n.AttributionName,
+			AttributionRole:    n.AttributionRole,
+			AttributionCompany: n.AttributionCompany,
+			LogoAssetID:        scene.AssetID(n.LogoAssetID),
+		}
 	case *contracts.Callout:
 		return scene.Callout{Kind: mapCalloutKind(n.Kind), Title: n.Title, Body: mapRichText(n.Body)}
 	case *contracts.Chip:
@@ -149,9 +159,28 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.Funnel{Stages: mapFunnelStages(n.Stages)}
 	case *contracts.Cycle:
 		return scene.Cycle{Stages: mapCycleStages(n.Stages)}
+	case *contracts.LogoWall:
+		return scene.LogoWall{
+			Logos:   mapLogoEntries(n.Logos),
+			Columns: n.Columns,
+			Tone:    mapLogoToneKind(n.Tone),
+			Caption: n.Caption,
+		}
 	default:
 		return nil
 	}
+}
+
+// mapLogoEntries maps a LogoWall's logo entries 1:1 (R14.7, D-125).
+func mapLogoEntries(logos []contracts.LogoEntry) []scene.LogoEntry {
+	if logos == nil {
+		return nil
+	}
+	mapped := make([]scene.LogoEntry, len(logos))
+	for i, l := range logos {
+		mapped[i] = scene.LogoEntry{AssetID: scene.AssetID(l.AssetID), Alt: l.Alt}
+	}
+	return mapped
 }
 
 // mapQuadrantAxis maps a Quadrant axis's low/high end captions (R14.9,

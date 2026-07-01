@@ -203,6 +203,22 @@ func mapDataMarkKind(kind contracts.DataMarkKind) scene.DataMarkKind {
 	}
 }
 
+// mapLogoToneKind maps the product LogoToneKind string enum to the engine's
+// int enum (R14.7, D-125). The empty string ("" — unset) maps to the
+// engine's zero value LogoToneNone, mirroring the engine default.
+func mapLogoToneKind(tone contracts.LogoToneKind) scene.LogoToneKind {
+	switch tone {
+	case contracts.LogoToneMono:
+		return scene.LogoToneMono
+	case contracts.LogoToneBrand:
+		return scene.LogoToneBrand
+	case contracts.LogoToneNone:
+		fallthrough
+	default:
+		return scene.LogoToneNone
+	}
+}
+
 func mapConnectorKind(kind contracts.ConnectorKind) scene.ConnectorKind {
 	switch kind {
 	case contracts.ConnectorArrowDashed:
