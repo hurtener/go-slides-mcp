@@ -73,6 +73,11 @@ type CreateDeckOutput struct {
 	Title string `json:"title,omitempty"`
 	// SoulID is the design soul applied to the deck.
 	SoulID string `json:"soulId,omitempty"`
+	// BrandSoulEstablished reports whether the deck is on a real brand soul
+	// rather than the built-in Deckard White default (R8.8). False means the
+	// deck is on the built-in default soul, not a brand soul — run
+	// bootstrap_soul to establish one.
+	BrandSoulEstablished bool `json:"brandSoulEstablished"`
 	// Slides is the ordered preview summary of the deck's slides.
 	Slides []SlideSummary `json:"slides,omitempty"`
 }

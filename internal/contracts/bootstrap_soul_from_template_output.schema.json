@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "soulId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "tokenCount": {
+      "type": "integer"
+    },
+    "extractedColors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "soulId",
+    "name",
+    "tokenCount"
+  ],
+  "additionalProperties": false
+}

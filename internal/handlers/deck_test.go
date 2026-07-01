@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"strings"
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/asset"
@@ -83,6 +84,48 @@ func TestDeckHandlersRoundTripThroughStore(t *testing.T) {
 	}
 	if _, err := h.deps.Store.GetDeck(stored.ID); !errors.Is(err, deck.ErrNotFound) {
 		t.Fatalf("store GetDeck after delete err = %v, want ErrNotFound", err)
+	}
+}
+
+// TestCreateDeckBrandSoulSignal proves R8.8: creating a deck on the built-in
+// default soul (empty or "deckard-white" SoulID) reports
+// BrandSoulEstablished == false and the Text carries the non-fatal notice; a
+// deck created on a real brand soul reports true with no notice.
+func TestCreateDeckBrandSoulSignal(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	defaultDeck, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Default Soul Deck"})
+	if err != nil {
+		t.Fatalf("createDeck (default): %v", err)
+	}
+	if defaultDeck.Structured.BrandSoulEstablished {
+		t.Fatal("createDeck (empty SoulID) BrandSoulEstablished = true, want false")
+	}
+	if !strings.Contains(defaultDeck.Text, noBrandSoulNotice) {
+		t.Fatalf("createDeck (empty SoulID) Text = %q, want it to contain the no-brand-soul notice", defaultDeck.Text)
+	}
+
+	explicitDefault, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Explicit Default Soul Deck", SoulID: soul.DeckardWhiteID})
+	if err != nil {
+		t.Fatalf("createDeck (explicit default): %v", err)
+	}
+	if explicitDefault.Structured.BrandSoulEstablished {
+		t.Fatal("createDeck (deckard-white SoulID) BrandSoulEstablished = true, want false")
+	}
+	if !strings.Contains(explicitDefault.Text, noBrandSoulNotice) {
+		t.Fatalf("createDeck (deckard-white SoulID) Text = %q, want it to contain the no-brand-soul notice", explicitDefault.Text)
+	}
+
+	brandDeck, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Brand Soul Deck", SoulID: "soul_acme"})
+	if err != nil {
+		t.Fatalf("createDeck (brand): %v", err)
+	}
+	if !brandDeck.Structured.BrandSoulEstablished {
+		t.Fatal("createDeck (brand SoulID) BrandSoulEstablished = false, want true")
+	}
+	if strings.Contains(brandDeck.Text, noBrandSoulNotice) {
+		t.Fatalf("createDeck (brand SoulID) Text = %q, want no no-brand-soul notice", brandDeck.Text)
 	}
 }
 

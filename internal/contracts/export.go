@@ -4,6 +4,15 @@ package contracts
 type ExportDeckInput struct {
 	// DeckID addresses the deck by stable ID or slug.
 	DeckID string `json:"deckId"`
+	// Autofit opts into auto density-fit before rendering (R10.11). When
+	// true, the export grows container-bearing slides (grid, two_column,
+	// bento, table, card_section) to fill the body frame so content-light
+	// slides don't read sparse — it only redistributes existing leftover
+	// slack, so it can never cause overflow. Off by default: a false (or
+	// omitted) Autofit renders byte-identical to pre-R10.11 exports. This
+	// flag is the entry point for the broader R10.11 autofit ladder; today
+	// it applies the fill pass only.
+	Autofit bool `json:"autofit,omitempty"`
 }
 
 // ExportStats is the structured render summary for one exported deck.
@@ -22,6 +31,15 @@ type ExportDeckOutput struct {
 	Path string `json:"path"`
 	// ResourceURI is the readable deck:// resource URI for the exported .pptx file.
 	ResourceURI string `json:"resourceUri"`
+	// SoulID is the design soul actually used to render the export (R8.8):
+	// the deck's stored SoulID when it resolves to a brand soul, otherwise
+	// the built-in Deckard White default id.
+	SoulID string `json:"soulId,omitempty"`
+	// BrandSoulEstablished reports whether the export rendered on a real
+	// brand soul rather than the built-in Deckard White default (R8.8).
+	// False means the deck rendered on the default soul — run bootstrap_soul
+	// to establish a brand soul before exporting.
+	BrandSoulEstablished bool `json:"brandSoulEstablished"`
 	// Stats is the render summary for the export.
 	Stats ExportStats `json:"stats"`
 }

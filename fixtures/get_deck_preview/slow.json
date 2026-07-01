@@ -12,6 +12,7 @@
       "tokens": { "app-accent": "#7c3aed", "app-accent-text": "#6d28d9", "app-accent-hover": "#6d28d9", "app-accent-soft": "rgba(124,58,237,0.12)" }
     },
     "deck": { "deckId": "deck_acme", "title": "Acme Quarterly", "slideCount": 3, "soulId": "deckard-white" },
+    "brandSoulEstablished": false,
     "resourceUri": "deck://export/deck_acme.pptx",
     "slides": [
       { "id": "a1", "index": 0, "layout": "cover", "title": "Acme Quarterly", "nodes": [ { "kind": "hero", "text": "Acme Quarterly", "detail": "Confidential" } ] },

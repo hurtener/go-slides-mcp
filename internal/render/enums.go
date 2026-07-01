@@ -483,10 +483,11 @@ func mapBackground(b contracts.Background) scene.Background {
 		grad[1] = mapColorRole(b.Gradient[1])
 	}
 	return scene.Background{
-		Kind:     mapBackgroundKind(b.Kind),
-		Color:    mapColorRole(b.Color),
-		Gradient: grad,
-		Angle:    b.Angle,
-		AssetID:  scene.AssetID(b.AssetID),
+		Kind:         mapBackgroundKind(b.Kind),
+		Color:        mapColorRole(b.Color),
+		Gradient:     grad,
+		Angle:        b.Angle,
+		AssetID:      scene.AssetID(b.AssetID),
+		GradientName: b.GradientName,
 	}
 }

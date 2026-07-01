@@ -1,6 +1,7 @@
 package render
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
@@ -213,7 +214,7 @@ func TestMapSlideZeroVariantBackground(t *testing.T) {
 	if got.Variant != scene.VariantLight {
 		t.Errorf("zero Variant should map to VariantLight, got %v", got.Variant)
 	}
-	if got.Background != (scene.Background{}) {
+	if !reflect.DeepEqual(got.Background, scene.Background{}) {
 		t.Errorf("nil Background should map to zero scene.Background (BackgroundNone), got %+v", got.Background)
 	}
 }

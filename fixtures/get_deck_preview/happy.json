@@ -7,6 +7,7 @@
     "state": "ready",
     "brand": { "title": "Deckard Slides", "defaultTheme": "deckard-white", "allowThemeSwitch": true },
     "deck": { "deckId": "deck_platform_review", "title": "Platform Review", "slideCount": 6, "soulId": "deckard-white" },
+    "brandSoulEstablished": false,
     "resourceUri": "deck://export/deck_platform_review.pptx",
     "slides": [
       { "id": "s1", "index": 0, "layout": "cover", "title": "Platform Review",

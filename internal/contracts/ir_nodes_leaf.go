@@ -12,6 +12,10 @@ type Hero struct {
 	// Align overrides the slide's horizontal alignment for this block:
 	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
 	Align HAlign `json:"align,omitempty"`
+	// AutoFit shrinks the title to fit its box instead of clipping/overflowing
+	// when the text is long (shrink-to-fit). Default false = the title renders
+	// at its full type size.
+	AutoFit bool `json:"autoFit,omitempty"`
 }
 
 func (Hero) slideNodeKind() Kind { return KindHero }
@@ -30,6 +34,10 @@ type Heading struct {
 	// Align overrides the slide's horizontal alignment for this block:
 	// "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
 	Align HAlign `json:"align,omitempty"`
+	// AutoFit shrinks the heading text to fit its box instead of
+	// clipping/overflowing when the text is long (shrink-to-fit). Default
+	// false = the heading renders at its full type size.
+	AutoFit bool `json:"autoFit,omitempty"`
 }
 
 func (Heading) slideNodeKind() Kind { return KindHeading }

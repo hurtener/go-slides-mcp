@@ -674,6 +674,13 @@ export interface CreateDeckOutput {
    */
   soulId?: string;
   /**
+   * BrandSoulEstablished reports whether the deck is on a real brand soul
+   * rather than the built-in Deckard White default (R8.8). False means the
+   * deck is on the built-in default soul, not a brand soul — run
+   * bootstrap_soul to establish one.
+   */
+  brandSoulEstablished: boolean;
+  /**
    * Slides is the ordered preview summary of the deck's slides.
    */
   slides?: SlideSummary[];
@@ -1225,6 +1232,17 @@ export interface ExportDeckInput {
    * DeckID addresses the deck by stable ID or slug.
    */
   deckId: string;
+  /**
+   * Autofit opts into auto density-fit before rendering (R10.11). When
+   * true, the export grows container-bearing slides (grid, two_column,
+   * bento, table, card_section) to fill the body frame so content-light
+   * slides don't read sparse — it only redistributes existing leftover
+   * slack, so it can never cause overflow. Off by default: a false (or
+   * omitted) Autofit renders byte-identical to pre-R10.11 exports. This
+   * flag is the entry point for the broader R10.11 autofit ladder; today
+   * it applies the fill pass only.
+   */
+  autofit?: boolean;
 }
 /**
  * ExportStats is the structured render summary for one exported deck.
@@ -1255,6 +1273,19 @@ export interface ExportDeckOutput {
    * ResourceURI is the readable deck:// resource URI for the exported .pptx file.
    */
   resourceUri: string;
+  /**
+   * SoulID is the design soul actually used to render the export (R8.8):
+   * the deck's stored SoulID when it resolves to a brand soul, otherwise
+   * the built-in Deckard White default id.
+   */
+  soulId?: string;
+  /**
+   * BrandSoulEstablished reports whether the export rendered on a real
+   * brand soul rather than the built-in Deckard White default (R8.8).
+   * False means the deck rendered on the default soul — run bootstrap_soul
+   * to establish a brand soul before exporting.
+   */
+  brandSoulEstablished: boolean;
   /**
    * Stats is the render summary for the export.
    */
@@ -1939,6 +1970,12 @@ export interface Hero {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+  /**
+   * AutoFit shrinks the title to fit its box instead of clipping/overflowing
+   * when the text is long (shrink-to-fit). Default false = the title renders
+   * at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Heading is a typed heading line at a 1..6 depth. Mirror of scene.Heading.
@@ -1957,6 +1994,12 @@ export interface Heading {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+  /**
+   * AutoFit shrinks the heading text to fit its box instead of
+   * clipping/overflowing when the text is long (shrink-to-fit). Default
+   * false = the heading renders at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Prose is body text: an ordered list of paragraphs, each a RichText. Mirror
@@ -2249,6 +2292,13 @@ export interface Stat {
    * color) | "down" (error color). Ignored when Delta is empty.
    */
   deltaTone?: DeltaTone;
+  /**
+   * AutoFit shrinks the Value (the big-number display run) to fit its box
+   * instead of clipping/overflowing when a long number/price would
+   * otherwise overflow (shrink-to-fit). Default false = the Value renders
+   * at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Table is a grid of cells with a header row and a caption. Renders as native
@@ -2623,6 +2673,13 @@ export interface DeckPreviewOutput {
    * Deck is the deck-level summary.
    */
   deck: DeckSummary;
+  /**
+   * BrandSoulEstablished reports whether the previewed deck is on a real
+   * brand soul rather than the built-in Deckard White default (R8.8).
+   * False means the deck renders in the built-in default soul — run
+   * bootstrap_soul to establish a brand soul.
+   */
+  brandSoulEstablished: boolean;
   /**
    * Slides are the per-slide thumbnail descriptors in deck order.
    */
@@ -3263,6 +3320,122 @@ export interface BootstrapSoulInput {
    * MonoFont overrides the mono and code font family.
    */
   monoFont?: string;
+  /**
+   * Palette is an optional complete color palette covering every surface,
+   * text, and extension token in one call. Unset keys inherit Deckard White
+   * byte-for-byte; an unknown key is a typed error.
+   */
+  palette?: BootstrapPalette;
+  /**
+   * DarkPalette is an optional soul-driven VariantDark color override set.
+   * Unset leaves every VariantDark slide on the engine's pinned neutral-gray
+   * dark default, byte-identical.
+   */
+  darkPalette?: BootstrapDarkPalette;
+  /**
+   * Gradients is an optional set of named brand gradients (R8.5). Each is
+   * registered on the soul under its Name and requested at slide-authoring
+   * time by Background.gradientName. Unset/empty leaves the soul with no
+   * named gradients, byte-identical to today. Bootstrap-only: there is no
+   * refine_soul path for gradients (a structured stop list does not fit the
+   * flat category/token/value refine shape).
+   */
+  gradients?: BootstrapGradient[];
+}
+/**
+ * BootstrapGradient is one named brand gradient definition for bootstrap_soul
+ * (R8.5), requested at slide-authoring time by a Background's gradientName.
+ */
+export interface BootstrapGradient {
+  /**
+   * Name is the gradient's stable identifier (e.g. "heroDark"), requested
+   * by a slide Background's gradientName. Must be non-empty and unique
+   * among the gradients in one bootstrap_soul call.
+   */
+  name: string;
+  /**
+   * Stops is the ordered color-stop list (2..8 stops), each Pos strictly
+   * ascending in [0,1] (0 = gradient start, 1 = gradient end).
+   */
+  stops: BootstrapGradientStop[];
+  /**
+   * Angle is the linear gradient angle in degrees clockwise from the
+   * positive x-axis (0° = left-to-right, 90° = top-to-bottom). Ignored
+   * when Radial is true.
+   */
+  angle?: number /* int */;
+  /**
+   * Radial selects a radial wash from the slide centre outward instead of
+   * a linear gradient; when true, Angle is ignored.
+   */
+  radial?: boolean;
+}
+/**
+ * BootstrapGradientStop is one color stop within a BootstrapGradient. Exactly
+ * one of ColorHex or ColorRole must be set per stop.
+ */
+export interface BootstrapGradientStop {
+  /**
+   * Pos is the stop position along the gradient axis, in [0,1].
+   */
+  pos: number /* float64 */;
+  /**
+   * ColorHex pins this stop to an exact six-digit hex color (no '#'),
+   * unaffected by a light/dark variant swap. Mutually exclusive with
+   * ColorRole — set exactly one per stop.
+   */
+  colorHex?: string;
+  /**
+   * ColorRole names a surface-role token (canvas, surface, surfaceAlt,
+   * accent, accentAlt, accentWarm, success, warning, error, info) whose
+   * resolved color follows the active theme/variant. Mutually exclusive
+   * with ColorHex — set exactly one per stop.
+   */
+  colorRole?: string;
+}
+/**
+ * BootstrapDarkPalette is an optional brand dark-mode color override set for
+ * bootstrap_soul (R8.3). Each map is keyed by the same token names
+ * refine_soul validates; an unset map leaves the corresponding VariantDark
+ * roles on the engine's pinned neutral-gray default.
+ */
+export interface BootstrapDarkPalette {
+  /**
+   * DarkSurfaces maps surface-role tokens to six-digit hex strings for
+   * VariantDark slides. Valid keys: canvas, surface, surfaceAlt, accent,
+   * accentAlt, accentWarm, success, warning, error, info.
+   */
+  darkSurfaces?: { [key: string]: string};
+  /**
+   * DarkText maps text-role tokens to six-digit hex strings for VariantDark
+   * slides. Valid keys: primary, secondary, tertiary, inverse, muted,
+   * accent, accentAlt, success, warning, error.
+   */
+  darkText?: { [key: string]: string};
+}
+/**
+ * BootstrapPalette is a complete optional brand color palette for
+ * bootstrap_soul. Each map is keyed by the same token names refine_soul
+ * validates.
+ */
+export interface BootstrapPalette {
+  /**
+   * Surfaces maps surface-role tokens to six-digit hex strings. Valid keys:
+   * canvas, surface, surfaceAlt, accent, accentAlt, accentWarm, success,
+   * warning, error, info.
+   */
+  surfaces?: { [key: string]: string};
+  /**
+   * Text maps text-role tokens to six-digit hex strings. Valid keys: primary,
+   * secondary, tertiary, inverse, muted, accent, accentAlt, success, warning,
+   * error.
+   */
+  text?: { [key: string]: string};
+  /**
+   * Extensions maps non-native extension tokens to six-digit hex strings.
+   * Valid keys: border, borderStrong, accentSoft.
+   */
+  extensions?: { [key: string]: string};
 }
 /**
  * BootstrapSoulOutput is the structured result for bootstrap_soul.
@@ -3286,11 +3459,62 @@ export interface BootstrapSoulOutput {
   tokenCount: number /* int */;
 }
 /**
+ * BootstrapSoulFromTemplateInput is the typed input for
+ * bootstrap_soul_from_template (R8.2): it extracts a complete brand soul from
+ * a brand .pptx kit's own theme (colors + fonts), so a deck can render in the
+ * brand's own palette without hand-typing every hex.
+ */
+export interface BootstrapSoulFromTemplateInput {
+  /**
+   * Name is the required soul name and the source of the stored soul id.
+   */
+  name: string;
+  /**
+   * Description is an optional one-line soul summary.
+   */
+  description?: string;
+  /**
+   * Path is the filesystem path to the brand .pptx kit whose theme (colors +
+   * fonts) seeds the soul. The file must exist and be a .pptx.
+   */
+  path: string;
+}
+/**
+ * BootstrapSoulFromTemplateOutput is the structured result for
+ * bootstrap_soul_from_template.
+ */
+export interface BootstrapSoulFromTemplateOutput {
+  /**
+   * SoulID is the stored soul identifier.
+   */
+  soulId: string;
+  /**
+   * Name is the stored soul name.
+   */
+  name: string;
+  /**
+   * Status is the stored soul lifecycle state.
+   */
+  status?: SoulStatus;
+  /**
+   * TokenCount is the number of flattened resolved design tokens in the soul.
+   */
+  tokenCount: number /* int */;
+  /**
+   * ExtractedColors summarizes the key resolved brand colors pulled from the
+   * template theme (role -> 6-digit hex), for agent review before building.
+   */
+  extractedColors?: { [key: string]: string};
+}
+/**
  * SoulOverride is one targeted refine instruction.
  */
 export interface SoulOverride {
   /**
-   * Category is the override family understood by the soul refiner.
+   * Category is the override family understood by the soul refiner: surface,
+   * text, space, radius, extension, darkSurface, or darkText. darkSurface and
+   * darkText target the same token names as surface/text but apply to the
+   * VariantDark color override set (R8.3) instead of the light theme.
    */
   category: string;
   /**
@@ -3893,4 +4117,15 @@ export interface Background {
    * (kind == "asset"). Resolved via the registered asset store.
    */
   assetId?: string;
+  /**
+   * GradientName, when set (kind == "gradient"), requests a named brand
+   * gradient registered on the active soul (bootstrap_soul's "gradients",
+   * R8.5) instead of the legacy Gradient role pair: its own stop list,
+   * angle, and linear/radial flag win, and its stops may pin exact brand
+   * hues or follow the active light/dark variant. A name not found on the
+   * soul renders without a background fill (a warning is recorded) rather
+   * than failing. Empty (the default) uses the legacy Gradient/Angle path,
+   * byte-identical to today.
+   */
+  gradientName?: string;
 }

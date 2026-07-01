@@ -57,6 +57,9 @@
             },
             "assetId": {
               "type": "string"
+            },
+            "gradientName": {
+              "type": "string"
             }
           },
           "additionalProperties": false

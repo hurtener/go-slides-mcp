@@ -33,6 +33,11 @@ type Stat struct {
 	// DeltaTone colors the delta: "neutral" (muted, default) | "up" (success
 	// color) | "down" (error color). Ignored when Delta is empty.
 	DeltaTone DeltaTone `json:"deltaTone,omitempty"`
+	// AutoFit shrinks the Value (the big-number display run) to fit its box
+	// instead of clipping/overflowing when a long number/price would
+	// otherwise overflow (shrink-to-fit). Default false = the Value renders
+	// at its full type size.
+	AutoFit bool `json:"autoFit,omitempty"`
 }
 
 func (Stat) slideNodeKind() Kind { return KindStat }
