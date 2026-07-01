@@ -6,7 +6,10 @@ import (
 	"testing"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/go-slides-mcp/internal/ir"
 	"github.com/hurtener/go-slides-mcp/internal/recipe"
+	"github.com/hurtener/go-slides-mcp/internal/render"
+	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
 func TestListRecipesIncludesBuiltins(t *testing.T) {
@@ -15,8 +18,11 @@ func TestListRecipesIncludesBuiltins(t *testing.T) {
 	if err != nil {
 		t.Fatalf("listRecipes: %v", err)
 	}
-	if len(listed.Structured.Recipes) < 4 {
-		t.Fatalf("listRecipes len = %d, want at least 4 builtins", len(listed.Structured.Recipes))
+	// 4 original builtins (title_cover, bulleted_content, two_column,
+	// section_break) + 4 R14.18/R14.6/R14.20 additions (agenda, pricing
+	// tiers, feature card, comparison matrix).
+	if len(listed.Structured.Recipes) < 8 {
+		t.Fatalf("listRecipes len = %d, want at least 8 builtins", len(listed.Structured.Recipes))
 	}
 	if listed.Structured.Recipes[0].Source != "builtin" {
 		t.Fatalf("first recipe source = %q, want builtin", listed.Structured.Recipes[0].Source)
@@ -24,12 +30,34 @@ func TestListRecipesIncludesBuiltins(t *testing.T) {
 	if listed.Structured.Recipes[0].RecipeID == "" {
 		t.Fatal("first recipe id empty")
 	}
+	// "comparison" now tags 4 builtins: the original rcp_two_column plus the
+	// three R14.20 offer-card-family/matrix additions below.
 	filtered, err := h.listRecipes(context.Background(), contracts.ListRecipesInput{Tag: "comparison"})
 	if err != nil {
 		t.Fatalf("listRecipes filtered: %v", err)
 	}
-	if len(filtered.Structured.Recipes) != 1 || filtered.Structured.Recipes[0].RecipeID != "rcp_two_column" {
-		t.Fatalf("filtered recipes = %+v", filtered.Structured.Recipes)
+	if len(filtered.Structured.Recipes) != 4 {
+		t.Fatalf("listRecipes filtered len = %d, want 4: %+v", len(filtered.Structured.Recipes), filtered.Structured.Recipes)
+	}
+	wantComparisonIDs := map[string]bool{
+		"rcp_two_column":        true,
+		"rcp_pricing_tiers":     true,
+		"rcp_feature_card":      true,
+		"rcp_comparison_matrix": true,
+	}
+	for _, r := range filtered.Structured.Recipes {
+		if !wantComparisonIDs[r.RecipeID] {
+			t.Fatalf("unexpected recipe %q in comparison-tag filter", r.RecipeID)
+		}
+	}
+
+	// "agenda" tags exactly the new R14.6 builtin.
+	agendaFiltered, err := h.listRecipes(context.Background(), contracts.ListRecipesInput{Tag: "agenda"})
+	if err != nil {
+		t.Fatalf("listRecipes agenda: %v", err)
+	}
+	if len(agendaFiltered.Structured.Recipes) != 1 || agendaFiltered.Structured.Recipes[0].RecipeID != "rcp_agenda" {
+		t.Fatalf("agenda-filtered recipes = %+v", agendaFiltered.Structured.Recipes)
 	}
 }
 
@@ -105,5 +133,108 @@ func TestApplyRecipeMissingReturnsNotFound(t *testing.T) {
 	_, err := h.applyRecipe(context.Background(), contracts.ApplyRecipeInput{DeckID: "deck_missing", RecipeID: "rcp_missing"})
 	if !errors.Is(err, recipe.ErrNotFound) {
 		t.Fatalf("applyRecipe missing err = %v, want ErrNotFound", err)
+	}
+}
+
+// TestApplyRecipeAgendaAddsSlideToDeck mirrors
+// TestApplyRecipeAddsSlideToDeck for the new R14.6 agenda builtin: apply it
+// to a fresh deck and confirm the composed card_grid slide lands.
+func TestApplyRecipeAgendaAddsSlideToDeck(t *testing.T) {
+	h := testHandlers()
+	ctx := context.Background()
+
+	createdDeck, err := h.createDeck(ctx, contracts.CreateDeckInput{Title: "Agenda"})
+	if err != nil {
+		t.Fatalf("createDeck: %v", err)
+	}
+	applied, err := h.applyRecipe(ctx, contracts.ApplyRecipeInput{DeckID: createdDeck.Structured.DeckID, RecipeID: "rcp_agenda"})
+	if err != nil {
+		t.Fatalf("applyRecipe: %v", err)
+	}
+	if applied.Structured.SlideID == "" {
+		t.Fatal("applyRecipe slide id empty")
+	}
+	got, err := h.deps.Store.GetSlide(createdDeck.Structured.DeckID, applied.Structured.SlideID)
+	if err != nil {
+		t.Fatalf("store GetSlide: %v", err)
+	}
+	if got.Layout != contracts.LayoutCardGrid {
+		t.Fatalf("applied slide layout = %q, want %q", got.Layout, contracts.LayoutCardGrid)
+	}
+}
+
+// TestBuiltinRecipesValidateAndRender is the R14.18 determinism acceptance:
+// every builtin recipe's Slide must pass ir.ValidateSlide AND render through
+// render.Render into non-empty PPTX bytes — proving each recipe is a real
+// renderable slide, not dead data, without a new NodeKind or engine change.
+func TestBuiltinRecipesValidateAndRender(t *testing.T) {
+	h := testHandlers()
+	deckardWhite := soul.DeckardWhite()
+
+	stored := h.deps.Recipes.List("")
+	builtinCount := 0
+	for _, r := range stored {
+		if r.Source != "builtin" {
+			continue
+		}
+		builtinCount++
+		t.Run(r.ID, func(t *testing.T) {
+			if err := ir.ValidateSlide(r.Slide); err != nil {
+				t.Fatalf("recipe %q: ValidateSlide: %v", r.ID, err)
+			}
+			doc := contracts.SlideDoc{Slides: []contracts.Slide{r.Slide}}
+			pptxBytes, _, err := render.Render(doc, deckardWhite)
+			if err != nil {
+				t.Fatalf("recipe %q: render.Render: %v", r.ID, err)
+			}
+			if len(pptxBytes) == 0 {
+				t.Fatalf("recipe %q: render.Render returned empty bytes", r.ID)
+			}
+		})
+	}
+	if builtinCount < 8 {
+		t.Fatalf("builtin recipe count = %d, want at least 8", builtinCount)
+	}
+}
+
+// TestOfferCardFamilyBothRenderFromCardListShape is the R14.20 family
+// assertion: rcp_pricing_tiers and rcp_feature_card are both Card+List
+// compositions (a Grid of Cards each carrying a body List) and both render —
+// proving one composition shape covers the price and non-price variants.
+func TestOfferCardFamilyBothRenderFromCardListShape(t *testing.T) {
+	h := testHandlers()
+	deckardWhite := soul.DeckardWhite()
+
+	for _, id := range []string{"rcp_pricing_tiers", "rcp_feature_card"} {
+		r, err := h.deps.Recipes.Get(id)
+		if err != nil {
+			t.Fatalf("recipe %q: Get: %v", id, err)
+		}
+		if len(r.Slide.Nodes) < 2 {
+			t.Fatalf("recipe %q: want a heading + grid, got %d nodes", id, len(r.Slide.Nodes))
+		}
+		grid, ok := r.Slide.Nodes[len(r.Slide.Nodes)-1].(*contracts.Grid)
+		if !ok {
+			t.Fatalf("recipe %q: last node is %T, want *contracts.Grid", id, r.Slide.Nodes[len(r.Slide.Nodes)-1])
+		}
+		for i, cell := range grid.Cells {
+			card, ok := cell.(*contracts.Card)
+			if !ok {
+				t.Fatalf("recipe %q: cell[%d] is %T, want *contracts.Card", id, i, cell)
+			}
+			hasList := false
+			for _, b := range card.Body {
+				if _, ok := b.(*contracts.List); ok {
+					hasList = true
+				}
+			}
+			if !hasList {
+				t.Fatalf("recipe %q: card[%d] body has no *contracts.List", id, i)
+			}
+		}
+		doc := contracts.SlideDoc{Slides: []contracts.Slide{r.Slide}}
+		if _, _, err := render.Render(doc, deckardWhite); err != nil {
+			t.Fatalf("recipe %q: render.Render: %v", id, err)
+		}
 	}
 }
