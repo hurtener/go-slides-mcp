@@ -2341,8 +2341,9 @@ export const DeltaDown: DeltaTone = "down"; // negative (error color)
  * Stat is a hero big-number metric: a display-scale Value with a Label
  * and an optional directional Delta (e.g. "$2,200" / "ARR" / "+18%"). A
  * row of Stats inside a Grid forms a metric or pricing strip. Mirror of
- * pptx-go's scene.Stat. The engine renders Value/Delta verbatim — it
- * formats no numbers (D-026).
+ * pptx-go's scene.Stat. By default the engine renders Value/Delta
+ * verbatim — it formats no numbers (D-026) — unless the typed Number
+ * path below is set (R14.13, D-121).
  */
 export interface Stat {
   /**
@@ -2371,6 +2372,26 @@ export interface Stat {
    * at its full type size.
    */
   autoFit?: boolean;
+  /**
+   * Number is an optional numeric value (R14.13, D-121). When set, it is
+   * formatted via Format (or a plain integer-ish default when Format is
+   * nil/omitted) and SUPERSEDES the raw Value string, then shrink-to-fits
+   * via AutoFit so a long formatted price/number stays on one line. Nil
+   * (omitted) renders the raw Value verbatim — byte-identical to a Stat
+   * that predates this field. A pointer because 0 is a real value (the
+   * D-054 nil-means-unset pattern).
+   * Note: this is a per-Stat mechanism only. A soul-level default number
+   * format (e.g. "this brand's numbers are € by default") is a deferred
+   * follow-up, not built here.
+   */
+  number?: number /* float64 */;
+  /**
+   * Format is an optional number/currency/percent/locale format applied
+   * to Number (R14.13, D-121). Nil with a non-nil Number uses a plain
+   * default (no grouping/decimals/affixes, i.e. the zero NumberFormat).
+   * Ignored when Number is nil.
+   */
+  format?: NumberFormat;
 }
 /**
  * Table is a grid of cells with a header row and a caption. Renders as native
@@ -2637,6 +2658,70 @@ export interface SlideDoc {
    * Slides is the deck's slides, in order.
    */
   slides?: Slide[];
+}
+/**
+ * NumberFormat is a deterministic number / currency / percent / locale
+ * format (R14.13, D-121). Mirror of pptx-go's scene.NumberFormat: the
+ * caller supplies it (e.g. a soul's number token or a per-Stat override),
+ * the engine only formats with it — it never decides the format itself
+ * (D-026). A Stat's Number is rendered through FormatNumber(Number, Format).
+ * The zero value formats with no grouping, no decimals, and no affixes
+ * (e.g. 4000 -> "4000"). A en-US currency sets GroupSep "," and
+ * CurrencySymbol "$" (4000 -> "$4,000"); a de-DE locale sets GroupSep "."
+ * and DecimalSep "," (4000 -> "4.000"). Layout order is Prefix, sign,
+ * [symbol if !SymbolAfter], body, [%], [symbol if SymbolAfter], Suffix.
+ */
+export interface NumberFormat {
+  /**
+   * Decimals is the fixed number of decimal places (0 = integer). Under
+   * Compact notation, 0 is treated as 1 (so 1200000 -> "1.2M", not "1M").
+   */
+  decimals?: number /* int */;
+  /**
+   * GroupSep is the thousands separator (e.g. "," or "."); "" = no
+   * grouping.
+   */
+  groupSep?: string;
+  /**
+   * DecimalSep is the decimal point (e.g. "," for de-DE); "" defaults
+   * to ".".
+   */
+  decimalSep?: string;
+  /**
+   * CurrencySymbol is prepended (or appended, see SymbolAfter); "" =
+   * none.
+   */
+  currencySymbol?: string;
+  /**
+   * SymbolAfter places the currency symbol after the number (e.g.
+   * "4.000 €") instead of before it (e.g. "$4,000").
+   */
+  symbolAfter?: boolean;
+  /**
+   * Percent multiplies the value by 100 and appends "%" (e.g.
+   * 0.92 -> "92%").
+   */
+  percent?: boolean;
+  /**
+   * Compact renders large magnitudes as K / M / B / T (e.g.
+   * 1200000 -> "1.2M").
+   */
+  compact?: boolean;
+  /**
+   * CompactThreshold is the magnitude at/above which Compact applies;
+   * 0 = 1000. Ignored when Compact is false.
+   */
+  compactThreshold?: number /* float64 */;
+  /**
+   * Prefix is an arbitrary string prepended before the sign/symbol/body
+   * (e.g. "~" for an approximate value).
+   */
+  prefix?: string;
+  /**
+   * Suffix is an arbitrary string appended after the body/%/symbol
+   * (e.g. "+" for "$4,000+").
+   */
+  suffix?: string;
 }
 /**
  * AppBrand is the white-label brand configuration delivered to the UI surfaces.

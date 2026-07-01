@@ -134,7 +134,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}
 	case *contracts.Stat:
-		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone), AutoFit: n.AutoFit}
+		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone), AutoFit: n.AutoFit, Number: n.Number, Format: mapNumberFormat(n.Format)}
 	default:
 		return nil
 	}

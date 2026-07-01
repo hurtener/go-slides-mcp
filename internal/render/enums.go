@@ -467,6 +467,27 @@ func mapDeltaTone(t contracts.DeltaTone) scene.DeltaTone {
 	}
 }
 
+// mapNumberFormat converts a contracts.NumberFormat pointer to a
+// scene.NumberFormat pointer, copying all 10 fields 1:1 (R14.13, D-121).
+// nil maps to nil, keeping a Stat with no Format byte-identical.
+func mapNumberFormat(f *contracts.NumberFormat) *scene.NumberFormat {
+	if f == nil {
+		return nil
+	}
+	return &scene.NumberFormat{
+		Decimals:         f.Decimals,
+		GroupSep:         f.GroupSep,
+		DecimalSep:       f.DecimalSep,
+		CurrencySymbol:   f.CurrencySymbol,
+		SymbolAfter:      f.SymbolAfter,
+		Percent:          f.Percent,
+		Compact:          f.Compact,
+		CompactThreshold: f.CompactThreshold,
+		Prefix:           f.Prefix,
+		Suffix:           f.Suffix,
+	}
+}
+
 // mapBackground converts a contracts.Background to scene.Background.
 // The gradient slice is mapped to the engine's [2]pptx.ColorRole:
 //   - 0 roles → both stops are the zero ColorRole

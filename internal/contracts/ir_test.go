@@ -22,6 +22,10 @@ func richTextSample() RichText {
 	}
 }
 
+// numPtr returns a pointer to v, for exercising Stat.Number (the D-054
+// nil-means-unset pattern needs a pointer to a literal in table tests).
+func numPtr(v float64) *float64 { return &v }
+
 func TestRichTextRoundTrip(t *testing.T) {
 	want := richTextSample()
 	b, err := json.Marshal(want)
@@ -115,6 +119,14 @@ func nodeRoundTrips() []struct {
 		{"stat-full", &Stat{Value: "$2,200", Label: "per month", Delta: "+18%", DeltaTone: DeltaUp}},
 		{"stat-no-delta", &Stat{Value: "98%", Label: "NPS score"}},
 		{"stat-delta-down", &Stat{Value: "14 days", Label: "avg cycle", Delta: "-2 days", DeltaTone: DeltaDown}},
+		// R14.13 (D-121) — typed Number + Format path.
+		{"stat-number-format", &Stat{
+			Value:  "unused when Number is set",
+			Label:  "MRR",
+			Number: numPtr(4000),
+			Format: &NumberFormat{CurrencySymbol: "$", GroupSep: ",", Suffix: "+"},
+		}},
+		{"stat-number-no-format", &Stat{Label: "count", Number: numPtr(0)}},
 		// R5 (D-055) — TwoColumn connector/badge.
 		{"two_column-badge-join", &TwoColumn{
 			Ratio:     Ratio11,

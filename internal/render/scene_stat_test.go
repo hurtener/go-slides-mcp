@@ -77,6 +77,79 @@ func TestMapNodeStatNoDelta(t *testing.T) {
 	}
 }
 
+// TestMapNodeStatNumberFormat asserts that Number and Format map through
+// (pointer copy for Number, field-for-field copy for Format) (R14.13, D-121).
+func TestMapNodeStatNumberFormat(t *testing.T) {
+	t.Parallel()
+
+	num := 4000.0
+	node := &contracts.Stat{
+		Label:  "MRR",
+		Number: &num,
+		Format: &contracts.NumberFormat{
+			Decimals:         2,
+			GroupSep:         ",",
+			DecimalSep:       ".",
+			CurrencySymbol:   "$",
+			SymbolAfter:      true,
+			Percent:          true,
+			Compact:          true,
+			CompactThreshold: 500,
+			Prefix:           "~",
+			Suffix:           "+",
+		},
+	}
+	sn := mapNode(node)
+	s, ok := sn.(scene.Stat)
+	if !ok {
+		t.Fatalf("mapNode returned %T, want scene.Stat", sn)
+	}
+	if s.Number == nil {
+		t.Fatal("Number: got nil, want non-nil")
+	}
+	if *s.Number != num {
+		t.Errorf("Number: got %v, want %v", *s.Number, num)
+	}
+	if s.Format == nil {
+		t.Fatal("Format: got nil, want non-nil")
+	}
+	want := scene.NumberFormat{
+		Decimals:         2,
+		GroupSep:         ",",
+		DecimalSep:       ".",
+		CurrencySymbol:   "$",
+		SymbolAfter:      true,
+		Percent:          true,
+		Compact:          true,
+		CompactThreshold: 500,
+		Prefix:           "~",
+		Suffix:           "+",
+	}
+	if *s.Format != want {
+		t.Errorf("Format: got %+v, want %+v", *s.Format, want)
+	}
+}
+
+// TestMapNodeStatNumberNilByteIdentical asserts that a Stat with no Number
+// (the pre-R14.13 shape) maps to a scene.Stat with nil Number and nil
+// Format — byte-identical to today (R14.13, D-121).
+func TestMapNodeStatNumberNilByteIdentical(t *testing.T) {
+	t.Parallel()
+
+	node := &contracts.Stat{Value: "$2,200", Label: "per month"}
+	sn := mapNode(node)
+	s, ok := sn.(scene.Stat)
+	if !ok {
+		t.Fatalf("mapNode returned %T, want scene.Stat", sn)
+	}
+	if s.Number != nil {
+		t.Errorf("Number: got %v, want nil", *s.Number)
+	}
+	if s.Format != nil {
+		t.Errorf("Format: got %+v, want nil", *s.Format)
+	}
+}
+
 // TestMapNodeStatNeutralToneEmptyString asserts that an empty DeltaTone string
 // maps to DeltaNeutral (the zero value / default).
 func TestMapNodeStatNeutralToneEmptyString(t *testing.T) {
