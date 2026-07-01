@@ -2,6 +2,7 @@ package render
 
 import (
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/pptx-go/pptx"
 	"github.com/hurtener/pptx-go/scene"
 )
 
@@ -97,6 +98,8 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Bleed:    n.Bleed,
 			Opacity:  n.Opacity,
 			Rotation: n.Rotation,
+			Color:    mapColorRolePtr(n.Color),
+			Pitch:    pptx.Pt(n.Pitch),
 		}
 	case *contracts.TwoColumn:
 		return scene.TwoColumn{

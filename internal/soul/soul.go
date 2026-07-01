@@ -4,6 +4,7 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/pptx-go/pptx"
 )
 
@@ -37,6 +38,12 @@ type Soul struct {
 	// a serialized token: Clone carries the (immutable, shared) provider by
 	// reference, and it is never marshaled into a contract.
 	FontProvider pptx.FontSource
+	// Decor is the soul's per-archetype background+decoration policy
+	// (R13.12). Nil (the default) is a no-op — the composer leaves a doc
+	// byte-identical when Decor is nil. A non-nil policy decorates each slide
+	// by its archetype at render time; it is a runtime capability applied by
+	// the composer, not a flattened design token.
+	Decor *contracts.DecorPolicy
 }
 
 // StyleGuide is a soul's design voice, shown to agents to steer authoring.
@@ -63,5 +70,6 @@ func (s *Soul) Clone() *Soul {
 	c.Extensions = maps.Clone(s.Extensions)
 	c.StyleGuide.Do = slices.Clone(s.StyleGuide.Do)
 	c.StyleGuide.Dont = slices.Clone(s.StyleGuide.Dont)
+	c.Decor = s.Decor.Clone()
 	return &c
 }

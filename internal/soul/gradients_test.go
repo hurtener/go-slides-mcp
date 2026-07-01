@@ -78,14 +78,26 @@ func TestBootstrapGradientsPopulateThemeGradients(t *testing.T) {
 	}
 }
 
-func TestBootstrapNilOrEmptyGradientsLeavesThemeGradientsNil(t *testing.T) {
+// TestBootstrapNilOrEmptyGradientsGetsOnlyTheDefaultDecorGradients verifies
+// that when the caller supplies no Gradients, Theme.Gradients is NOT nil: it
+// carries exactly the two default decor-policy gradients (coverWash,
+// heroDark) that registerDecorGradients seeds for R13.12's cover/dark
+// archetypes — Bootstrap no longer leaves Theme.Gradients empty, since every
+// bootstrapped soul now needs a non-flat cover/dark treatment out of the box.
+func TestBootstrapNilOrEmptyGradientsGetsOnlyTheDefaultDecorGradients(t *testing.T) {
 	for _, g := range [][]GradientSpec{nil, {}} {
 		s, err := Bootstrap(BootstrapParams{Name: "x", Gradients: g})
 		if err != nil {
 			fatalBootstrap(t, err)
 		}
-		if s.Theme.Gradients != nil {
-			t.Fatalf("Theme.Gradients = %+v, want nil for %+v", s.Theme.Gradients, g)
+		if len(s.Theme.Gradients) != 2 {
+			t.Fatalf("Theme.Gradients = %+v, want exactly the 2 default decor gradients for %+v", s.Theme.Gradients, g)
+		}
+		if _, ok := s.Theme.Gradients["coverWash"]; !ok {
+			t.Error(`Theme.Gradients["coverWash"] missing`)
+		}
+		if _, ok := s.Theme.Gradients["heroDark"]; !ok {
+			t.Error(`Theme.Gradients["heroDark"] missing`)
 		}
 	}
 }

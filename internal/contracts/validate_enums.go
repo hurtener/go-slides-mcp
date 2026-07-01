@@ -101,6 +101,7 @@ func ValidateNodeEnums(n SlideNode) error {
 			checkEnum("decorationKind", "DecorationKind", v.Kind, AllowedDecorationKind(), false),
 			checkEnum("layer", "Layer", v.Layer, AllowedLayer(), true),
 			checkEnum("anchor", "Anchor", v.Anchor, AllowedAnchor(), true),
+			checkEnum("color", "ColorRole", v.Color, AllowedColorRole(), true),
 		)
 	case *Image:
 		errs = append(errs,
@@ -135,6 +136,7 @@ func ValidateSlideEnums(s Slide) error {
 		checkEnum("align.vertical", "VAlign", s.Align.Vertical, AllowedVAlign(), true),
 		checkEnum("align.horizontal", "HAlign", s.Align.Horizontal, AllowedHAlign(), true),
 		checkEnum("variant", "Variant", s.Variant, AllowedVariant(), true),
+		checkEnum("archetype", "SlideArchetype", s.Archetype, AllowedSlideArchetype(), true),
 	)
 	if s.Background != nil {
 		errs = append(errs,

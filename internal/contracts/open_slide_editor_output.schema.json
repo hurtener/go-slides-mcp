@@ -73,6 +73,9 @@
           },
           "additionalProperties": false
         },
+        "archetype": {
+          "type": "string"
+        },
         "section": {
           "type": "string"
         },

@@ -16,6 +16,10 @@ const (
 	ColorWarning    ColorRole = "warning"
 	ColorError      ColorRole = "error"
 	ColorInfo       ColorRole = "info"
+	// ColorPaper is a faintly tinted off-white canvas distinct from pure
+	// white; the default content-slide background a bootstrapped soul emits
+	// (R13.1).
+	ColorPaper ColorRole = "paper"
 )
 
 // IsValid reports whether v is one of the closed ColorRole wire values

@@ -85,7 +85,7 @@ func AllowedColorRole() []ColorRole {
 	return []ColorRole{
 		ColorCanvas, ColorSurface, ColorSurfaceAlt, ColorAccent,
 		ColorAccentAlt, ColorAccentWarm, ColorSuccess, ColorWarning,
-		ColorError, ColorInfo,
+		ColorError, ColorInfo, ColorPaper,
 	}
 }
 

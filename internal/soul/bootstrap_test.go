@@ -192,3 +192,36 @@ func fatalBootstrap(t *testing.T, err error) {
 	t.Helper()
 	t.Fatal(err)
 }
+
+// TestBootstrapProducesNonNilDecorAndLowChromaPaper is the R13-D extension:
+// a bootstrapped soul now always carries a non-nil DecorPolicy and a paper
+// tint distinct from pure white (R13.1/R13.12).
+func TestBootstrapProducesNonNilDecorAndLowChromaPaper(t *testing.T) {
+	s, err := Bootstrap(BootstrapParams{Name: "Decor Bootstrap"})
+	if err != nil {
+		fatalBootstrap(t, err)
+	}
+	if s.Decor == nil {
+		t.Fatal("Bootstrap().Decor = nil, want non-nil")
+	}
+	paper := s.Theme.ResolveColor(pptx.ColorPaper)
+	if paper == "FFFFFF" {
+		t.Fatalf("ColorPaper = %q, want != FFFFFF", paper)
+	}
+	r, g, b, ok := parseRGBHex(string(paper))
+	if !ok {
+		t.Fatalf("ColorPaper %q did not parse as hex", paper)
+	}
+	maxC, minC := r, r
+	for _, c := range []int{g, b} {
+		if c > maxC {
+			maxC = c
+		}
+		if c < minC {
+			minC = c
+		}
+	}
+	if maxC-minC > 12 {
+		t.Errorf("ColorPaper %q chroma spread = %d, want <= 12", paper, maxC-minC)
+	}
+}
