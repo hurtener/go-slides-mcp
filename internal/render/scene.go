@@ -145,6 +145,10 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		}
 	case *contracts.Tree:
 		return scene.Tree{Root: mapTreeNode(n.Root), Orientation: mapFlowOrientation(n.Orientation)}
+	case *contracts.Funnel:
+		return scene.Funnel{Stages: mapFunnelStages(n.Stages)}
+	case *contracts.Cycle:
+		return scene.Cycle{Stages: mapCycleStages(n.Stages)}
 	default:
 		return nil
 	}
@@ -197,6 +201,30 @@ func mapTreeNode(n contracts.TreeNode) scene.TreeNode {
 		Children:    children,
 		AccentIndex: n.AccentIndex,
 	}
+}
+
+// mapFunnelStages maps a Funnel's bands element-wise (R14.11, D-128).
+func mapFunnelStages(stages []contracts.FunnelStage) []scene.FunnelStage {
+	if stages == nil {
+		return nil
+	}
+	mapped := make([]scene.FunnelStage, len(stages))
+	for i, s := range stages {
+		mapped[i] = scene.FunnelStage{Label: s.Label, Value: s.Value, AccentIndex: s.AccentIndex}
+	}
+	return mapped
+}
+
+// mapCycleStages maps a Cycle's ring nodes element-wise (R14.11, D-128).
+func mapCycleStages(stages []contracts.CycleStage) []scene.CycleStage {
+	if stages == nil {
+		return nil
+	}
+	mapped := make([]scene.CycleStage, len(stages))
+	for i, s := range stages {
+		mapped[i] = scene.CycleStage{Label: s.Label, Icon: s.Icon, AccentIndex: s.AccentIndex}
+	}
+	return mapped
 }
 
 // mapMilestones maps a Timeline's milestone list, preserving nil vs. empty

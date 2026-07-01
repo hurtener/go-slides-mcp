@@ -287,6 +287,29 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Orientation: FlowVertical,
 		}, true
 
+	case KindFunnel:
+		// Funnel (R14.11, D-128): 3 stages, each with a Label/Value/
+		// AccentIndex, covering every field on round-trip.
+		return &Funnel{
+			Stages: []FunnelStage{
+				{Label: "Visitors", Value: "10,000", AccentIndex: 0},
+				{Label: "Signups", Value: "2,400", AccentIndex: 1},
+				{Label: "Customers", Value: "380", AccentIndex: 2},
+			},
+		}, true
+
+	case KindCycle:
+		// Cycle (R14.11, D-128): 4 stages, each with a Label/Icon/
+		// AccentIndex, covering every field on round-trip.
+		return &Cycle{
+			Stages: []CycleStage{
+				{Label: "Plan", Icon: "star", AccentIndex: 0},
+				{Label: "Build", Icon: "diamond", AccentIndex: 1},
+				{Label: "Ship", Icon: "check", AccentIndex: 2},
+				{Label: "Learn", Icon: "circle", AccentIndex: 0},
+			},
+		}, true
+
 	default:
 		return nil, false
 	}
