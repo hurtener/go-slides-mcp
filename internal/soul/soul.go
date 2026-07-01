@@ -44,6 +44,15 @@ type Soul struct {
 	// by its archetype at render time; it is a runtime capability applied by
 	// the composer, not a flattened design token.
 	Decor *contracts.DecorPolicy
+	// IconSet is the soul's brand icon set (R14.16): glyph-name -> single-path
+	// SVG string. It is a runtime capability like FontProvider/Decor, not a
+	// flattened design token — the render path registers each entry via
+	// scene.WithIconExtension so every Card/Flow/Milestone/etc. icon
+	// reference resolves from the brand set before the curated set. A
+	// nil/empty IconSet means curated-set-only and renders byte-identical to
+	// a soul without the field. Set copy-on-write by ApplyIcons and treated
+	// as immutable-after-set.
+	IconSet map[string]string
 }
 
 // StyleGuide is a soul's design voice, shown to agents to steer authoring.
@@ -68,6 +77,7 @@ func (s *Soul) Clone() *Soul {
 		c.Theme = s.Theme.Clone()
 	}
 	c.Extensions = maps.Clone(s.Extensions)
+	c.IconSet = maps.Clone(s.IconSet)
 	c.StyleGuide.Do = slices.Clone(s.StyleGuide.Do)
 	c.StyleGuide.Dont = slices.Clone(s.StyleGuide.Dont)
 	c.Decor = s.Decor.Clone()
