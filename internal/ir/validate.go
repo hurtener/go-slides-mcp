@@ -105,7 +105,36 @@ func validateTable(t *contracts.Table) error {
 			errs = append(errs, fmt.Errorf("table: row[%d] width %d != header width %d", i, len(row), w))
 		}
 	}
+	errs = append(errs, validateTableStyle(t.Style, w)...)
 	return errors.Join(errs...)
+}
+
+// validateTableStyle checks the structural constraints of a comparison-matrix
+// Style against the table's column count w (R14.3, D-118): HighlightCol must
+// be a real column (or 0 = none); every HeaderGroup must span at least one
+// column; and, when groups are present, their spans must sum to the column
+// count so the merged header row lines up with the body.
+func validateTableStyle(s *contracts.TableStyle, w int) []error {
+	if s == nil {
+		return nil
+	}
+	var errs []error
+	if s.HighlightCol < 0 || s.HighlightCol > w {
+		errs = append(errs, fmt.Errorf("table: style.highlightCol %d out of range 0..%d", s.HighlightCol, w))
+	}
+	if len(s.HeaderGroups) > 0 {
+		sum := 0
+		for i, g := range s.HeaderGroups {
+			if g.Span < 1 {
+				errs = append(errs, fmt.Errorf("table: style.headerGroups[%d] span %d must be >= 1", i, g.Span))
+			}
+			sum += g.Span
+		}
+		if sum != w {
+			errs = append(errs, fmt.Errorf("table: style.headerGroups span sum %d != header width %d", sum, w))
+		}
+	}
+	return errs
 }
 
 func validateTwoColumn(tc *contracts.TwoColumn) error {

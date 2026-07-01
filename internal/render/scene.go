@@ -68,7 +68,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.Arrow:
 		return scene.Arrow{Direction: mapArrowDirection(n.Direction), Label: n.Label}
 	case *contracts.Table:
-		return scene.Table{Headers: mapParagraphs(n.Headers), Rows: mapTableRows(n.Rows), Caption: n.Caption}
+		return scene.Table{Headers: mapParagraphs(n.Headers), Rows: mapTableRows(n.Rows), Caption: n.Caption, Style: mapTableStyle(n.Style)}
 	case *contracts.Flow:
 		return scene.Flow{Orientation: mapFlowOrientation(n.Orientation), Steps: mapFlowSteps(n.Steps), Connector: mapConnectorKind(n.Connector)}
 	case *contracts.SectionDivider:

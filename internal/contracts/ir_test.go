@@ -104,6 +104,19 @@ func nodeRoundTrips() []struct {
 			Rows:    [][]RichText{{{{Text: "1"}}}, {{{Text: "2"}}}},
 			Caption: "cap",
 		}},
+		// R14.3 (D-118) — comparison-matrix Style, including grouped headers.
+		{"table-styled", &Table{
+			Headers: []RichText{{{Text: "Feature"}}, {{Text: "Free"}}, {{Text: "Pro"}}, {{Text: "Enterprise"}}},
+			Rows:    [][]RichText{{{{Text: "Seats"}}, {{Text: "1"}}, {{Text: "10"}}, {{Text: "Unlimited"}}}},
+			Caption: "Plans",
+			Style: &TableStyle{
+				HeaderFill:   true,
+				Zebra:        true,
+				HighlightCol: 3,
+				RowLabelCol:  true,
+				HeaderGroups: []HeaderGroup{{Label: "Plan", Span: 1}, {Label: "Paid tiers", Span: 3}},
+			},
+		}},
 		{"flow", &Flow{Orientation: FlowHorizontal, Connector: ConnectorArrow, Steps: []FlowStep{
 			{Label: RichText{{Text: "start"}}, Detail: RichText{{Text: "go"}}, Icon: "play"},
 			{Label: RichText{{Text: "end"}, {Text: "!", Bold: true}}},
