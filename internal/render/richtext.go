@@ -22,14 +22,15 @@ func mapRichText(text contracts.RichText) scene.RichText {
 
 func mapRunStyle(style contracts.RunStyle) scene.RunStyle {
 	return scene.RunStyle{
-		TypeRole:  mapTypeRole(style.TypeRole),
-		Bold:      style.Bold,
-		Italic:    style.Italic,
-		Underline: style.Underline,
-		Strike:    style.Strike,
-		Code:      style.Code,
-		Link:      style.Link,
-		Href:      style.Href,
+		TypeRole:    mapTypeRole(style.TypeRole),
+		Bold:        style.Bold,
+		Italic:      style.Italic,
+		Underline:   style.Underline,
+		Strike:      style.Strike,
+		Code:        style.Code,
+		Link:        style.Link,
+		Href:        style.Href,
+		Superscript: style.Superscript,
 	}
 }
 

@@ -51,6 +51,10 @@ type TextRun struct {
 	// Color is the run color as {"token":"<role>"} or {"literal":"RRGGBB"};
 	// omit it (the zero value) for the default token "primary".
 	Color TextColor `json:"color,omitempty"`
+	// Superscript raises the run above the baseline at a reduced size — a
+	// footnote marker on a figure/stat (R14.12). False (the default) keeps
+	// the run on the baseline.
+	Superscript bool `json:"superscript,omitempty"`
 }
 
 // Style returns the run's typography role and inline-formatting flags grouped
@@ -58,14 +62,15 @@ type TextRun struct {
 // shape stays flat; this is an internal convenience over the flat fields.
 func (r TextRun) Style() RunStyle {
 	return RunStyle{
-		TypeRole:  r.TypeRole,
-		Bold:      r.Bold,
-		Italic:    r.Italic,
-		Underline: r.Underline,
-		Strike:    r.Strike,
-		Code:      r.Code,
-		Link:      r.Link,
-		Href:      r.Href,
+		TypeRole:    r.TypeRole,
+		Bold:        r.Bold,
+		Italic:      r.Italic,
+		Underline:   r.Underline,
+		Strike:      r.Strike,
+		Code:        r.Code,
+		Link:        r.Link,
+		Href:        r.Href,
+		Superscript: r.Superscript,
 	}
 }
 
@@ -89,6 +94,9 @@ type RunStyle struct {
 	Link bool
 	// Href is the link URL when Link is true.
 	Href string
+	// Superscript raises the run above the baseline at a reduced size — a
+	// footnote marker on a figure/stat (R14.12).
+	Superscript bool
 }
 
 // TextColor is a run color: either a soul-bound token role (the documented
@@ -142,27 +150,29 @@ const (
 // CONVENTIONS §4 run shape: { text, typeRole?, bold?, ..., color? }.
 func (r TextRun) MarshalJSON() ([]byte, error) {
 	type plain struct {
-		Text      string     `json:"text"`
-		TypeRole  TypeRole   `json:"typeRole,omitempty"`
-		Bold      bool       `json:"bold,omitempty"`
-		Italic    bool       `json:"italic,omitempty"`
-		Underline bool       `json:"underline,omitempty"`
-		Strike    bool       `json:"strike,omitempty"`
-		Code      bool       `json:"code,omitempty"`
-		Link      bool       `json:"link,omitempty"`
-		Href      string     `json:"href,omitempty"`
-		Color     *TextColor `json:"color,omitempty"`
+		Text        string     `json:"text"`
+		TypeRole    TypeRole   `json:"typeRole,omitempty"`
+		Bold        bool       `json:"bold,omitempty"`
+		Italic      bool       `json:"italic,omitempty"`
+		Underline   bool       `json:"underline,omitempty"`
+		Strike      bool       `json:"strike,omitempty"`
+		Code        bool       `json:"code,omitempty"`
+		Link        bool       `json:"link,omitempty"`
+		Href        string     `json:"href,omitempty"`
+		Color       *TextColor `json:"color,omitempty"`
+		Superscript bool       `json:"superscript,omitempty"`
 	}
 	p := plain{
-		Text:      r.Text,
-		TypeRole:  r.TypeRole,
-		Bold:      r.Bold,
-		Italic:    r.Italic,
-		Underline: r.Underline,
-		Strike:    r.Strike,
-		Code:      r.Code,
-		Link:      r.Link,
-		Href:      r.Href,
+		Text:        r.Text,
+		TypeRole:    r.TypeRole,
+		Bold:        r.Bold,
+		Italic:      r.Italic,
+		Underline:   r.Underline,
+		Strike:      r.Strike,
+		Code:        r.Code,
+		Link:        r.Link,
+		Href:        r.Href,
+		Superscript: r.Superscript,
 	}
 	if r.Color != (TextColor{}) {
 		c := r.Color
@@ -177,16 +187,17 @@ func (r TextRun) MarshalJSON() ([]byte, error) {
 // correct flat shape.
 func (r *TextRun) UnmarshalJSON(data []byte) error {
 	type plain struct {
-		Text      string     `json:"text"`
-		TypeRole  TypeRole   `json:"typeRole,omitempty"`
-		Bold      bool       `json:"bold,omitempty"`
-		Italic    bool       `json:"italic,omitempty"`
-		Underline bool       `json:"underline,omitempty"`
-		Strike    bool       `json:"strike,omitempty"`
-		Code      bool       `json:"code,omitempty"`
-		Link      bool       `json:"link,omitempty"`
-		Href      string     `json:"href,omitempty"`
-		Color     *TextColor `json:"color,omitempty"`
+		Text        string     `json:"text"`
+		TypeRole    TypeRole   `json:"typeRole,omitempty"`
+		Bold        bool       `json:"bold,omitempty"`
+		Italic      bool       `json:"italic,omitempty"`
+		Underline   bool       `json:"underline,omitempty"`
+		Strike      bool       `json:"strike,omitempty"`
+		Code        bool       `json:"code,omitempty"`
+		Link        bool       `json:"link,omitempty"`
+		Href        string     `json:"href,omitempty"`
+		Color       *TextColor `json:"color,omitempty"`
+		Superscript bool       `json:"superscript,omitempty"`
 	}
 	var p plain
 	if err := strictUnmarshal(data, &p); err != nil {
@@ -204,6 +215,7 @@ func (r *TextRun) UnmarshalJSON(data []byte) error {
 	r.Code = p.Code
 	r.Link = p.Link
 	r.Href = p.Href
+	r.Superscript = p.Superscript
 	if p.Color != nil {
 		r.Color = *p.Color
 	}
