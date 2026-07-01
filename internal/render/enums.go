@@ -167,6 +167,8 @@ func mapColorRole(role contracts.ColorRole) pptx.ColorRole {
 		return scene.ColorError
 	case contracts.ColorInfo:
 		return scene.ColorInfo
+	case contracts.ColorPaper:
+		return pptx.ColorPaper
 	case contracts.ColorSurface:
 		fallthrough
 	default:

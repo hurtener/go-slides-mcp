@@ -38,7 +38,7 @@ func FromTemplate(name, description string, theme *pptx.Theme) (*Soul, error) {
 		"accentSoft":   string(t.ResolveColor(pptx.ColorAccent)),
 	}
 
-	return &Soul{
+	s := &Soul{
 		ID:          id,
 		Name:        trimmedName,
 		Description: description,
@@ -48,5 +48,16 @@ func FromTemplate(name, description string, theme *pptx.Theme) (*Soul, error) {
 			NorthStar: "Render in the brand's own palette and type.",
 		},
 		Extensions: extensions,
-	}, nil
+	}
+
+	// R13.1/R13.12: seed the paper tint and the default decor policy from the
+	// extracted brand theme, same as Bootstrap — a from-template soul is
+	// decorated out of the box too. registerDecorGradients derives its own
+	// dark-canvas fallback when the template carried no DarkColors, so this
+	// is deterministic even for a brand kit with no dark variant.
+	t.Colors.Surfaces[pptx.ColorPaper] = pptx.RGB(paperTint(string(canvas), string(t.ResolveColor(pptx.ColorSurfaceAlt))))
+	registerDecorGradients(s)
+	s.Decor = DefaultDecorPolicy(t)
+
+	return s, nil
 }

@@ -851,6 +851,64 @@ export interface SetDeckSectionsOutput {
   sections?: DeckSection[];
 }
 /**
+ * SlideArchetype names a slide's role in the deck for the purpose of
+ * soul-driven decoration (R13.12): cover/section/content/dark/closing. It
+ * selects the per-archetype background+decoration recipe a bootstrapped soul
+ * carries (soul.DecorPolicy) when the slide itself sets no explicit
+ * Background/decorations.
+ */
+export type SlideArchetype = string;
+/**
+ * Slide archetypes (wire values per R13.12).
+ */
+export const ArchetypeCover: SlideArchetype = "cover";
+/**
+ * Slide archetypes (wire values per R13.12).
+ */
+export const ArchetypeSection: SlideArchetype = "section";
+/**
+ * Slide archetypes (wire values per R13.12).
+ */
+export const ArchetypeContent: SlideArchetype = "content";
+/**
+ * Slide archetypes (wire values per R13.12).
+ */
+export const ArchetypeDark: SlideArchetype = "dark";
+/**
+ * Slide archetypes (wire values per R13.12).
+ */
+export const ArchetypeClosing: SlideArchetype = "closing";
+/**
+ * ArchetypeDecor is the background+decoration recipe for one SlideArchetype
+ * (R13.12): a bootstrapped soul's DecorPolicy carries one of these per
+ * archetype it decorates. Applied only when the slide itself sets no explicit
+ * Background and no top-level Decoration node — an explicit per-slide setting
+ * always wins.
+ */
+export interface ArchetypeDecor {
+  /**
+   * Background is the archetype's default full-bleed fill.
+   */
+  background?: Background;
+  /**
+   * Decorations are the ornament nodes prepended to the slide's node tree.
+   */
+  decorations?: Decoration[];
+}
+/**
+ * DecorPolicy is a soul's per-archetype background+decoration policy
+ * (R13.12/R13.13): a bootstrapped soul carries one so every slide is
+ * tastefully decorated by default without the caller hand-placing ornaments.
+ * Nil (the default) is a no-op — the built-in Deckard White soul carries a
+ * nil policy so its render stays byte-identical to a policy-free deck.
+ */
+export interface DecorPolicy {
+  /**
+   * ByArchetype maps a SlideArchetype to its default recipe.
+   */
+  byArchetype?: { [key: SlideArchetype]: ArchetypeDecor};
+}
+/**
  * DescribeNodeInput is the typed input for the describe_node tool.
  */
 export interface DescribeNodeInput {
@@ -1843,6 +1901,20 @@ export interface Decoration {
    * Rotation is the clockwise rotation in degrees.
    */
   rotation?: number /* float64 */;
+  /**
+   * Color overrides the ornament's color role (R13.5). Empty = the engine
+   * default (accent). Set to `canvas`/`paper` for a neutral paper grain or
+   * `surface`/an inverse role for a pale starfield on dark slides. Applies
+   * to preset decorations; asset decorations ignore it.
+   */
+  color?: ColorRole;
+  /**
+   * Pitch is the lattice spacing in POINTS for pattern presets
+   * (grid_dots/noise_overlay/starfield); the dot count derives from the box
+   * at this pitch so a full-bleed texture keeps a consistent density
+   * (R13.7). 0 keeps the preset's legacy fixed count — byte-identical.
+   */
+  pitch?: number /* float64 */;
 }
 /**
  * Divider is a horizontal rule with surrounding spacing. Renders as native
@@ -2433,6 +2505,12 @@ export const ColorError: ColorRole = "error";
  */
 export const ColorInfo: ColorRole = "info";
 /**
+ * ColorPaper is a faintly tinted off-white canvas distinct from pure
+ * white; the default content-slide background a bootstrapped soul emits
+ * (R13.1).
+ */
+export const ColorPaper: ColorRole = "paper";
+/**
  * SpaceRole names a spacing token role (mirrors pptx-go's SpaceRole).
  */
 export type SpaceRole = string;
@@ -2513,6 +2591,13 @@ export interface Slide {
    * Nil (the default) draws nothing — byte-identical to pre-existing slides.
    */
   background?: Background;
+  /**
+   * Archetype is the slide's role in the deck (cover/section/content/dark/
+   * closing). It selects the soul's per-archetype background+decoration
+   * recipe (R13.12) when the slide sets no explicit Background/decorations.
+   * Empty = inferred from Layout/Variant/position by the composer.
+   */
+  archetype?: SlideArchetype;
   /**
    * Section is the per-slide chrome eyebrow label (R3, opt-in). When the
    * deck chrome is enabled, this string appears in the top section-eyebrow

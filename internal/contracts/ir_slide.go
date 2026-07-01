@@ -26,6 +26,11 @@ type Slide struct {
 	// linear gradient of soul color roles), or "asset" (full-bleed picture).
 	// Nil (the default) draws nothing — byte-identical to pre-existing slides.
 	Background *Background `json:"background,omitempty"`
+	// Archetype is the slide's role in the deck (cover/section/content/dark/
+	// closing). It selects the soul's per-archetype background+decoration
+	// recipe (R13.12) when the slide sets no explicit Background/decorations.
+	// Empty = inferred from Layout/Variant/position by the composer.
+	Archetype SlideArchetype `json:"archetype,omitempty"`
 	// Section is the per-slide chrome eyebrow label (R3, opt-in). When the
 	// deck chrome is enabled, this string appears in the top section-eyebrow
 	// band above the body on this slide (e.g. "01 — Direction"). Empty means
@@ -44,14 +49,15 @@ type Slide struct {
 // never recurses.
 func (s *Slide) MarshalJSON() ([]byte, error) {
 	type plain struct {
-		ID         string      `json:"id"`
-		Layout     LayoutKind  `json:"layout,omitempty"`
-		Align      Alignment   `json:"align,omitempty"`
-		Variant    Variant     `json:"variant,omitempty"`
-		Background *Background `json:"background,omitempty"`
-		Section    string      `json:"section,omitempty"`
-		Nodes      []SlideNode `json:"nodes,omitempty"`
-		Notes      RichText    `json:"notes,omitempty"`
+		ID         string         `json:"id"`
+		Layout     LayoutKind     `json:"layout,omitempty"`
+		Align      Alignment      `json:"align,omitempty"`
+		Variant    Variant        `json:"variant,omitempty"`
+		Background *Background    `json:"background,omitempty"`
+		Archetype  SlideArchetype `json:"archetype,omitempty"`
+		Section    string         `json:"section,omitempty"`
+		Nodes      []SlideNode    `json:"nodes,omitempty"`
+		Notes      RichText       `json:"notes,omitempty"`
 	}
 	return json.Marshal(plain{
 		ID:         s.ID,
@@ -59,6 +65,7 @@ func (s *Slide) MarshalJSON() ([]byte, error) {
 		Align:      s.Align,
 		Variant:    s.Variant,
 		Background: s.Background,
+		Archetype:  s.Archetype,
 		Section:    s.Section,
 		Nodes:      s.Nodes,
 		Notes:      s.Notes,
@@ -74,6 +81,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 		Align      Alignment         `json:"align,omitempty"`
 		Variant    Variant           `json:"variant,omitempty"`
 		Background *Background       `json:"background,omitempty"`
+		Archetype  SlideArchetype    `json:"archetype,omitempty"`
 		Section    string            `json:"section,omitempty"`
 		Nodes      []json.RawMessage `json:"nodes,omitempty"`
 		Notes      RichText          `json:"notes,omitempty"`
@@ -87,6 +95,7 @@ func (s *Slide) UnmarshalJSON(data []byte) error {
 	s.Align = r.Align
 	s.Variant = r.Variant
 	s.Background = r.Background
+	s.Archetype = r.Archetype
 	s.Section = r.Section
 	nodes, err := unmarshalNodes(r.Nodes)
 	if err != nil {

@@ -175,6 +175,18 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 
 	deriveAccentText(s, p)
 
+	// R13.1/R13.12: seed the paper tint, register the default cover/dark
+	// named gradients, and build the soul's default decor policy — all
+	// derived from the now-fully-built theme, so a bootstrapped soul is
+	// tastefully decorated out of the box without the caller hand-placing
+	// ornaments.
+	s.Theme.Colors.Surfaces[pptx.ColorPaper] = pptx.RGB(paperTint(
+		string(s.Theme.ResolveColor(pptx.ColorCanvas)),
+		string(s.Theme.ResolveColor(pptx.ColorSurfaceAlt)),
+	))
+	registerDecorGradients(s)
+	s.Decor = DefaultDecorPolicy(s.Theme)
+
 	s.ID = id
 	s.Name = name
 	s.Status = "ready"

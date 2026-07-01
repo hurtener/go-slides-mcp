@@ -49,6 +49,16 @@ type Decoration struct {
 	Opacity float64 `json:"opacity,omitempty"`
 	// Rotation is the clockwise rotation in degrees.
 	Rotation float64 `json:"rotation,omitempty"`
+	// Color overrides the ornament's color role (R13.5). Empty = the engine
+	// default (accent). Set to `canvas`/`paper` for a neutral paper grain or
+	// `surface`/an inverse role for a pale starfield on dark slides. Applies
+	// to preset decorations; asset decorations ignore it.
+	Color ColorRole `json:"color,omitempty"`
+	// Pitch is the lattice spacing in POINTS for pattern presets
+	// (grid_dots/noise_overlay/starfield); the dot count derives from the box
+	// at this pitch so a full-bleed texture keeps a consistent density
+	// (R13.7). 0 keeps the preset's legacy fixed count — byte-identical.
+	Pitch float64 `json:"pitch,omitempty"`
 }
 
 func (Decoration) slideNodeKind() Kind { return KindDecoration }
