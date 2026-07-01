@@ -1570,6 +1570,11 @@ export const KindStat: Kind = "stat";
  */
 export const KindBento: Kind = "bento";
 /**
+ * Node kind added in R14.4 — the Timeline / roadmap node (D-119), mirroring
+ * pptx-go's scene.Timeline.
+ */
+export const KindTimeline: Kind = "timeline";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -2519,6 +2524,96 @@ export interface HeaderGroup {
    * Span is the number of columns the group covers (>= 1).
    */
   span?: number /* int */;
+}
+/**
+ * Timeline is a roadmap / horizontal-axis node: a single-lane or swimlaned
+ * series of Milestones, optionally overlaid with phase/horizon Bands drawn
+ * behind the axis. Renders as native PPTX shapes (axis, marker dots,
+ * custGeom icons) — no asset. Mirror of pptx-go's scene.Timeline (D-119).
+ */
+export interface Timeline {
+  /**
+   * Milestones is the single-lane milestone list, used when Lanes is
+   * empty. Ignored (superseded) when Lanes is non-empty.
+   */
+  milestones?: Milestone[];
+  /**
+   * Lanes are swimlanes (rows), each with its own milestones. When
+   * non-empty, Lanes supersedes Milestones.
+   */
+  lanes?: TimelineLane[];
+  /**
+   * Bands are optional phase/horizon regions drawn behind the axis, each
+   * spanning [From,To] of the timeline width.
+   */
+  bands?: TimelineBand[];
+}
+/**
+ * Milestone is one point on a Timeline axis. Mirror of pptx-go's
+ * scene.Milestone.
+ */
+export interface Milestone {
+  /**
+   * Position is the milestone's location along the axis, 0..1 (0 = start,
+   * 1 = end).
+   */
+  position: number /* float64 */;
+  /**
+   * Label is the milestone's headline text.
+   */
+  label?: string;
+  /**
+   * Detail is optional supporting text under the label.
+   */
+  detail?: string;
+  /**
+   * Icon is an optional curated icon name drawn at the marker.
+   */
+  icon?: string;
+  /**
+   * AccentIndex selects a soul-driven series accent color for the marker
+   * (0 = the first accent). A plain int passthrough — 0 is a real value
+   * (the first accent), not "unset".
+   */
+  accentIndex?: number /* int */;
+}
+/**
+ * TimelineLane is one swimlane (row) of a Timeline: a left-gutter Label and
+ * its own Milestones. Mirror of pptx-go's scene.TimelineLane.
+ */
+export interface TimelineLane {
+  /**
+   * Label is the swimlane's left-gutter caption.
+   */
+  label?: string;
+  /**
+   * Milestones are this lane's milestones.
+   */
+  milestones?: Milestone[];
+}
+/**
+ * TimelineBand is a phase/horizon region drawn behind a Timeline axis: it
+ * spans [From,To] (each 0..1) of the timeline width, filled with Fill (a
+ * low-alpha surface role) and labeled at the top. Mirror of pptx-go's
+ * scene.TimelineBand.
+ */
+export interface TimelineBand {
+  /**
+   * From is the band's start position along the axis, 0..1.
+   */
+  from: number /* float64 */;
+  /**
+   * To is the band's end position along the axis, 0..1. Must be >= From.
+   */
+  to: number /* float64 */;
+  /**
+   * Label is the band's caption drawn at its top.
+   */
+  label?: string;
+  /**
+   * Fill is the band's surface color role (low-alpha).
+   */
+  fill?: ColorRole;
 }
 /**
  * ColumnRatio names a left:right width split (mirrors pptx-go's

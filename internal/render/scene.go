@@ -125,9 +125,54 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}
 	case *contracts.Stat:
 		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone), AutoFit: n.AutoFit, Number: n.Number, Format: mapNumberFormat(n.Format)}
+	case *contracts.Timeline:
+		return scene.Timeline{Milestones: mapMilestones(n.Milestones), Lanes: mapTimelineLanes(n.Lanes), Bands: mapTimelineBands(n.Bands)}
 	default:
 		return nil
 	}
+}
+
+// mapMilestones maps a Timeline's milestone list, preserving nil vs. empty
+// (R14.4, D-119).
+func mapMilestones(milestones []contracts.Milestone) []scene.Milestone {
+	if milestones == nil {
+		return nil
+	}
+	mapped := make([]scene.Milestone, len(milestones))
+	for i, m := range milestones {
+		mapped[i] = scene.Milestone{
+			Position:    m.Position,
+			Label:       m.Label,
+			Detail:      m.Detail,
+			Icon:        m.Icon,
+			AccentIndex: m.AccentIndex,
+		}
+	}
+	return mapped
+}
+
+// mapTimelineLanes maps a Timeline's swimlanes (R14.4, D-119).
+func mapTimelineLanes(lanes []contracts.TimelineLane) []scene.TimelineLane {
+	if lanes == nil {
+		return nil
+	}
+	mapped := make([]scene.TimelineLane, len(lanes))
+	for i, ln := range lanes {
+		mapped[i] = scene.TimelineLane{Label: ln.Label, Milestones: mapMilestones(ln.Milestones)}
+	}
+	return mapped
+}
+
+// mapTimelineBands maps a Timeline's phase/horizon bands (R14.4, D-119).
+func mapTimelineBands(bands []contracts.TimelineBand) []scene.TimelineBand {
+	if bands == nil {
+		return nil
+	}
+	mapped := make([]scene.TimelineBand, len(bands))
+	for i, b := range bands {
+		mapped[i] = scene.TimelineBand{From: b.From, To: b.To, Label: b.Label, Fill: mapColorRole(b.Fill)}
+	}
+	return mapped
 }
 
 func mapParagraphs(paragraphs []contracts.RichText) []scene.RichText {

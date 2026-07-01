@@ -120,6 +120,8 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, childErr("card_section.body", v.Body))
 	case *contracts.Decoration:
 		errs = append(errs, validateDecoration(v))
+	case *contracts.Timeline:
+		errs = append(errs, validateTimeline(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -238,6 +240,39 @@ func validateDecoration(d *contracts.Decoration) error {
 		errs = append(errs, fmt.Errorf("decoration: opacity %.3f out of [0,1]", d.Opacity))
 	}
 	return errors.Join(errs...)
+}
+
+// validateTimeline checks structural constraints for the Timeline node
+// (R14.4, D-119), mirroring the engine's scene.ValidateScene rules for
+// Timeline: at least one milestone (across top-level Milestones and every
+// Lane), every Milestone.Position in [0,1], and every Band's [From,To] span
+// within [0,1] with From <= To.
+func validateTimeline(t *contracts.Timeline) []error {
+	var errs []error
+	total := len(t.Milestones)
+	for _, ln := range t.Lanes {
+		total += len(ln.Milestones)
+	}
+	if total == 0 {
+		errs = append(errs, errors.New("timeline: needs at least one milestone or lane"))
+	}
+	checkMilestones := func(where string, ms []contracts.Milestone) {
+		for i, m := range ms {
+			if m.Position < 0 || m.Position > 1 {
+				errs = append(errs, fmt.Errorf("timeline: %s milestone[%d] position %g out of [0,1]", where, i, m.Position))
+			}
+		}
+	}
+	checkMilestones("top-level", t.Milestones)
+	for li, ln := range t.Lanes {
+		checkMilestones(fmt.Sprintf("lane[%d]", li), ln.Milestones)
+	}
+	for i, b := range t.Bands {
+		if b.From < 0 || b.From > 1 || b.To < 0 || b.To > 1 || b.From > b.To {
+			errs = append(errs, fmt.Errorf("timeline: band[%d] span [%g,%g] invalid (need 0<=from<=to<=1)", i, b.From, b.To))
+		}
+	}
+	return errs
 }
 
 func cropErrs(c contracts.Crop) []error {

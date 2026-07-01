@@ -214,6 +214,21 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			},
 		}, true
 
+	case KindTimeline:
+		// Timeline (R14.4, D-119): Milestones drives markers when Lanes is
+		// empty. Every Milestone field is set (position/label/detail/icon/
+		// accentIndex) plus one Band, so the round-trip covers every field.
+		return &Timeline{
+			Milestones: []Milestone{
+				{Position: 0, Label: "Kickoff", Detail: "Scope locked", Icon: "star", AccentIndex: 0},
+				{Position: 0.5, Label: "Beta", Detail: "First external users", Icon: "diamond", AccentIndex: 1},
+				{Position: 1, Label: "GA", Detail: "General availability", Icon: "check", AccentIndex: 2},
+			},
+			Bands: []TimelineBand{
+				{From: 0, To: 0.5, Label: "Phase 1", Fill: ColorSurfaceAlt},
+			},
+		}, true
+
 	default:
 		return nil, false
 	}
