@@ -100,6 +100,10 @@ func TestValidateBackgroundRules(t *testing.T) {
 		{"bg-stops-not-ascending", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0.5}, {Pos: 0.2}}}}, "not strictly ascending"},
 		{"bg-mesh-radius-negative", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Radius: -1}}}}, "out of range, must be >= 0"},
 		{"bg-mesh-alpha-oob", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Radius: 100, Alpha: 1.5}}}}, "out of [0,1]"},
+		{"bg-scrim-nil", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor}}, ""},
+		{"bg-scrim-opacity-ok", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Scrim: &contracts.Scrim{Opacity: 0.5}}}, ""},
+		{"bg-scrim-opacity-oob-high", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Scrim: &contracts.Scrim{Opacity: 1.5}}}, "out of [0,1]"},
+		{"bg-scrim-opacity-oob-negative", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Scrim: &contracts.Scrim{Opacity: -0.1}}}, "out of [0,1]"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

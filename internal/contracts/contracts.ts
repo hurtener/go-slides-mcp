@@ -1824,6 +1824,13 @@ export interface Card {
    * center-anchored, bleeding `radial_glow`. nil = none, byte-identical.
    */
   backdrop?: Decoration;
+  /**
+   * ImageFill fills the card surface with a cover-fit photo (resolved via
+   * the registered asset store) instead of the solid Fill — the
+   * image-as-surface treatment for photographic cards (R14.1). "" = solid,
+   * byte-identical to a pre-R14.1 card.
+   */
+  imageFill?: AssetID;
 }
 /**
  * CardSection is a top-level card accepting grids, two-columns, or nested
@@ -2196,6 +2203,18 @@ export interface Image {
    * Fit selects how the image fills its slot; FitFill is the default.
    */
   fit?: Fit;
+  /**
+   * CornerRadius rounds the picture's corners from a theme radius token
+   * (R13.11). RadiusNone (the zero value) leaves the picture rectangular —
+   * byte-identical to a pre-R13.11 Image.
+   */
+  cornerRadius?: RadiusRole;
+  /**
+   * Elevation casts a soft drop shadow on the picture from a theme
+   * elevation token (R13.11). ElevationFlat (the zero value) emits no
+   * shadow — byte-identical to a pre-R13.11 Image.
+   */
+  elevation?: ElevationRole;
 }
 /**
  * CodeBlock is a source-code listing placed from a pre-rasterized image
@@ -2664,6 +2683,41 @@ export const ElevationRaised: ElevationRole = "raised";
  * Elevation roles (mirror the define-a-theme skill enum verbatim).
  */
 export const ElevationElevated: ElevationRole = "elevated";
+/**
+ * RadiusRole names a corner-radius role (mirrors pptx-go's RadiusRole; the
+ * soul/theme resolves it to a concrete EMU radius at render time).
+ */
+export type RadiusRole = string;
+/**
+ * Radius roles (mirror the define-a-theme skill enum + internal/soul's
+ * radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+ * a picture rectangular — byte-identical to a pre-R13.11 Image.
+ */
+export const RadiusNone: RadiusRole = "";
+/**
+ * Radius roles (mirror the define-a-theme skill enum + internal/soul's
+ * radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+ * a picture rectangular — byte-identical to a pre-R13.11 Image.
+ */
+export const RadiusSM: RadiusRole = "sm";
+/**
+ * Radius roles (mirror the define-a-theme skill enum + internal/soul's
+ * radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+ * a picture rectangular — byte-identical to a pre-R13.11 Image.
+ */
+export const RadiusMD: RadiusRole = "md";
+/**
+ * Radius roles (mirror the define-a-theme skill enum + internal/soul's
+ * radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+ * a picture rectangular — byte-identical to a pre-R13.11 Image.
+ */
+export const RadiusLG: RadiusRole = "lg";
+/**
+ * Radius roles (mirror the define-a-theme skill enum + internal/soul's
+ * radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+ * a picture rectangular — byte-identical to a pre-R13.11 Image.
+ */
+export const RadiusFull: RadiusRole = "full";
 /**
  * Slide is one slide: a stable ID, a structural layout, an ordered node tree,
  * and optional speaker notes. Nodes and Notes route through the codec
@@ -4391,6 +4445,54 @@ export interface MeshGlow {
   alpha?: number /* float64 */;
 }
 /**
+ * Scrim is an optional darkening/tinting overlay drawn over a slide's
+ * background fill so text reads legibly over a photographic or busy
+ * background (R14.1). It applies over any drawn background kind. nil draws
+ * nothing — byte-identical to a pre-R14.1 background.
+ */
+export interface Scrim {
+  /**
+   * Color is the overlay's surface color role (a dark role for a
+   * darkening scrim). Resolves against the active soul/theme.
+   */
+  color?: ColorRole;
+  /**
+   * Opacity is the overlay's dense-edge opacity, in [0,1]. For a solid
+   * scrim the whole overlay carries Opacity; for a gradient scrim the
+   * dense edge carries Opacity and the opposite edge is transparent.
+   */
+  opacity?: number /* float64 */;
+  /**
+   * Gradient, when true, draws a transparent→Color linear gradient
+   * overlay instead of a flat wash — the classic bottom-heavy caption
+   * scrim.
+   */
+  gradient?: boolean;
+  /**
+   * GradientAngle orients a gradient scrim in degrees clockwise from the
+   * positive x-axis; 0 defaults to 90° (top transparent, bottom dense).
+   */
+  gradientAngle?: number /* int */;
+}
+/**
+ * Duotone is an optional two-tone recolor applied to a photographic
+ * background (R14.1): the photo's shadows map to Shadow and its highlights
+ * to Highlight. Applies only to kind "asset". nil leaves the photo at its
+ * natural colors — byte-identical.
+ */
+export interface Duotone {
+  /**
+   * Shadow is the role the photo's dark tones map to. Resolves against
+   * the active soul/theme.
+   */
+  shadow?: ColorRole;
+  /**
+   * Highlight is the role the photo's light tones map to. Resolves
+   * against the active soul/theme.
+   */
+  highlight?: ColorRole;
+}
+/**
  * Background is a slide's full-bleed background specification. It is drawn
  * behind all body content — the lowest layer in z-order. The zero value
  * (nil pointer, or Kind == "") draws nothing; all existing slides are
@@ -4450,4 +4552,16 @@ export interface Background {
    * base canvas fill in order. Empty draws nothing (absent config).
    */
   mesh?: MeshGlow[];
+  /**
+   * Scrim is an optional darkening/tinting overlay applied over any drawn
+   * background kind (R14.1) — used to keep text legible over a photo or
+   * busy background. nil draws nothing, byte-identical to today.
+   */
+  scrim?: Scrim;
+  /**
+   * Duotone is an optional two-tone recolor of a photographic background
+   * (R14.1); applies only when Kind == "asset". nil = natural colors,
+   * byte-identical to today.
+   */
+  duotone?: Duotone;
 }

@@ -58,3 +58,22 @@ const (
 // (Phase 12 A4). Empty string is rejected here; the validator passes "" as
 // legal in the optional-with-default semantics it actually uses.
 func (v ElevationRole) IsValid() bool { return IsValidEnum(v, AllowedElevationRole()) }
+
+// RadiusRole names a corner-radius role (mirrors pptx-go's RadiusRole; the
+// soul/theme resolves it to a concrete EMU radius at render time).
+type RadiusRole string
+
+// Radius roles (mirror the define-a-theme skill enum + internal/soul's
+// radiusRole wire spelling verbatim). RadiusNone (the empty string) leaves
+// a picture rectangular — byte-identical to a pre-R13.11 Image.
+const (
+	RadiusNone RadiusRole = ""
+	RadiusSM   RadiusRole = "sm"
+	RadiusMD   RadiusRole = "md"
+	RadiusLG   RadiusRole = "lg"
+	RadiusFull RadiusRole = "full"
+)
+
+// IsValid reports whether v is one of the closed RadiusRole wire values
+// (Phase 12 A4).
+func (v RadiusRole) IsValid() bool { return IsValidEnum(v, AllowedRadiusRole()) }

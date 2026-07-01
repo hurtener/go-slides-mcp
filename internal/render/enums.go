@@ -230,6 +230,26 @@ func mapElevationRole(role contracts.ElevationRole) pptx.ElevationRole {
 	}
 }
 
+// mapRadiusRole converts the wire-level RadiusRole string to the engine's
+// pptx.RadiusRole enum (R13.11). The empty string (RadiusNone) maps to the
+// zero value, leaving a picture rectangular — byte-identical.
+func mapRadiusRole(role contracts.RadiusRole) pptx.RadiusRole {
+	switch role {
+	case contracts.RadiusSM:
+		return pptx.RadiusSM
+	case contracts.RadiusMD:
+		return pptx.RadiusMD
+	case contracts.RadiusLG:
+		return pptx.RadiusLG
+	case contracts.RadiusFull:
+		return pptx.RadiusFull
+	case contracts.RadiusNone:
+		fallthrough
+	default:
+		return pptx.RadiusNone
+	}
+}
+
 func mapTextColorRole(role contracts.TextColorRole) pptx.TextColorRole {
 	switch role {
 	case contracts.TextSecondary:
@@ -602,6 +622,25 @@ func mapBackground(b contracts.Background) scene.Background {
 			}
 		}
 	}
+	// Scrim/Duotone stay nil when the product field is unset — that keeps a
+	// background that sets neither byte-identical to pre-R14.1 output
+	// (CLAUDE.md byte-identity contract).
+	var scrim *scene.Scrim
+	if b.Scrim != nil {
+		scrim = &scene.Scrim{
+			Color:         mapColorRole(b.Scrim.Color),
+			Opacity:       int(b.Scrim.Opacity * 100000),
+			Gradient:      b.Scrim.Gradient,
+			GradientAngle: b.Scrim.GradientAngle,
+		}
+	}
+	var duo *scene.Duotone
+	if b.Duotone != nil {
+		duo = &scene.Duotone{
+			Shadow:    mapColorRole(b.Duotone.Shadow),
+			Highlight: mapColorRole(b.Duotone.Highlight),
+		}
+	}
 	return scene.Background{
 		Kind:         mapBackgroundKind(b.Kind),
 		Color:        mapColorRole(b.Color),
@@ -611,5 +650,7 @@ func mapBackground(b contracts.Background) scene.Background {
 		AssetID:      scene.AssetID(b.AssetID),
 		GradientName: b.GradientName,
 		Mesh:         mesh,
+		Scrim:        scrim,
+		Duotone:      duo,
 	}
 }

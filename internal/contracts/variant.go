@@ -73,6 +73,40 @@ type MeshGlow struct {
 	Alpha float64 `json:"alpha,omitempty"`
 }
 
+// Scrim is an optional darkening/tinting overlay drawn over a slide's
+// background fill so text reads legibly over a photographic or busy
+// background (R14.1). It applies over any drawn background kind. nil draws
+// nothing — byte-identical to a pre-R14.1 background.
+type Scrim struct {
+	// Color is the overlay's surface color role (a dark role for a
+	// darkening scrim). Resolves against the active soul/theme.
+	Color ColorRole `json:"color,omitempty"`
+	// Opacity is the overlay's dense-edge opacity, in [0,1]. For a solid
+	// scrim the whole overlay carries Opacity; for a gradient scrim the
+	// dense edge carries Opacity and the opposite edge is transparent.
+	Opacity float64 `json:"opacity,omitempty"`
+	// Gradient, when true, draws a transparent→Color linear gradient
+	// overlay instead of a flat wash — the classic bottom-heavy caption
+	// scrim.
+	Gradient bool `json:"gradient,omitempty"`
+	// GradientAngle orients a gradient scrim in degrees clockwise from the
+	// positive x-axis; 0 defaults to 90° (top transparent, bottom dense).
+	GradientAngle int `json:"gradientAngle,omitempty"`
+}
+
+// Duotone is an optional two-tone recolor applied to a photographic
+// background (R14.1): the photo's shadows map to Shadow and its highlights
+// to Highlight. Applies only to kind "asset". nil leaves the photo at its
+// natural colors — byte-identical.
+type Duotone struct {
+	// Shadow is the role the photo's dark tones map to. Resolves against
+	// the active soul/theme.
+	Shadow ColorRole `json:"shadow,omitempty"`
+	// Highlight is the role the photo's light tones map to. Resolves
+	// against the active soul/theme.
+	Highlight ColorRole `json:"highlight,omitempty"`
+}
+
 // Background is a slide's full-bleed background specification. It is drawn
 // behind all body content — the lowest layer in z-order. The zero value
 // (nil pointer, or Kind == "") draws nothing; all existing slides are
@@ -115,4 +149,12 @@ type Background struct {
 	// Mesh holds the pooled radial glows for kind "mesh" (R13.4), drawn over the
 	// base canvas fill in order. Empty draws nothing (absent config).
 	Mesh []MeshGlow `json:"mesh,omitempty"`
+	// Scrim is an optional darkening/tinting overlay applied over any drawn
+	// background kind (R14.1) — used to keep text legible over a photo or
+	// busy background. nil draws nothing, byte-identical to today.
+	Scrim *Scrim `json:"scrim,omitempty"`
+	// Duotone is an optional two-tone recolor of a photographic background
+	// (R14.1); applies only when Kind == "asset". nil = natural colors,
+	// byte-identical to today.
+	Duotone *Duotone `json:"duotone,omitempty"`
 }

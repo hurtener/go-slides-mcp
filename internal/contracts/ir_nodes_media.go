@@ -17,6 +17,14 @@ type Image struct {
 	Crop Crop `json:"crop,omitempty"`
 	// Fit selects how the image fills its slot; FitFill is the default.
 	Fit Fit `json:"fit,omitempty"`
+	// CornerRadius rounds the picture's corners from a theme radius token
+	// (R13.11). RadiusNone (the zero value) leaves the picture rectangular —
+	// byte-identical to a pre-R13.11 Image.
+	CornerRadius RadiusRole `json:"cornerRadius,omitempty"`
+	// Elevation casts a soft drop shadow on the picture from a theme
+	// elevation token (R13.11). ElevationFlat (the zero value) emits no
+	// shadow — byte-identical to a pre-R13.11 Image.
+	Elevation ElevationRole `json:"elevation,omitempty"`
 }
 
 func (Image) slideNodeKind() Kind { return KindImage }

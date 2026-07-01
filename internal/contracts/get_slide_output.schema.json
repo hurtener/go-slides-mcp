@@ -102,6 +102,42 @@
                 },
                 "additionalProperties": false
               }
+            },
+            "scrim": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "opacity": {
+                  "type": "number"
+                },
+                "gradient": {
+                  "type": "boolean"
+                },
+                "gradientAngle": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            },
+            "duotone": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "shadow": {
+                  "type": "string"
+                },
+                "highlight": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
             }
           },
           "additionalProperties": false

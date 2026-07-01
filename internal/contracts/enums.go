@@ -115,6 +115,18 @@ func AllowedElevationRole() []ElevationRole {
 // plain strings — for inclusion in an error message.
 func (ElevationRole) allowedStrings() []string { return stringsFrom(AllowedElevationRole()) }
 
+// AllowedRadiusRole returns the closed set of RadiusRole wire values. The
+// zero value (RadiusNone, "") is also legal — a rectangular picture corner.
+func AllowedRadiusRole() []RadiusRole {
+	return []RadiusRole{
+		RadiusNone, RadiusSM, RadiusMD, RadiusLG, RadiusFull,
+	}
+}
+
+// allowedStrings returns the closed set of RadiusRole wire values as plain
+// strings — for inclusion in an error message.
+func (RadiusRole) allowedStrings() []string { return stringsFrom(AllowedRadiusRole()) }
+
 // AllowedLayoutKind returns the closed set of LayoutKind wire values.
 func AllowedLayoutKind() []LayoutKind {
 	return []LayoutKind{
