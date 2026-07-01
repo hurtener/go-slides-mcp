@@ -47,7 +47,17 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolv
 		return nil, Stats{}, fmt.Errorf("render: nil soul theme")
 	}
 
-	pres := pptx.New(pptx.WithTheme(s.Theme))
+	popts := []pptx.Option{pptx.WithTheme(s.Theme)}
+	if s.FontProvider != nil {
+		// Embed the brand faces the deck actually uses (R9.1): the engine's
+		// save-time pass walks every run, collects the distinct (family, weight,
+		// italic) set in a stable sorted order, and resolves each through the
+		// provider — so the serif display/heading faces ship inside the .pptx and
+		// render on any machine. A nil provider skips both options and keeps the
+		// render byte-identical to the pre-embedding output.
+		popts = append(popts, pptx.WithFontEmbedding(), pptx.WithFontSource(s.FontProvider))
+	}
+	pres := pptx.New(popts...)
 	sc := scene.Scene{
 		Theme:  s.Theme,
 		Slides: mapSlides(doc.Slides),

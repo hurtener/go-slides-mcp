@@ -1,6 +1,9 @@
 package soul
 
-import "github.com/hurtener/pptx-go/pptx"
+import (
+	"github.com/hurtener/go-slides-mcp/internal/soul/fonts"
+	"github.com/hurtener/pptx-go/pptx"
+)
 
 // DeckardWhiteID is the stable id of the built-in default soul.
 const DeckardWhiteID = "deckard-white"
@@ -70,6 +73,10 @@ func DeckardWhite() *Soul {
 		Description: "Warm editorial off-white — teal accent, serif display, airy and rebrandable.",
 		Status:      "ready",
 		Theme:       t,
+		// The default soul names bundled OFL serif/sans faces (Playfair Display,
+		// Lora, Inter); register the provider so they embed on export (R9.1) and
+		// the editorial serif renders on any machine.
+		FontProvider: fonts.Provider(),
 		StyleGuide: StyleGuide{
 			NorthStar: "Calm, editorial, premium: warm off-white, generous whitespace, one teal accent, serif titles.",
 			Do: []string{

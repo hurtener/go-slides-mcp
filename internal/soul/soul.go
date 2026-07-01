@@ -28,6 +28,15 @@ type Soul struct {
 	// "border", "borderStrong", "tooltip", "accentSoft" — as hex strings.
 	// Applied to deck shapes as literal strokes/washes by the renderer.
 	Extensions map[string]string
+	// FontProvider, when non-nil, resolves the soul's named font families to
+	// embeddable bytes (R9.1). The render path registers it as the engine
+	// FontSource and enables save-time embedding, so the faces the deck actually
+	// uses ship inside the .pptx and render on any machine without a host
+	// install. A nil provider means "embed nothing" — the render path is then
+	// byte-identical to the pre-embedding output. It is a runtime capability, not
+	// a serialized token: Clone carries the (immutable, shared) provider by
+	// reference, and it is never marshaled into a contract.
+	FontProvider pptx.FontSource
 }
 
 // StyleGuide is a soul's design voice, shown to agents to steer authoring.
