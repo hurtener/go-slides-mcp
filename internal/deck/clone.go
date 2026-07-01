@@ -37,7 +37,7 @@ func cloneSections(sections []Section) []Section {
 	}
 	out := make([]Section, len(sections))
 	for i, section := range sections {
-		out[i] = Section{Name: section.Name}
+		out[i] = Section{Name: section.Name, Variant: section.Variant, Archetype: section.Archetype}
 		if len(section.SlideIDs) > 0 {
 			out[i].SlideIDs = append([]string(nil), section.SlideIDs...)
 		}

@@ -59,6 +59,7 @@ func (h *handlers) exportDeck(_ context.Context, in contracts.ExportDeckInput) (
 	established := brandSoulEstablished(stored.SoulID) && resolvedOK
 
 	doc := contracts.SlideDoc{Title: stored.Title, Chrome: mapChrome(stored.Chrome), Slides: append([]contracts.Slide(nil), stored.Slides...)}
+	doc.Slides = render.ApplySectionThemes(doc.Slides, mapSections(stored.Sections))
 	resolver := raster.NewStoreResolver(h.deps.Assets)
 	if in.Autofit {
 		doc = autofit.Fill(doc)

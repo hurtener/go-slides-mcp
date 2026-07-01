@@ -45,4 +45,12 @@ type Section struct {
 	Name string `json:"name,omitempty"`
 	// SlideIDs is the ordered set of slide IDs in the section.
 	SlideIDs []string `json:"slideIds,omitempty"`
+	// Variant is a section-scoped theme variant default (R14.14), applied to
+	// every member slide that sets no explicit Variant of its own. Empty =
+	// no override.
+	Variant string `json:"variant,omitempty"`
+	// Archetype is a section-scoped decoration archetype default (R14.14),
+	// applied to every member slide that sets no explicit Archetype of its
+	// own. Empty = no override.
+	Archetype string `json:"archetype,omitempty"`
 }

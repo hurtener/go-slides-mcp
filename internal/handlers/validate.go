@@ -59,6 +59,7 @@ func (h *handlers) validateDeckForExport(_ context.Context, in contracts.Validat
 	}
 
 	doc := contracts.SlideDoc{Title: stored.Title, Slides: append([]contracts.Slide(nil), stored.Slides...)}
+	doc.Slides = render.ApplySectionThemes(doc.Slides, mapSections(stored.Sections))
 	s := h.resolveSoul(stored.SoulID)
 	rr := h.renderStats(doc, s)
 	deckReport, perSlide := validate.Deck(doc, s.Theme, [][]string{rr.warnings}, rr.colors)
