@@ -151,6 +151,14 @@ func ValidateSlideEnums(s Slide) error {
 				),
 			)
 		}
+		for i, st := range s.Background.Stops {
+			errs = append(errs, checkEnum(fmt.Sprintf("background.stops[%d].color", i), "ColorRole", st.Color, AllowedColorRole(), true))
+		}
+		for i, mg := range s.Background.Mesh {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("background.mesh[%d].anchor", i), "Anchor", mg.Anchor, AllowedAnchor(), true),
+				checkEnum(fmt.Sprintf("background.mesh[%d].color", i), "ColorRole", mg.Color, AllowedColorRole(), true))
+		}
 	}
 	return errors.Join(errs...)
 }

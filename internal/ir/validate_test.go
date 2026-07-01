@@ -79,6 +79,46 @@ func TestValidateNodeRules(t *testing.T) {
 	}
 }
 
+// TestValidateBackgroundRules exercises the Stage-1 structural checks on a
+// slide's Background.Stops/Mesh (R13.2/R13.3/R13.4), mirroring the
+// table-style-* cases in TestValidateNodeRules above but at the slide level
+// (validateBackground is called from ValidateSlide, not ValidateNode).
+func TestValidateBackgroundRules(t *testing.T) {
+	cases := []struct {
+		name  string
+		slide contracts.Slide
+		want  string
+	}{
+		{"bg-nil", contracts.Slide{}, ""},
+		{"bg-stops-empty", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundGradient}}, ""},
+		{"bg-stops-too-few", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0, Color: contracts.ColorAccent}}}}, "need 2..8 entries"},
+		{"bg-stops-too-many", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{
+			{Pos: 0}, {Pos: 0.1}, {Pos: 0.2}, {Pos: 0.3}, {Pos: 0.4}, {Pos: 0.5}, {Pos: 0.6}, {Pos: 0.7}, {Pos: 0.8},
+		}}}, "need 2..8 entries"},
+		{"bg-stops-pos-oob", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: -0.1}, {Pos: 1.5}}}}, "out of [0,1]"},
+		{"bg-stops-not-ascending", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0.5}, {Pos: 0.2}}}}, "not strictly ascending"},
+		{"bg-mesh-radius-negative", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Radius: -1}}}}, "out of range, must be >= 0"},
+		{"bg-mesh-alpha-oob", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Radius: 100, Alpha: 1.5}}}}, "out of [0,1]"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			err := ValidateSlide(c.slide)
+			if c.want == "" {
+				if err != nil {
+					t.Fatalf("want nil, got: %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("want error containing %q, got nil", c.want)
+			}
+			if !strings.Contains(err.Error(), c.want) {
+				t.Fatalf("want error containing %q, got: %v", c.want, err)
+			}
+		})
+	}
+}
+
 // TestValidateRecursesIntoContainers proves a bad node nested deep in a
 // container surfaces through ValidateSlide.
 func TestValidateRecursesIntoContainers(t *testing.T) {

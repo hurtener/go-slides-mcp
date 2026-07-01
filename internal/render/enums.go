@@ -448,6 +448,10 @@ func mapBackgroundKind(k contracts.BackgroundKind) scene.BackgroundKind {
 		return scene.BackgroundGradient
 	case contracts.BackgroundAsset:
 		return scene.BackgroundAsset
+	case contracts.BackgroundRadial:
+		return scene.BackgroundRadial
+	case contracts.BackgroundMesh:
+		return scene.BackgroundMesh
 	default:
 		// BackgroundNone ("") and any unknown value map to BackgroundNone.
 		return scene.BackgroundNone
@@ -523,6 +527,9 @@ func mapHeaderGroups(groups []contracts.HeaderGroup) []scene.HeaderGroup {
 //   - 0 roles → both stops are the zero ColorRole
 //   - 1 role  → both stops use the same role
 //   - 2+ roles → first two roles are used as start and end stops
+//
+// Stops and Mesh (R13.2/R13.3/R13.4) map element-wise and stay nil when the
+// product slice is empty.
 func mapBackground(b contracts.Background) scene.Background {
 	var grad [2]pptx.ColorRole
 	switch len(b.Gradient) {
@@ -535,12 +542,36 @@ func mapBackground(b contracts.Background) scene.Background {
 		grad[0] = mapColorRole(b.Gradient[0])
 		grad[1] = mapColorRole(b.Gradient[1])
 	}
+	// Stops/Mesh stay nil when the product slices are empty — that keeps a
+	// background that sets neither byte-identical to pre-R13.2/13.3/13.4
+	// output (CLAUDE.md byte-identity contract).
+	var stops []scene.GradientStop
+	if len(b.Stops) > 0 {
+		stops = make([]scene.GradientStop, len(b.Stops))
+		for i, s := range b.Stops {
+			stops[i] = scene.GradientStop{Pos: s.Pos, Color: mapColorRole(s.Color)}
+		}
+	}
+	var mesh []scene.MeshGlow
+	if len(b.Mesh) > 0 {
+		mesh = make([]scene.MeshGlow, len(b.Mesh))
+		for i, m := range b.Mesh {
+			mesh[i] = scene.MeshGlow{
+				Anchor: mapAnchor(m.Anchor),
+				Color:  mapColorRole(m.Color),
+				Radius: pptx.Pt(m.Radius),
+				Alpha:  int(m.Alpha * 100000),
+			}
+		}
+	}
 	return scene.Background{
 		Kind:         mapBackgroundKind(b.Kind),
 		Color:        mapColorRole(b.Color),
 		Gradient:     grad,
+		Stops:        stops,
 		Angle:        b.Angle,
 		AssetID:      scene.AssetID(b.AssetID),
 		GradientName: b.GradientName,
+		Mesh:         mesh,
 	}
 }

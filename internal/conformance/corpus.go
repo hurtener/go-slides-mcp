@@ -52,6 +52,7 @@ var Archetypes = []Fixture{
 	{"dark-feature", darkFeatureDoc},
 	{"closing", closingDoc},
 	{"dashboard", dashboardDoc},
+	{"cover-mesh", coverMeshDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -65,6 +66,31 @@ func coverDoc() contracts.SlideDoc {
 		ID:        "cover",
 		Archetype: contracts.ArchetypeCover,
 		Layout:    contracts.LayoutCover,
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{
+				Eyebrow:  "FY26 Board Review",
+				Title:    "The State of the Platform",
+				Subtitle: "A quarterly look at growth, reliability, and what's next",
+			},
+		},
+	})
+}
+
+// coverMeshDoc is a cover slide whose Background is a two-glow mesh wash
+// (R13.4) — the corpus's product-level accept case for BackgroundMesh,
+// asset-free like every other archetype fixture in this file.
+func coverMeshDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Cover Mesh", contracts.Slide{
+		ID:        "cover-mesh",
+		Archetype: contracts.ArchetypeCover,
+		Layout:    contracts.LayoutCover,
+		Background: &contracts.Background{
+			Kind: contracts.BackgroundMesh,
+			Mesh: []contracts.MeshGlow{
+				{Anchor: contracts.AnchorTopLeft, Color: contracts.ColorAccent, Radius: 240, Alpha: 0.12},
+				{Anchor: contracts.AnchorBottomRight, Color: contracts.ColorAccentAlt, Radius: 200, Alpha: 0.08},
+			},
+		},
 		Nodes: []contracts.SlideNode{
 			&contracts.Hero{
 				Eyebrow:  "FY26 Board Review",
