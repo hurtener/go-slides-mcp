@@ -25,8 +25,45 @@ func ValidateDoc(d contracts.SlideDoc) error {
 func ValidateSlide(s contracts.Slide) error {
 	return errors.Join(
 		contracts.ValidateSlideEnums(s),
+		errors.Join(validateBackground(s.Background)...),
 		childErr("nodes", s.Nodes),
 	)
+}
+
+// validateBackground checks the structural constraints of a background's
+// multi-stop gradient and mesh glows (R13.2/R13.3/R13.4), mirroring the
+// engine's degrade-to-warning rules but enforced as a hard Stage-1 error
+// (precedent: validateTableStyle). A nil background, or one with empty
+// Stops/Mesh, produces no error — the byte-identical opt-out.
+func validateBackground(b *contracts.Background) []error {
+	if b == nil {
+		return nil
+	}
+	var errs []error
+	if n := len(b.Stops); n > 0 {
+		if n < 2 || n > 8 {
+			errs = append(errs, fmt.Errorf("background: stops need 2..8 entries, got %d", n))
+		}
+		prev := -1.0
+		for i, st := range b.Stops {
+			if st.Pos < 0 || st.Pos > 1 {
+				errs = append(errs, fmt.Errorf("background: stops[%d] pos %v out of [0,1]", i, st.Pos))
+			}
+			if st.Pos <= prev {
+				errs = append(errs, fmt.Errorf("background: stops not strictly ascending at [%d]", i))
+			}
+			prev = st.Pos
+		}
+	}
+	for i, mg := range b.Mesh {
+		if mg.Radius < 0 {
+			errs = append(errs, fmt.Errorf("background: mesh[%d] radius %v out of range, must be >= 0", i, mg.Radius))
+		}
+		if mg.Alpha < 0 || mg.Alpha > 1 {
+			errs = append(errs, fmt.Errorf("background: mesh[%d] alpha %v out of [0,1]", i, mg.Alpha))
+		}
+	}
+	return errs
 }
 
 // ValidateNode runs Stage-1 structural validation on a single node, mirroring

@@ -363,6 +363,7 @@ func (Variant) allowedStrings() []string { return stringsFrom(AllowedVariant()) 
 func AllowedBackgroundKind() []BackgroundKind {
 	return []BackgroundKind{
 		BackgroundNone, BackgroundColor, BackgroundGradient, BackgroundAsset,
+		BackgroundRadial, BackgroundMesh,
 	}
 }
 

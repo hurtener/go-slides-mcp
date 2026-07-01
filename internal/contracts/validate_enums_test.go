@@ -213,6 +213,8 @@ func TestValidateSlideEnumsKnownGood(t *testing.T) {
 		{"background-color", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Color: contracts.ColorAccent}}},
 		{"background-gradient", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundGradient, Gradient: []contracts.ColorRole{contracts.ColorAccent, contracts.ColorSurface}}}},
 		{"background-asset", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundAsset}}},
+		{"background-radial", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0, Color: contracts.ColorAccent}, {Pos: 1, Color: contracts.ColorSurface}}}}},
+		{"background-mesh", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: contracts.AnchorTopLeft, Color: contracts.ColorAccent, Radius: 120, Alpha: 0.1}}}}},
 		{"empty-slide", contracts.Slide{}},
 	}
 	for _, tc := range cases {
@@ -249,6 +251,12 @@ func TestValidateSlideEnumsBadValues(t *testing.T) {
 		{"bg-color-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundColor, Color: "red"}}, "want one of"},
 		// Background Gradient ColorRole
 		{"bg-gradient-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundGradient, Gradient: []contracts.ColorRole{"red", contracts.ColorSurface}}}, "want one of"},
+		// Background Stops ColorRole
+		{"bg-stops-color-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundRadial, Stops: []contracts.GradientStop{{Pos: 0, Color: "red"}, {Pos: 1, Color: contracts.ColorSurface}}}}, "want one of"},
+		// Background Mesh Anchor
+		{"bg-mesh-anchor-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: "middle", Color: contracts.ColorAccent}}}}, "want one of"},
+		// Background Mesh ColorRole
+		{"bg-mesh-color-bad", contracts.Slide{Background: &contracts.Background{Kind: contracts.BackgroundMesh, Mesh: []contracts.MeshGlow{{Anchor: contracts.AnchorCenter, Color: "red"}}}}, "want one of"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

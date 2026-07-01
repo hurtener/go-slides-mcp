@@ -4318,6 +4318,57 @@ export const BackgroundGradient: BackgroundKind = "gradient";
  */
 export const BackgroundAsset: BackgroundKind = "asset";
 /**
+ * BackgroundRadial fills the slide canvas with a center-out radial
+ * gradient (spotlight/vignette) from Background.Stops (or the legacy
+ * Background.Gradient pair when Stops is empty). The focal point is
+ * centered — an offset is not yet exposed.
+ */
+export const BackgroundRadial: BackgroundKind = "radial";
+/**
+ * BackgroundMesh draws a soft mesh wash: the base canvas fill plus N
+ * low-alpha radial glows from Background.Mesh, pooled at caller-chosen
+ * anchors over the canvas.
+ */
+export const BackgroundMesh: BackgroundKind = "mesh";
+/**
+ * GradientStop is one color stop in a multi-stop background gradient (R13.3).
+ */
+export interface GradientStop {
+  /**
+   * Pos is the stop position along the gradient axis, in [0,1]
+   * (0 = start, 1 = end).
+   */
+  pos: number /* float64 */;
+  /**
+   * Color is the surface color role at this stop. Resolves against the
+   * active soul/theme.
+   */
+  color?: ColorRole;
+}
+/**
+ * MeshGlow is one pooled radial glow in a mesh background (R13.4).
+ */
+export interface MeshGlow {
+  /**
+   * Anchor is where the glow pools on the slide (its center).
+   */
+  anchor?: Anchor;
+  /**
+   * Color is the glow's surface color role. Resolves against the active
+   * soul/theme.
+   */
+  color?: ColorRole;
+  /**
+   * Radius is the glow circle's radius in POINTS; a value <= 0 is skipped.
+   */
+  radius?: number /* float64 */;
+  /**
+   * Alpha is the glow center's opacity in [0,1]; 0 = invisible. Keep it
+   * low (~0.08-0.15) for a subtle pool; the edge fades to transparent.
+   */
+  alpha?: number /* float64 */;
+}
+/**
  * Background is a slide's full-bleed background specification. It is drawn
  * behind all body content — the lowest layer in z-order. The zero value
  * (nil pointer, or Kind == "") draws nothing; all existing slides are
@@ -4326,7 +4377,8 @@ export const BackgroundAsset: BackgroundKind = "asset";
 export interface Background {
   /**
    * Kind selects the fill type: "" (no background), "color" (solid),
-   * "gradient" (two-stop linear), or "asset" (full-bleed picture).
+   * "gradient" (two-stop linear), "radial" (center-out radial gradient),
+   * "mesh" (pooled radial glows), or "asset" (full-bleed picture).
    */
   kind?: BackgroundKind;
   /**
@@ -4364,4 +4416,16 @@ export interface Background {
    * byte-identical to today.
    */
   gradientName?: string;
+  /**
+   * Stops is an optional multi-stop gradient (2..8 ascending stops in [0,1]) for
+   * kind "gradient" or "radial". When non-empty it supersedes Gradient (and is
+   * required for a multi-hue "radial" vignette). Empty = the legacy Gradient/Angle
+   * path, byte-identical to today. (R13.2/R13.3)
+   */
+  stops?: GradientStop[];
+  /**
+   * Mesh holds the pooled radial glows for kind "mesh" (R13.4), drawn over the
+   * base canvas fill in order. Empty draws nothing (absent config).
+   */
+  mesh?: MeshGlow[];
 }

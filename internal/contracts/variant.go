@@ -38,7 +38,40 @@ const (
 	// BackgroundAsset fills the slide canvas with a full-bleed picture
 	// resolved via Background.AssetID from the registered asset store.
 	BackgroundAsset BackgroundKind = "asset"
+	// BackgroundRadial fills the slide canvas with a center-out radial
+	// gradient (spotlight/vignette) from Background.Stops (or the legacy
+	// Background.Gradient pair when Stops is empty). The focal point is
+	// centered — an offset is not yet exposed.
+	BackgroundRadial BackgroundKind = "radial"
+	// BackgroundMesh draws a soft mesh wash: the base canvas fill plus N
+	// low-alpha radial glows from Background.Mesh, pooled at caller-chosen
+	// anchors over the canvas.
+	BackgroundMesh BackgroundKind = "mesh"
 )
+
+// GradientStop is one color stop in a multi-stop background gradient (R13.3).
+type GradientStop struct {
+	// Pos is the stop position along the gradient axis, in [0,1]
+	// (0 = start, 1 = end).
+	Pos float64 `json:"pos"`
+	// Color is the surface color role at this stop. Resolves against the
+	// active soul/theme.
+	Color ColorRole `json:"color,omitempty"`
+}
+
+// MeshGlow is one pooled radial glow in a mesh background (R13.4).
+type MeshGlow struct {
+	// Anchor is where the glow pools on the slide (its center).
+	Anchor Anchor `json:"anchor,omitempty"`
+	// Color is the glow's surface color role. Resolves against the active
+	// soul/theme.
+	Color ColorRole `json:"color,omitempty"`
+	// Radius is the glow circle's radius in POINTS; a value <= 0 is skipped.
+	Radius float64 `json:"radius,omitempty"`
+	// Alpha is the glow center's opacity in [0,1]; 0 = invisible. Keep it
+	// low (~0.08-0.15) for a subtle pool; the edge fades to transparent.
+	Alpha float64 `json:"alpha,omitempty"`
+}
 
 // Background is a slide's full-bleed background specification. It is drawn
 // behind all body content — the lowest layer in z-order. The zero value
@@ -46,7 +79,8 @@ const (
 // byte-identical after this field is added to Slide.
 type Background struct {
 	// Kind selects the fill type: "" (no background), "color" (solid),
-	// "gradient" (two-stop linear), or "asset" (full-bleed picture).
+	// "gradient" (two-stop linear), "radial" (center-out radial gradient),
+	// "mesh" (pooled radial glows), or "asset" (full-bleed picture).
 	Kind BackgroundKind `json:"kind,omitempty"`
 	// Color is the surface color role for a solid-color background
 	// (kind == "color"). Resolves against the active soul/theme.
@@ -73,4 +107,12 @@ type Background struct {
 	// than failing. Empty (the default) uses the legacy Gradient/Angle path,
 	// byte-identical to today.
 	GradientName string `json:"gradientName,omitempty"`
+	// Stops is an optional multi-stop gradient (2..8 ascending stops in [0,1]) for
+	// kind "gradient" or "radial". When non-empty it supersedes Gradient (and is
+	// required for a multi-hue "radial" vignette). Empty = the legacy Gradient/Angle
+	// path, byte-identical to today. (R13.2/R13.3)
+	Stops []GradientStop `json:"stops,omitempty"`
+	// Mesh holds the pooled radial glows for kind "mesh" (R13.4), drawn over the
+	// base canvas fill in order. Empty draws nothing (absent config).
+	Mesh []MeshGlow `json:"mesh,omitempty"`
 }

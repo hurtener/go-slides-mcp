@@ -54,6 +54,51 @@
             },
             "gradientName": {
               "type": "string"
+            },
+            "stops": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "number"
+                  },
+                  "color": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "pos"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "mesh": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "object",
+                "properties": {
+                  "anchor": {
+                    "type": "string"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "radius": {
+                    "type": "number"
+                  },
+                  "alpha": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              }
             }
           },
           "additionalProperties": false
