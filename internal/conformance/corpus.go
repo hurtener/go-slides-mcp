@@ -64,6 +64,7 @@ var Archetypes = []Fixture{
 	{"funnel", funnelDoc},
 	{"cycle", cycleDoc},
 	{"footnotes-sources", footnotesSourcesDoc},
+	{"agenda", agendaDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -683,6 +684,40 @@ func footnotesSourcesDoc() contracts.SlideDoc {
 		Footnotes: []contracts.RichText{
 			rt("Source: internal telemetry, 2026."),
 			rt("Note: figures unaudited; final numbers pending Q3 close."),
+		},
+	})
+}
+
+// agendaDoc mirrors the rcp_agenda builtin recipe (internal/recipe/store.go,
+// R14.6): a card_grid of 4 numbered Cards forming a section index. Kept to 4
+// cells across a 4-column Grid — modest and asset-free, like every other
+// archetype fixture in this file — so it stays clear of the safe area
+// (INV-2 zero-overflow, strict).
+func agendaDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Agenda", contracts.Slide{
+		ID:        "agenda",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Agenda")},
+			&contracts.Grid{
+				Columns: 4,
+				Gap:     contracts.SpaceMD,
+				Cells: []contracts.SlideNode{
+					&contracts.Card{Eyebrow: "01", Header: "Context", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("Where we are today")}},
+					}},
+					&contracts.Card{Eyebrow: "02", Header: "Strategy", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("Where we're headed")}},
+					}},
+					&contracts.Card{Eyebrow: "03", Header: "Roadmap", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("How we get there")}},
+					}},
+					&contracts.Card{Eyebrow: "04", Header: "Ask", Body: []contracts.SlideNode{
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("What we need from you")}},
+					}},
+				},
+			},
 		},
 	})
 }
