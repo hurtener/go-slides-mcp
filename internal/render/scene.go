@@ -49,9 +49,9 @@ func mapNodes(nodes []contracts.SlideNode) []scene.SlideNode {
 func mapNode(node contracts.SlideNode) scene.SlideNode {
 	switch n := node.(type) {
 	case *contracts.Hero:
-		return scene.Hero{Eyebrow: n.Eyebrow, Title: n.Title, Subtitle: n.Subtitle, Align: mapHAlign(n.Align)}
+		return scene.Hero{Eyebrow: n.Eyebrow, Title: n.Title, Subtitle: n.Subtitle, Align: mapHAlign(n.Align), AutoFit: n.AutoFit}
 	case *contracts.Heading:
-		return scene.Heading{Text: mapRichText(n.Text), Level: n.Level, Align: mapHAlign(n.Align)}
+		return scene.Heading{Text: mapRichText(n.Text), Level: n.Level, Align: mapHAlign(n.Align), AutoFit: n.AutoFit}
 	case *contracts.Prose:
 		return scene.Prose{Paragraphs: mapParagraphs(n.Paragraphs), Align: mapHAlign(n.Align)}
 	case *contracts.List:
@@ -131,7 +131,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}
 	case *contracts.Stat:
-		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone)}
+		return scene.Stat{Value: n.Value, Label: n.Label, Delta: n.Delta, DeltaTone: mapDeltaTone(n.DeltaTone), AutoFit: n.AutoFit}
 	default:
 		return nil
 	}

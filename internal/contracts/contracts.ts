@@ -1970,6 +1970,12 @@ export interface Hero {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+  /**
+   * AutoFit shrinks the title to fit its box instead of clipping/overflowing
+   * when the text is long (shrink-to-fit). Default false = the title renders
+   * at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Heading is a typed heading line at a 1..6 depth. Mirror of scene.Heading.
@@ -1988,6 +1994,12 @@ export interface Heading {
    * "left" | "center" | "right". Empty = inherit the slide's align.horizontal.
    */
   align?: HAlign;
+  /**
+   * AutoFit shrinks the heading text to fit its box instead of
+   * clipping/overflowing when the text is long (shrink-to-fit). Default
+   * false = the heading renders at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Prose is body text: an ordered list of paragraphs, each a RichText. Mirror
@@ -2280,6 +2292,13 @@ export interface Stat {
    * color) | "down" (error color). Ignored when Delta is empty.
    */
   deltaTone?: DeltaTone;
+  /**
+   * AutoFit shrinks the Value (the big-number display run) to fit its box
+   * instead of clipping/overflowing when a long number/price would
+   * otherwise overflow (shrink-to-fit). Default false = the Value renders
+   * at its full type size.
+   */
+  autoFit?: boolean;
 }
 /**
  * Table is a grid of cells with a header row and a caption. Renders as native
