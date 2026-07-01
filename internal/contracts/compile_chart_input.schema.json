@@ -55,6 +55,9 @@
     },
     "caption": {
       "type": "string"
+    },
+    "soulId": {
+      "type": "string"
     }
   },
   "required": [

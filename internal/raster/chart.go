@@ -31,6 +31,16 @@ type Series struct {
 	Values []float64
 }
 
+// ChartStyle is the internal (Go-only) brand styling input for RasterizeChart.
+// It carries an ordered brand series palette (6-digit hex, no '#'), consumed
+// for bar bars / pie slices / line series, cycled by index. Empty/nil = the
+// built-in default (deckardAccent for bars; library defaults for pie/line) —
+// byte-identical to the pre-R14.2 output. R14.2 (soul-styled charts).
+type ChartStyle struct {
+	// SeriesColors is the ordered brand palette, 6-digit hex without '#'.
+	SeriesColors []string
+}
+
 // ChartSpec is the typed input for RasterizeChart. The compile_chart tool
 // mirrors this struct on its input contract; ToolDeps.Assets holds the
 // produced PNG bytes, and an IR Chart node references its asset ID.
@@ -46,6 +56,11 @@ type ChartSpec struct {
 	// series is plotted (chart.Value{Label, Value}); for line, every series
 	// renders as its own continuous line.
 	Series []Series `json:"series,omitempty"`
+	// Style is an internal, Go-only brand styling input (R14.2). It is NOT
+	// part of the compile_chart wire contract — the handler sets it from a
+	// resolved soul's accent palette, never the caller directly. Nil (the
+	// zero value) renders byte-identical to the pre-R14.2 default path.
+	Style *ChartStyle `json:"-"`
 }
 
 // rasterWidth / rasterHeight pin the canvas to a deterministic 1200x720 PNG.
@@ -129,13 +144,33 @@ func buildChartRenderer(spec ChartSpec) (interface {
 // dispatch in buildChartRenderer is what callers see. Each returns a type
 // with a Render method that accepts (chart.RendererProvider, *bytes.Buffer).
 
+// hexColor parses a 6-digit hex string (with or without a leading '#') into
+// a drawing.Color.
+func hexColor(s string) drawing.Color {
+	return drawing.ColorFromHex(strings.TrimPrefix(s, "#"))
+}
+
+// seriesColorAt returns (style.SeriesColors[i % len], true) when style is
+// non-nil and non-empty; otherwise (zero, false) so callers can fall back to
+// the pre-R14.2 default (byte-identical when there is no brand style).
+func seriesColorAt(style *ChartStyle, i int) (drawing.Color, bool) {
+	if style == nil || len(style.SeriesColors) == 0 {
+		return drawing.Color{}, false
+	}
+	return hexColor(style.SeriesColors[i%len(style.SeriesColors)]), true
+}
+
 func barChartFor(spec ChartSpec) *chart.BarChart {
 	values := make([]chart.Value, 0, len(spec.Labels))
 	for i, label := range spec.Labels {
+		fill, stroke := deckardAccent, deckardAccent
+		if c, ok := seriesColorAt(spec.Style, i); ok {
+			fill, stroke = c, c
+		}
 		values = append(values, chart.Value{
 			Label: label,
 			Value: spec.Series[0].Values[i],
-			Style: chart.Style{FillColor: deckardAccent, StrokeColor: deckardAccent},
+			Style: chart.Style{FillColor: fill, StrokeColor: stroke},
 		})
 	}
 	return &chart.BarChart{
@@ -150,7 +185,11 @@ func barChartFor(spec ChartSpec) *chart.BarChart {
 func pieChartFor(spec ChartSpec) *chart.PieChart {
 	values := make([]chart.Value, 0, len(spec.Labels))
 	for i, label := range spec.Labels {
-		values = append(values, chart.Value{Label: label, Value: spec.Series[0].Values[i]})
+		v := chart.Value{Label: label, Value: spec.Series[0].Values[i]}
+		if c, ok := seriesColorAt(spec.Style, i); ok {
+			v.Style = chart.Style{FillColor: c}
+		}
+		values = append(values, v)
 	}
 	return &chart.PieChart{
 		Title:  spec.Title,
@@ -162,16 +201,20 @@ func pieChartFor(spec ChartSpec) *chart.PieChart {
 
 func lineChartFor(spec ChartSpec) (*chart.Chart, error) {
 	lines := make([]chart.Series, 0, len(spec.Series))
-	for _, s := range spec.Series {
+	for i, s := range spec.Series {
 		xv := make([]float64, len(s.Values))
-		for i := range xv {
-			xv[i] = float64(i)
+		for j := range xv {
+			xv[j] = float64(j)
 		}
-		lines = append(lines, chart.ContinuousSeries{
+		cs := chart.ContinuousSeries{
 			Name:    strings.TrimSpace(s.Name),
 			XValues: xv,
 			YValues: append([]float64(nil), s.Values...),
-		})
+		}
+		if c, ok := seriesColorAt(spec.Style, i); ok {
+			cs.Style = chart.Style{StrokeColor: c}
+		}
+		lines = append(lines, cs)
 	}
 	return &chart.Chart{
 		Title:  spec.Title,

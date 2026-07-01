@@ -482,6 +482,13 @@ export interface CompileChartInput {
    * Caption overrides the chart node caption (defaults to the spec title).
    */
   caption?: string;
+  /**
+   * SoulID resolves this soul's accent palette to brand-style the chart's
+   * series colors (R14.2). Empty = the built-in Deckard White default
+   * rasterization (byte-identical to a chart compiled before soul-aware
+   * styling).
+   */
+  soulId?: string;
 }
 /**
  * CompileChartOutput returns a ready-to-use chart IR node plus its asset id.

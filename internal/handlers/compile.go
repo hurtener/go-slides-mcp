@@ -5,10 +5,12 @@ import (
 	"fmt"
 
 	"github.com/hurtener/dockyard/runtime/tool"
+	"github.com/hurtener/pptx-go/pptx"
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/markdown"
 	"github.com/hurtener/go-slides-mcp/internal/raster"
+	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
 // compileMarkdown parses markdown source into Deckard IR leaf nodes.
@@ -60,6 +62,15 @@ func (h *handlers) compileChart(_ context.Context, in contracts.CompileChartInpu
 		spec.Series[i] = raster.Series{Name: s.Name, Values: s.Values}
 	}
 
+	var warnings []string
+	if in.SoulID != "" {
+		if s, ok := h.deps.Souls.Get(in.SoulID); ok {
+			spec.Style = &raster.ChartStyle{SeriesColors: brandSeriesPalette(s)}
+		} else {
+			warnings = append(warnings, fmt.Sprintf("soul %q not found; chart rendered with default palette", in.SoulID))
+		}
+	}
+
 	png, err := raster.RasterizeChart(spec)
 	if err != nil {
 		return tool.Result[contracts.CompileChartOutput]{}, fmt.Errorf("compile_chart: %w", err)
@@ -74,11 +85,32 @@ func (h *handlers) compileChart(_ context.Context, in contracts.CompileChartInpu
 		caption = in.Spec.Title
 	}
 	out := contracts.CompileChartOutput{
-		Node:    contracts.Chart{AssetID: contracts.AssetID(asset.ID), Caption: caption},
-		AssetID: asset.ID,
+		Node:     contracts.Chart{AssetID: contracts.AssetID(asset.ID), Caption: caption},
+		AssetID:  asset.ID,
+		Warnings: warnings,
 	}
 	return tool.Result[contracts.CompileChartOutput]{
 		Text:       agentText(fmt.Sprintf("Compiled %s chart. Embed this node in a slide's \"nodes\":", spec.Type), out.Node),
 		Structured: out,
 	}, nil
+}
+
+// brandSeriesPalette resolves s's accent palette, in order, to 6-digit hex
+// strings — the deterministic categorical series palette a chart cycles
+// through when styled on-brand (R14.2).
+func brandSeriesPalette(s *soul.Soul) []string {
+	roles := []pptx.ColorRole{
+		pptx.ColorAccent,
+		pptx.ColorAccentAlt,
+		pptx.ColorAccentWarm,
+		pptx.ColorInfo,
+		pptx.ColorSuccess,
+		pptx.ColorWarning,
+		pptx.ColorError,
+	}
+	palette := make([]string, len(roles))
+	for i, role := range roles {
+		palette[i] = string(s.Theme.ResolveColor(role))
+	}
+	return palette
 }
