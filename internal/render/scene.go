@@ -2,6 +2,7 @@ package render
 
 import (
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
+	"github.com/hurtener/pptx-go/pptx"
 	"github.com/hurtener/pptx-go/scene"
 )
 
@@ -205,6 +206,15 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Rows:       mapIconRows(n.Rows),
 			Fill:       n.Fill,
 			GlyphColor: mapIconRowsGlyphColor(n.GlyphColor),
+		}
+	case *contracts.Lockup:
+		return scene.Lockup{
+			Caption:   n.Caption,
+			AssetID:   scene.AssetID(n.AssetID),
+			Icon:      n.Icon,
+			AssetSide: mapAssetSide(n.AssetSide),
+			MaxHeight: pptx.Pt(n.MaxHeight),
+			Align:     mapHAlign(n.Align),
 		}
 	default:
 		return nil

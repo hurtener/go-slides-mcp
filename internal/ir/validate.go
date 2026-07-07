@@ -149,6 +149,8 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateBanner(v)...)
 	case *contracts.IconRows:
 		errs = append(errs, validateIconRows(v)...)
+	case *contracts.Lockup:
+		errs = append(errs, validateLockup(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -435,6 +437,23 @@ func validateIconRows(ir *contracts.IconRows) []error {
 		return []error{errors.New("icon_rows: needs at least one row")}
 	}
 	return nil
+}
+
+// validateLockup enforces Lockup's structural rules (R12.9, D-102): exactly
+// one of AssetID or Icon is set (asset path OR media-free icon path), and
+// MaxHeight is non-negative. Enum checks for AssetSide/Align run separately
+// via ValidateNodeEnums.
+func validateLockup(l *contracts.Lockup) []error {
+	var errs []error
+	hasAsset := l.AssetID != ""
+	hasIcon := l.Icon != ""
+	if hasAsset == hasIcon {
+		errs = append(errs, errors.New("lockup: exactly one of assetId or icon must be set"))
+	}
+	if l.MaxHeight < 0 {
+		errs = append(errs, fmt.Errorf("lockup: maxHeight %v must be >= 0", l.MaxHeight))
+	}
+	return errs
 }
 
 func cropErrs(c contracts.Crop) []error {

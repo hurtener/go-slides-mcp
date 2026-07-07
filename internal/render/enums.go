@@ -238,6 +238,20 @@ func mapIconRowsGlyphColor(r contracts.ColorRole) pptx.ColorRole {
 	return mapColorRole(r)
 }
 
+// mapAssetSide maps the product AssetSide string enum to the engine's
+// int enum (R12.9, D-102). The empty string ("" — unset) maps to the
+// zero value LeadCaption, mirroring the engine default (caption leads).
+func mapAssetSide(s contracts.AssetSide) scene.AssetSide {
+	switch s {
+	case contracts.TrailCaption:
+		return scene.TrailCaption
+	case contracts.LeadCaption:
+		fallthrough
+	default:
+		return scene.LeadCaption
+	}
+}
+
 func mapColorRole(role contracts.ColorRole) pptx.ColorRole {
 	switch role {
 	case contracts.ColorCanvas:
