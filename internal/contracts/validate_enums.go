@@ -191,6 +191,11 @@ func ValidateNodeEnums(n SlideNode) error {
 				checkEnum(fmt.Sprintf("rows[%d].tone", i), "RowTone", r.Tone, AllowedRowTone(), true),
 			)
 		}
+	case *Lockup:
+		errs = append(errs,
+			checkEnum("assetSide", "AssetSide", v.AssetSide, AllowedAssetSide(), true),
+			checkEnum("align", "HAlign", v.Align, AllowedHAlign(), true),
+		)
 	}
 	return errors.Join(errs...)
 }

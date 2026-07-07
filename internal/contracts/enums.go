@@ -346,6 +346,18 @@ func AllowedRowTone() []RowTone {
 // strings — for inclusion in an error message.
 func (RowTone) allowedStrings() []string { return stringsFrom(AllowedRowTone()) }
 
+// AllowedAssetSide returns the closed set of AssetSide wire values (R12.9,
+// D-102). The empty string is also legal (LeadCaption, the zero value) and
+// is accepted by the validator (acceptEmpty=true), mirroring the
+// AllowedColumnJoin pattern.
+func AllowedAssetSide() []AssetSide {
+	return []AssetSide{LeadCaption, TrailCaption}
+}
+
+// allowedStrings returns the closed set of AssetSide wire values as plain
+// strings — for inclusion in an error message.
+func (AssetSide) allowedStrings() []string { return stringsFrom(AllowedAssetSide()) }
+
 // AllowedLogoToneKind returns the closed set of LogoToneKind wire values
 // (R14.7, D-125). The empty string (LogoToneNone) is excluded from this list
 // but is accepted by the validator (acceptEmpty=true), mirroring the

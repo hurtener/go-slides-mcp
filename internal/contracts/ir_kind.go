@@ -113,6 +113,13 @@ const (
 	KindIconRows Kind = "icon_rows"
 )
 
+// Node kind added in R12.9 — the Lockup "powered by" attribution mark
+// (D-102), mirroring pptx-go's scene.Lockup. Asset-bearing when
+// AssetID != ""; icon-only (media-free) when Icon != "".
+const (
+	KindLockup Kind = "lockup"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

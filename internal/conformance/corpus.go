@@ -70,6 +70,7 @@ var Archetypes = []Fixture{
 	{"checklist", checklistDoc},
 	{"banner", bannerDoc},
 	{"icon-rows", iconRowsDoc},
+	{"lockup", lockupDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -852,6 +853,30 @@ func iconRowsDoc() contracts.SlideDoc {
 				},
 				Fill:       true,
 				GlyphColor: contracts.ColorAccent,
+			},
+		},
+	})
+}
+
+// lockupDoc exercises the Lockup attribution mark (R12.9, D-102) on the
+// ICON path (media-free): a centered "POWERED BY" caption paired with a
+// curated star glyph, logo trailing the caption. Asset-free so the corpus
+// keeps its no-resolver invariant; a separate render test exercises the
+// AssetID path with a stub resolver. Modest so it stays clear of the safe
+// area (INV-2 strict).
+func lockupDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Lockup", contracts.Slide{
+		ID:        "lockup",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Partnered With")},
+			&contracts.Lockup{
+				Caption:   "POWERED BY",
+				Icon:      "star",
+				AssetSide: contracts.LeadCaption,
+				MaxHeight: 18,
+				Align:     contracts.HAlignCenter,
 			},
 		},
 	})

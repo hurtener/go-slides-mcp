@@ -430,6 +430,20 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			GlyphColor: ColorAccent,
 		}, true
 
+	case KindLockup:
+		// Lockup (R12.9, D-102): uses the ICON path (Icon='star',
+		// AssetID='') so the example round-trips with no resolver; a
+		// separate render test exercises the AssetID path with a stub
+		// resolver. Every field set: Caption/AssetID/Icon/AssetSide/
+		// MaxHeight/Align.
+		return &Lockup{
+			Caption:   "POWERED BY",
+			Icon:      "star",
+			AssetSide: LeadCaption,
+			MaxHeight: 18,
+			Align:     HAlignCenter,
+		}, true
+
 	default:
 		return nil, false
 	}
