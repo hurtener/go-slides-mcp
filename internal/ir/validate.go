@@ -143,6 +143,12 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateButton(v)...)
 	case *contracts.ChipRow:
 		errs = append(errs, validateChipRow(v)...)
+	case *contracts.Checklist:
+		errs = append(errs, validateChecklist(v)...)
+	case *contracts.Banner:
+		errs = append(errs, validateBanner(v)...)
+	case *contracts.IconRows:
+		errs = append(errs, validateIconRows(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -385,6 +391,48 @@ func validateButton(b *contracts.Button) []error {
 func validateChipRow(c *contracts.ChipRow) []error {
 	if len(c.Chips) == 0 {
 		return []error{errors.New("chip_row: needs at least one chip")}
+	}
+	return nil
+}
+
+// validateChecklist enforces Checklist's structural rules (R12.2, D-095): at
+// least one item, and Columns in [1..3] (the engine clamps past 3 to 3 at
+// render — we lift it to a Stage-1 hard error so an agent gets a loud
+// correction rather than a silent reflow). The engine allows Columns==0 to
+// mean "1 column" but rejects negative values, so we accept the zero value.
+func validateChecklist(c *contracts.Checklist) []error {
+	if len(c.Items) == 0 {
+		return []error{errors.New("checklist: needs at least one item")}
+	}
+	if c.Columns < 0 || c.Columns > 3 {
+		return []error{fmt.Errorf("checklist: columns %d out of range 0..3", c.Columns)}
+	}
+	return nil
+}
+
+// validateBanner enforces Banner's structural rules (R12.6, D-097): at
+// least one of Lead or Body (an invisible strip carries no message) and
+// every Trailing child itself validates. Recurses into Trailing so the
+// Stage-1 cascade catches a malformed trailing node.
+func validateBanner(b *contracts.Banner) []error {
+	var errs []error
+	if len(b.Lead) == 0 && len(b.Body) == 0 {
+		errs = append(errs, errors.New("banner: needs at least one of lead or body"))
+	}
+	for i, tw := range b.Trailing {
+		if err := ValidateNode(tw); err != nil {
+			errs = append(errs, fmt.Errorf("banner.trailing[%d]: %w", i, err))
+		}
+	}
+	return errs
+}
+
+// validateIconRows enforces IconRows' structural rule (R12.7, D-100): at
+// least one row (an empty list renders nothing and is not a real
+// "icon-label" strip).
+func validateIconRows(ir *contracts.IconRows) []error {
+	if len(ir.Rows) == 0 {
+		return []error{errors.New("icon_rows: needs at least one row")}
 	}
 	return nil
 }

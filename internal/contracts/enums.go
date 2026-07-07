@@ -324,6 +324,28 @@ func AllowedButtonSize() []ButtonSize {
 // strings — for inclusion in an error message.
 func (ButtonSize) allowedStrings() []string { return stringsFrom(AllowedButtonSize()) }
 
+// AllowedCheckState returns the closed set of CheckState wire values
+// (R12.2, D-095). The empty string is also legal (CheckDone, the zero
+// value) and is accepted by the validator (acceptEmpty=true).
+func AllowedCheckState() []CheckState {
+	return []CheckState{CheckDone, CheckNo, CheckNeutral}
+}
+
+// allowedStrings returns the closed set of CheckState wire values as plain
+// strings — for inclusion in an error message.
+func (CheckState) allowedStrings() []string { return stringsFrom(AllowedCheckState()) }
+
+// AllowedRowTone returns the closed set of RowTone wire values (R12.7,
+// D-100). The empty string is also legal (RowPlain, the zero value) and is
+// accepted by the validator (acceptEmpty=true).
+func AllowedRowTone() []RowTone {
+	return []RowTone{RowPlain, RowPill}
+}
+
+// allowedStrings returns the closed set of RowTone wire values as plain
+// strings — for inclusion in an error message.
+func (RowTone) allowedStrings() []string { return stringsFrom(AllowedRowTone()) }
+
 // AllowedLogoToneKind returns the closed set of LogoToneKind wire values
 // (R14.7, D-125). The empty string (LogoToneNone) is excluded from this list
 // but is accepted by the validator (acceptEmpty=true), mirroring the

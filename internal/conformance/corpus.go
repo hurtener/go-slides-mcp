@@ -67,6 +67,9 @@ var Archetypes = []Fixture{
 	{"agenda", agendaDoc},
 	{"button-cta", buttonCTADoc},
 	{"chip-row", chipRowDoc},
+	{"checklist", checklistDoc},
+	{"banner", bannerDoc},
+	{"icon-rows", iconRowsDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -768,6 +771,87 @@ func chipRowDoc() contracts.SlideDoc {
 				},
 				Wrap:  true,
 				Align: contracts.HAlignLeft,
+			},
+		},
+	})
+}
+
+// checklistDoc exercises the Checklist dense feature list (R12.2, D-095):
+// 4 rows (each a different CheckState — done/no/neutral/done-default),
+// 2-column row-major reflow, an accent GlyphTone, Fill on. Asset-free so
+// no resolver path runs (the placeholder glyph is native curGeom).
+// Kept modest so it stays clear of the safe area (INV-2 strict).
+func checklistDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Checklist", contracts.Slide{
+		ID:        "checklist",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("What You Get")},
+			&contracts.Checklist{
+				Items: []contracts.ChecklistItem{
+					{Text: contracts.RichText{{Text: "Byte-identical exports"}}, State: contracts.CheckDone, Icon: "check"},
+					{Text: contracts.RichText{{Text: "No headless browser"}}, State: contracts.CheckDone},
+					{Text: contracts.RichText{{Text: "Soul-driven theming"}}, State: contracts.CheckDone, Icon: "star"},
+					{Text: contracts.RichText{{Text: "Single binary"}}, State: contracts.CheckNeutral, Icon: "dot"},
+				},
+				Columns:   2,
+				GlyphTone: contracts.ColorAccent,
+				Fill:      true,
+			},
+		},
+	})
+}
+
+// bannerDoc exercises the Banner full-width filled strip (R12.6, D-097):
+// a Lead + Body, a leading curated Icon, an explicit accent Fill, a
+// custom TextColor, and one Trailing Button child. Asset-free + modest so
+// it stays clear of the safe area (INV-2 strict).
+func bannerDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Banner", contracts.Slide{
+		ID:        "banner",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("The Pitch")},
+			&contracts.Banner{
+				Lead:      contracts.RichText{{Text: "Run it internally"}},
+				Body:      contracts.RichText{{Text: "Or sell it externally — without building an agentic platform."}},
+				Icon:      "star",
+				Fill:      contracts.ColorAccent,
+				TextColor: contracts.TextInverse,
+				Trailing: []contracts.SlideNode{
+					&contracts.Button{
+						Label:        "Start free",
+						Tone:         contracts.ButtonGhost,
+						TrailingIcon: "arrow-right",
+					},
+				},
+			},
+		},
+	})
+}
+
+// iconRowsDoc exercises the IconRows vertical icon-label row list (R12.7,
+// D-100): 4 rows across RowPlain and RowPill tones, every row has a
+// leading curated Icon + label, one carries right-aligned Meta; Fill on.
+// Asset-free + modest so it stays clear of the safe area (INV-2 strict).
+func iconRowsDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Icon Rows", contracts.Slide{
+		ID:        "icon-rows",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Integrations")},
+			&contracts.IconRows{
+				Rows: []contracts.IconRow{
+					{Icon: "check", Label: contracts.RichText{{Text: "Chat & Q&A"}}, Tone: contracts.RowPlain},
+					{Icon: "star", Label: contracts.RichText{{Text: "Salesforce · Slack"}}, Tone: contracts.RowPill},
+					{Icon: "diamond", Label: contracts.RichText{{Text: "Microsoft 365"}}, Meta: contracts.RichText{{Text: "12 sources"}}, Tone: contracts.RowPlain},
+					{Icon: "circle", Label: contracts.RichText{{Text: "Workspace"}}, Tone: contracts.RowPill},
+				},
+				Fill:       true,
+				GlyphColor: contracts.ColorAccent,
 			},
 		},
 	})

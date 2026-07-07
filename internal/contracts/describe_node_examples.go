@@ -363,6 +363,73 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Align: HAlignCenter,
 		}, true
 
+	case KindChecklist:
+		// Checklist (R12.2, D-095): 4 items across every CheckState
+		// (done/no/neutral), one with a custom Icon override, Columns=2
+		// (row-major reflow), an accent GlyphTone, and Fill on — covering
+		// every field on round-trip.
+		return &Checklist{
+			Items: []ChecklistItem{
+				{Text: RichText{{Text: "Understood by the model"}}, State: CheckDone, Icon: "check"},
+				{Text: RichText{
+					{Text: "Not in this tier"},
+				}, State: CheckNo, Icon: "x"},
+				{Text: RichText{{Text: "Roadmap, no ETA"}}, State: CheckNeutral, Icon: "dot"},
+				{Text: RichText{{Text: "Built-in to all plans"}}, State: CheckDone},
+			},
+			Columns:   2,
+			GlyphTone: ColorAccent,
+			Fill:      true,
+		}, true
+
+	case KindBanner:
+		// Banner (R12.6, D-097): Lead + Body rich text, a leading
+		// curated Icon, an explicit accent Fill (pre-empts the engine's
+		// zero-promotion), a custom TextColor on the Fill, and one
+		// Trailing child (a Button) — covering every field on round-trip.
+		return &Banner{
+			Lead:      RichText{{Text: "Run it internally"}},
+			Body:      RichText{{Text: "Without building an agentic platform."}},
+			Icon:      "star",
+			Fill:      ColorAccent,
+			TextColor: TextInverse,
+			Trailing: []SlideNode{
+				&Button{
+					Label:        "Start free",
+					Tone:         ButtonGhost,
+					TrailingIcon: "arrow-right",
+				},
+			},
+		}, true
+
+	case KindIconRows:
+		// IconRows (R12.7, D-100): 3 rows, one of each Tone (plain/pill,
+		// + a no-tone default), every row has an Icon + Label; the
+		// middle row carries a right-aligned Meta — covering every field
+		// on round-trip.
+		return &IconRows{
+			Rows: []IconRow{
+				{
+					Icon:  "check",
+					Label: RichText{{Text: "Chat & Q&A"}},
+					Tone:  RowPlain,
+				},
+				{
+					Icon:  "star",
+					Label: RichText{{Text: "Specialized agents"}},
+					Meta:  RichText{{Text: "12 packs"}},
+					Tone:  RowPill,
+				},
+				{
+					Icon:  "diamond",
+					Label: RichText{{Text: "Automated workflows"}},
+					Tone:  RowPlain,
+				},
+			},
+			Fill:       true,
+			GlyphColor: ColorAccent,
+		}, true
+
 	default:
 		return nil, false
 	}

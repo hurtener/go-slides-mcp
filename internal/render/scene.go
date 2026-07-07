@@ -184,6 +184,28 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Wrap:  n.Wrap,
 			Align: mapHAlign(n.Align),
 		}
+	case *contracts.Checklist:
+		return scene.Checklist{
+			Items:     mapChecklistItems(n.Items),
+			Columns:   n.Columns,
+			GlyphTone: mapColorRolePtr(n.GlyphTone),
+			Fill:      n.Fill,
+		}
+	case *contracts.Banner:
+		return scene.Banner{
+			Lead:      mapRichText(n.Lead),
+			Body:      mapRichText(n.Body),
+			Icon:      n.Icon,
+			Fill:      mapBannerFill(n.Fill),
+			TextColor: mapTextColorRole(n.TextColor),
+			Trailing:  mapNodes(n.Trailing),
+		}
+	case *contracts.IconRows:
+		return scene.IconRows{
+			Rows:       mapIconRows(n.Rows),
+			Fill:       n.Fill,
+			GlyphColor: mapIconRowsGlyphColor(n.GlyphColor),
+		}
 	default:
 		return nil
 	}
@@ -215,6 +237,41 @@ func mapChipSpecs(chips []contracts.ChipSpec) []scene.ChipSpec {
 			Tone:  mapChipTone(c.Tone),
 			Color: mapColorRole(c.Color),
 			Icon:  c.Icon,
+		}
+	}
+	return mapped
+}
+
+// mapChecklistItems maps a Checklist's rows 1:1 (R12.2, D-095): Text (rich),
+// State (glyph selector), and an optional Icon override. nil ⇒ nil.
+func mapChecklistItems(items []contracts.ChecklistItem) []scene.ChecklistItem {
+	if items == nil {
+		return nil
+	}
+	mapped := make([]scene.ChecklistItem, len(items))
+	for i, it := range items {
+		mapped[i] = scene.ChecklistItem{
+			Text:  mapRichText(it.Text),
+			State: mapCheckState(it.State),
+			Icon:  it.Icon,
+		}
+	}
+	return mapped
+}
+
+// mapIconRows maps an IconRows' rows 1:1 (R12.7, D-100): Icon, Label (rich),
+// Meta (rich), Tone. nil ⇒ nil.
+func mapIconRows(rows []contracts.IconRow) []scene.IconRow {
+	if rows == nil {
+		return nil
+	}
+	mapped := make([]scene.IconRow, len(rows))
+	for i, r := range rows {
+		mapped[i] = scene.IconRow{
+			Icon:  r.Icon,
+			Label: mapRichText(r.Label),
+			Meta:  mapRichText(r.Meta),
+			Tone:  mapRowTone(r.Tone),
 		}
 	}
 	return mapped

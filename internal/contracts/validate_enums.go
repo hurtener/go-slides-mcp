@@ -165,6 +165,32 @@ func ValidateNodeEnums(n SlideNode) error {
 				checkEnum(fmt.Sprintf("chips[%d].color", i), "ColorRole", c.Color, AllowedColorRole(), true),
 			)
 		}
+	case *Checklist:
+		errs = append(errs,
+			checkEnum("glyphTone", "ColorRole", v.GlyphTone, AllowedColorRole(), true),
+		)
+		for i, it := range v.Items {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("items[%d].state", i), "CheckState", it.State, AllowedCheckState(), true),
+			)
+		}
+	case *Banner:
+		errs = append(errs,
+			checkEnum("fill", "ColorRole", v.Fill, AllowedColorRole(), true),
+			checkEnum("textColor", "TextColorRole", v.TextColor, AllowedTextColorRole(), true),
+		)
+		for _, tw := range v.Trailing {
+			errs = append(errs, ValidateNodeEnums(tw))
+		}
+	case *IconRows:
+		errs = append(errs,
+			checkEnum("glyphColor", "ColorRole", v.GlyphColor, AllowedColorRole(), true),
+		)
+		for i, r := range v.Rows {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("rows[%d].tone", i), "RowTone", r.Tone, AllowedRowTone(), true),
+			)
+		}
 	}
 	return errors.Join(errs...)
 }

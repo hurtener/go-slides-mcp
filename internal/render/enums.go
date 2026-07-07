@@ -181,6 +181,63 @@ func mapButtonSize(s contracts.ButtonSize) scene.ButtonSize {
 	}
 }
 
+// mapCheckState maps the product CheckState string enum to the engine's
+// int CheckState enum (R12.2, D-095). The empty string ("" — unset) maps
+// to the zero value CheckDone, mirroring the engine default (a filled
+// accent-tinted check glyph).
+func mapCheckState(s contracts.CheckState) scene.CheckState {
+	switch s {
+	case contracts.CheckNo:
+		return scene.CheckNo
+	case contracts.CheckNeutral:
+		return scene.CheckNeutral
+	case contracts.CheckDone:
+		fallthrough
+	default:
+		return scene.CheckDone
+	}
+}
+
+// mapRowTone maps the product RowTone string enum to the engine's int
+// RowTone enum (R12.7, D-100). The empty string ("" — unset) maps to the
+// zero value RowPlain, mirroring the engine default (no frame).
+func mapRowTone(t contracts.RowTone) scene.RowTone {
+	switch t {
+	case contracts.RowPill:
+		return scene.RowPill
+	case contracts.RowPlain:
+		fallthrough
+	default:
+		return scene.RowPlain
+	}
+}
+
+// mapBannerFill maps a product ColorRole to the engine's ColorRole for
+// the Banner.Fill field (R12.6, D-097). The product empty string maps to
+// the engine's zero value ColorCanvas — NOT the generic ColorSurface
+// default — because the Banner renderer interprets engine-ColorCanvas as
+// "promote to ColorAccent" (a banner is always a filled strip and a
+// canvas-colored one would be invisible). A non-empty value delegates to
+// the generic mapper.
+func mapBannerFill(r contracts.ColorRole) pptx.ColorRole {
+	if r == "" {
+		return scene.ColorCanvas
+	}
+	return mapColorRole(r)
+}
+
+// mapIconRowsGlyphColor maps a product ColorRole to the engine's
+// ColorRole for the IconRows.GlyphColor field (R12.7, D-100). Same pattern
+// as mapBannerFill: an empty product value preserves the engine-ColorCanvas
+// zero so the renderer promotes it to ColorAccent (a canvas-colored glyph
+// would be invisible against any slide background).
+func mapIconRowsGlyphColor(r contracts.ColorRole) pptx.ColorRole {
+	if r == "" {
+		return scene.ColorCanvas
+	}
+	return mapColorRole(r)
+}
+
 func mapColorRole(role contracts.ColorRole) pptx.ColorRole {
 	switch role {
 	case contracts.ColorCanvas:
