@@ -71,6 +71,9 @@ var Archetypes = []Fixture{
 	{"banner", bannerDoc},
 	{"icon-rows", iconRowsDoc},
 	{"lockup", lockupDoc},
+	{"connector-grid", connectorGridDoc},
+	{"bridge-two-column", bridgeTwoColumnDoc},
+	{"ribbon-card", ribbonCardDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -878,6 +881,75 @@ func lockupDoc() contracts.SlideDoc {
 				MaxHeight: 18,
 				Align:     contracts.HAlignCenter,
 			},
+		},
+	})
+}
+
+// connectorGridDoc exercises Grid.Connectors (R12.4, D-099): a 3-column
+// architecture row with two gutter connectors, one bi_arrow and one arrow.
+// Modest node count so it stays clear of the safe area (INV-2 strict).
+func connectorGridDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Connector Grid", contracts.Slide{
+		ID:        "connector-grid",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Architecture")},
+			&contracts.Grid{
+				Columns: 3,
+				Gap:     contracts.SpaceMD,
+				Connectors: []contracts.GridConnector{
+					{Between: [2]int{0, 1}, Kind: contracts.ConnectorBiArrow, Label: "sync"},
+					{Between: [2]int{1, 2}, Kind: contracts.ConnectorArrow, Label: "ship"},
+				},
+				Cells: []contracts.SlideNode{
+					&contracts.Card{Header: "People", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Users + operators")}}}},
+					&contracts.Card{Header: "Agents", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Planning + execution")}}}},
+					&contracts.Card{Header: "Data", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Knowledge + memory")}}}},
+				},
+			},
+		},
+	})
+}
+
+// bridgeTwoColumnDoc exercises TwoColumn.JoinPosition (R12.8, D-101): a
+// badge join labeled "One agent" spanning the top of both columns.
+func bridgeTwoColumnDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Bridge Two Column", contracts.Slide{
+		ID:        "bridge-two-column",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTwoColumn,
+		Nodes: []contracts.SlideNode{
+			&contracts.TwoColumn{
+				Ratio:        contracts.Ratio11,
+				Join:         contracts.JoinBadge,
+				JoinLabel:    "One agent",
+				JoinPosition: contracts.JoinTopBridge,
+				Left: []contracts.SlideNode{
+					&contracts.Prose{Paragraphs: []contracts.RichText{rt("Build internally")}},
+				},
+				Right: []contracts.SlideNode{
+					&contracts.Prose{Paragraphs: []contracts.RichText{rt("Sell externally")}},
+				},
+			},
+		},
+	})
+}
+
+// ribbonCardDoc exercises Card.Ribbon (R12.3, D-098): the center card in a
+// 3-up row carries a top-bar ribbon highlighting it as the recommended plan.
+func ribbonCardDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Ribbon Card", contracts.Slide{
+		ID:        "ribbon-card",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Plans")},
+			&contracts.Grid{Columns: 3, Gap: contracts.SpaceMD, Cells: []contracts.SlideNode{
+				&contracts.Card{Header: "Starter", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("For small teams")}}}},
+				&contracts.Card{Header: "Business", Ribbon: &contracts.Ribbon{Text: "MOST POPULAR", Position: contracts.RibbonTopBar, Color: contracts.ColorAccent, TextColor: contracts.TextInverse}, Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Our recommended plan")}}}},
+				&contracts.Card{Header: "Enterprise", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Custom scale")}}}},
+			}},
 		},
 	})
 }

@@ -104,16 +104,17 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 		return mapDecoration(*n)
 	case *contracts.TwoColumn:
 		return scene.TwoColumn{
-			Ratio:     mapColumnRatio(n.Ratio),
-			Left:      mapNodes(n.Left),
-			Right:     mapNodes(n.Right),
-			Join:      mapColumnJoin(n.Join),
-			JoinLabel: n.JoinLabel,
+			Ratio:        mapColumnRatio(n.Ratio),
+			Left:         mapNodes(n.Left),
+			Right:        mapNodes(n.Right),
+			Join:         mapColumnJoin(n.Join),
+			JoinLabel:    n.JoinLabel,
+			JoinPosition: mapJoinPosition(n.JoinPosition),
 		}
 	case *contracts.Bento:
 		return mapBento(n)
 	case *contracts.Grid:
-		return scene.Grid{Columns: n.Columns, Ratio: cloneInts(n.Ratio), Gap: mapSpaceRole(n.Gap), Cells: mapNodes(n.Cells)}
+		return scene.Grid{Columns: n.Columns, Ratio: cloneInts(n.Ratio), Gap: mapSpaceRole(n.Gap), Cells: mapNodes(n.Cells), Connectors: mapGridConnectors(n.Connectors)}
 	case *contracts.Card:
 		return scene.Card{
 			Header:      n.Header,
@@ -133,6 +134,7 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Watermark:   n.Watermark,
 			Backdrop:    mapDecorationPtr(n.Backdrop),
 			ImageFill:   scene.AssetID(n.ImageFill),
+			Ribbon:      mapRibbonPtr(n.Ribbon),
 		}
 	case *contracts.CardSection:
 		return scene.CardSection{Header: n.Header, Body: mapNodes(n.Body)}
@@ -282,6 +284,38 @@ func mapIconRows(rows []contracts.IconRow) []scene.IconRow {
 			Label: mapRichText(r.Label),
 			Meta:  mapRichText(r.Meta),
 			Tone:  mapRowTone(r.Tone),
+		}
+	}
+	return mapped
+}
+
+// mapRibbonPtr maps an optional product Ribbon to the engine (R12.3, D-098).
+// An empty Color string maps to a nil *ColorRole so the engine renderer
+// promotes it to ColorAccent (the D-054 pointer-sentinel pattern).
+func mapRibbonPtr(r *contracts.Ribbon) *scene.Ribbon {
+	if r == nil {
+		return nil
+	}
+	return &scene.Ribbon{
+		Text:      r.Text,
+		Position:  mapRibbonPos(r.Position),
+		Color:     mapColorRolePtr(r.Color),
+		TextColor: mapTextColorRole(r.TextColor),
+	}
+}
+
+// mapGridConnectors maps a Grid's gutter connectors 1:1 (R12.4, D-099).
+// nil => nil so a Grid with no Connectors stays byte-identical.
+func mapGridConnectors(cs []contracts.GridConnector) []scene.GridConnector {
+	if cs == nil {
+		return nil
+	}
+	mapped := make([]scene.GridConnector, len(cs))
+	for i, c := range cs {
+		mapped[i] = scene.GridConnector{
+			Between: c.Between,
+			Kind:    mapConnectorKind(c.Kind),
+			Label:   c.Label,
 		}
 	}
 	return mapped

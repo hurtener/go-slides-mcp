@@ -43,6 +43,46 @@ const (
 	CardLayoutIconTop CardLayout = "iconTop"
 )
 
+// RibbonPos selects where a Card.Ribbon is pinned (mirrors pptx-go's
+// scene.RibbonPos, an int enum — the product mirror is a string enum).
+// The zero value RibbonTopBar is a full-width tab across the card's top
+// edge that reserves its own band; the corner positions are overlays.
+// (R12.3, D-098.)
+type RibbonPos string
+
+// Ribbon positions (wire values per compose-a-scene).
+const (
+	// RibbonTopBar is a full-width tab across the top; it reserves a band.
+	RibbonTopBar RibbonPos = "top_bar"
+	// RibbonCornerTL is a text tab pinned in the top-left corner.
+	RibbonCornerTL RibbonPos = "corner_tl"
+	// RibbonCornerTR is a text tab pinned in the top-right corner.
+	RibbonCornerTR RibbonPos = "corner_tr"
+	// RibbonCornerStar is a star glyph in the top-right corner (Text ignored).
+	RibbonCornerStar RibbonPos = "corner_star"
+)
+
+// Ribbon is a pinned emphasis badge on a Card (R12.3, D-098): a "MOST
+// POPULAR" / "RECOMMENDED" / "NEW" marker that singles one card out of a
+// row. It sits OUTSIDE the header text flow — distinct from Card.HeaderPill.
+// A RibbonTopBar reserves a band so the card body shifts down; the corner
+// positions are overlays. Mirror of pptx-go's scene.Ribbon.
+//
+// Color overrides the badge fill; an empty string leaves the engine's nil
+// *ColorRole in effect, which the renderer promotes to ColorAccent.
+// TextColor colors the label; an empty string leaves the engine's zero
+// TextPrimary in effect, which the renderer auto-contrasts on the fill.
+type Ribbon struct {
+	// Text is the ribbon label. Ignored for RibbonCornerStar.
+	Text string `json:"text,omitempty"`
+	// Position selects where the ribbon is pinned; empty = RibbonTopBar.
+	Position RibbonPos `json:"position,omitempty"`
+	// Color overrides the badge fill color role; "" = engine nil (*ColorAccent default).
+	Color ColorRole `json:"color,omitempty"`
+	// TextColor colors the label; "" = engine zero (TextPrimary, auto-contrasted).
+	TextColor TextColorRole `json:"textColor,omitempty"`
+}
+
 // Card is an accent card holding a body of child nodes. All fields beyond
 // Header/Body are additive (zero values reproduce the default render).
 // Mirror of scene.Card. Children nest recursively.
@@ -92,6 +132,11 @@ type Card struct {
 	// image-as-surface treatment for photographic cards (R14.1). "" = solid,
 	// byte-identical to a pre-R14.1 card.
 	ImageFill AssetID `json:"imageFill,omitempty"`
+	// Ribbon is an optional pinned emphasis badge (R12.3, D-098) — a
+	// "MOST POPULAR" top bar or a corner badge that singles this card out
+	// of a row. It sits outside the header text flow (distinct from
+	// HeaderPill). nil = no ribbon, byte-identical.
+	Ribbon *Ribbon `json:"ribbon,omitempty"`
 }
 
 func (Card) slideNodeKind() Kind { return KindCard }
@@ -121,6 +166,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 		Watermark   string            `json:"watermark,omitempty"`
 		Backdrop    *Decoration       `json:"backdrop,omitempty"`
 		ImageFill   AssetID           `json:"imageFill,omitempty"`
+		Ribbon      *Ribbon           `json:"ribbon,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -147,6 +193,7 @@ func (c *Card) UnmarshalJSON(data []byte) error {
 	c.Watermark = r.Watermark
 	c.Backdrop = r.Backdrop
 	c.ImageFill = r.ImageFill
+	c.Ribbon = r.Ribbon
 	return nil
 }
 

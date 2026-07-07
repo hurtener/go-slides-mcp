@@ -37,6 +37,24 @@ const (
 // The empty string (JoinNone) is also valid.
 func (v ColumnJoin) IsValid() bool { return IsValidEnum(v, AllowedColumnJoin()) }
 
+// JoinPosition selects where a TwoColumn's Join element sits (mirrors
+// pptx-go's scene.JoinPosition, an int enum). The zero value JoinSeam
+// centers it on the vertical seam between the columns; JoinTopBridge /
+// JoinBottomBridge draw a horizontal accent bracket spanning both columns'
+// combined width at the top / bottom edge, with the JoinLabel as a
+// centered pill on it. (R12.8, D-101.)
+type JoinPosition string
+
+// Join positions (wire values per compose-a-scene).
+const (
+	// JoinSeam centers the Join element on the vertical seam (zero value).
+	JoinSeam JoinPosition = "seam"
+	// JoinTopBridge spans a bracket across the top of the two columns.
+	JoinTopBridge JoinPosition = "top_bridge"
+	// JoinBottomBridge spans a bracket across the bottom of the two columns.
+	JoinBottomBridge JoinPosition = "bottom_bridge"
+)
+
 // TwoColumn splits a slide into left and right child columns. Both sides
 // must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
 // Children are []SlideNode and nest recursively.
@@ -56,6 +74,8 @@ type TwoColumn struct {
 	// JoinLabel is the badge text when Join == "badge" (e.g. "VS").
 	// Ignored for other Join values.
 	JoinLabel string `json:"joinLabel,omitempty"`
+	// JoinPosition selects where the Join element sits; empty = JoinSeam.
+	JoinPosition JoinPosition `json:"joinPosition,omitempty"`
 }
 
 func (TwoColumn) slideNodeKind() Kind { return KindTwoColumn }
@@ -68,11 +88,12 @@ func (t *TwoColumn) MarshalJSON() ([]byte, error) { return marshalNode(KindTwoCo
 // so the container nests recursively (CONVENTIONS §3).
 func (t *TwoColumn) UnmarshalJSON(data []byte) error {
 	type raw struct {
-		Ratio     ColumnRatio       `json:"ratio,omitempty"`
-		Left      []json.RawMessage `json:"left,omitempty"`
-		Right     []json.RawMessage `json:"right,omitempty"`
-		Join      ColumnJoin        `json:"join,omitempty"`
-		JoinLabel string            `json:"joinLabel,omitempty"`
+		Ratio        ColumnRatio       `json:"ratio,omitempty"`
+		Left         []json.RawMessage `json:"left,omitempty"`
+		Right        []json.RawMessage `json:"right,omitempty"`
+		Join         ColumnJoin        `json:"join,omitempty"`
+		JoinLabel    string            `json:"joinLabel,omitempty"`
+		JoinPosition JoinPosition      `json:"joinPosition,omitempty"`
 	}
 	var r raw
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -81,6 +102,7 @@ func (t *TwoColumn) UnmarshalJSON(data []byte) error {
 	t.Ratio = r.Ratio
 	t.Join = r.Join
 	t.JoinLabel = r.JoinLabel
+	t.JoinPosition = r.JoinPosition
 	left, err := unmarshalNodes(r.Left)
 	if err != nil {
 		return err

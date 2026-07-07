@@ -1956,6 +1956,59 @@ export const CardLayoutIconTop = "iconTop";
  */
 export type CardLayout = typeof CardLayoutDefault | typeof CardLayoutIconTop;
 /**
+ * RibbonPos selects where a Card.Ribbon is pinned (mirrors pptx-go's
+ * scene.RibbonPos, an int enum — the product mirror is a string enum).
+ * The zero value RibbonTopBar is a full-width tab across the card's top
+ * edge that reserves its own band; the corner positions are overlays.
+ * (R12.3, D-098.)
+ */
+export type RibbonPos = string;
+/**
+ * RibbonTopBar is a full-width tab across the top; it reserves a band.
+ */
+export const RibbonTopBar: RibbonPos = "top_bar";
+/**
+ * RibbonCornerTL is a text tab pinned in the top-left corner.
+ */
+export const RibbonCornerTL: RibbonPos = "corner_tl";
+/**
+ * RibbonCornerTR is a text tab pinned in the top-right corner.
+ */
+export const RibbonCornerTR: RibbonPos = "corner_tr";
+/**
+ * RibbonCornerStar is a star glyph in the top-right corner (Text ignored).
+ */
+export const RibbonCornerStar: RibbonPos = "corner_star";
+/**
+ * Ribbon is a pinned emphasis badge on a Card (R12.3, D-098): a "MOST
+ * POPULAR" / "RECOMMENDED" / "NEW" marker that singles one card out of a
+ * row. It sits OUTSIDE the header text flow — distinct from Card.HeaderPill.
+ * A RibbonTopBar reserves a band so the card body shifts down; the corner
+ * positions are overlays. Mirror of pptx-go's scene.Ribbon.
+ * Color overrides the badge fill; an empty string leaves the engine's nil
+ * *ColorRole in effect, which the renderer promotes to ColorAccent.
+ * TextColor colors the label; an empty string leaves the engine's zero
+ * TextPrimary in effect, which the renderer auto-contrasts on the fill.
+ */
+export interface Ribbon {
+  /**
+   * Text is the ribbon label. Ignored for RibbonCornerStar.
+   */
+  text?: string;
+  /**
+   * Position selects where the ribbon is pinned; empty = RibbonTopBar.
+   */
+  position?: RibbonPos;
+  /**
+   * Color overrides the badge fill color role; "" = engine nil (*ColorAccent default).
+   */
+  color?: ColorRole;
+  /**
+   * TextColor colors the label; "" = engine zero (TextPrimary, auto-contrasted).
+   */
+  textColor?: TextColorRole;
+}
+/**
  * Card is an accent card holding a body of child nodes. All fields beyond
  * Header/Body are additive (zero values reproduce the default render).
  * Mirror of scene.Card. Children nest recursively.
@@ -2040,6 +2093,13 @@ export interface Card {
    * byte-identical to a pre-R14.1 card.
    */
   imageFill?: AssetID;
+  /**
+   * Ribbon is an optional pinned emphasis badge (R12.3, D-098) — a
+   * "MOST POPULAR" top bar or a corner badge that singles this card out
+   * of a row. It sits outside the header text flow (distinct from
+   * HeaderPill). nil = no ribbon, byte-identical.
+   */
+  ribbon?: Ribbon;
 }
 /**
  * CardSection is a top-level card accepting grids, two-columns, or nested
@@ -2435,6 +2495,10 @@ export const ConnectorCycle: ConnectorKind = "cycle";
  */
 export const ConnectorPlus: ConnectorKind = "plus";
 /**
+ * Connector styles (wire values per compose-a-scene).
+ */
+export const ConnectorBiArrow: ConnectorKind = "bi_arrow";
+/**
  * FlowStep is one step in a Flow. Mirror of scene.FlowStep. Icon is a closed-
  * name curated/extension icon (Stage-1 validated at render time).
  */
@@ -2507,6 +2571,27 @@ export interface FunnelStage {
   accentIndex?: number /* int */;
 }
 /**
+ * GridConnector draws a connector glyph in the gutter between two adjacent
+ * columns of a Grid (R12.4, D-099), so an architecture / pipeline grid reads
+ * as data flow, not just adjacency. Between holds the two adjacent column
+ * indices ({c, c+1}); Kind reuses the Flow connector set (plus ConnectorBiArrow);
+ * Label is an optional caption in the gutter.
+ */
+export interface GridConnector {
+  /**
+   * Between holds the two adjacent column indices, e.g. {0,1}.
+   */
+  between?: number /* int */[];
+  /**
+   * Kind selects the gutter glyph (reuse Flow's connector vocabulary incl. bi_arrow).
+   */
+  kind?: ConnectorKind;
+  /**
+   * Label is an optional gutter caption; "" = none.
+   */
+  label?: string;
+}
+/**
  * Grid lays out children in a column grid. Columns is 2..4; Cells length is a
  * multiple of Columns; Ratio is empty or len == Columns (validation, later
  * unit). Mirror of scene.Grid. Children nest recursively.
@@ -2528,6 +2613,11 @@ export interface Grid {
    * Cells is the grid children, a multiple of Columns.
    */
   cells?: SlideNode[];
+  /**
+   * Connectors are optional inter-column gutter glyphs; empty = none,
+   * byte-identical to a pre-R12.4 Grid.
+   */
+  connectors?: GridConnector[];
 }
 /**
  * RowTone selects an IconRow's framing (mirrors pptx-go's scene.RowTone, an
@@ -3548,6 +3638,27 @@ export const JoinBadge: ColumnJoin = "badge";
  */
 export const JoinArrow: ColumnJoin = "arrow";
 /**
+ * JoinPosition selects where a TwoColumn's Join element sits (mirrors
+ * pptx-go's scene.JoinPosition, an int enum). The zero value JoinSeam
+ * centers it on the vertical seam between the columns; JoinTopBridge /
+ * JoinBottomBridge draw a horizontal accent bracket spanning both columns'
+ * combined width at the top / bottom edge, with the JoinLabel as a
+ * centered pill on it. (R12.8, D-101.)
+ */
+export type JoinPosition = string;
+/**
+ * JoinSeam centers the Join element on the vertical seam (zero value).
+ */
+export const JoinSeam: JoinPosition = "seam";
+/**
+ * JoinTopBridge spans a bracket across the top of the two columns.
+ */
+export const JoinTopBridge: JoinPosition = "top_bridge";
+/**
+ * JoinBottomBridge spans a bracket across the bottom of the two columns.
+ */
+export const JoinBottomBridge: JoinPosition = "bottom_bridge";
+/**
  * TwoColumn splits a slide into left and right child columns. Both sides
  * must be non-empty (validation, later unit). Mirror of scene.TwoColumn.
  * Children are []SlideNode and nest recursively.
@@ -3577,6 +3688,10 @@ export interface TwoColumn {
    * Ignored for other Join values.
    */
   joinLabel?: string;
+  /**
+   * JoinPosition selects where the Join element sits; empty = JoinSeam.
+   */
+  joinPosition?: JoinPosition;
 }
 /**
  * ColorRole names a surface fill color role (mirrors pptx-go's ColorRole;
