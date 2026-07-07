@@ -149,6 +149,22 @@ func ValidateNodeEnums(n SlideNode) error {
 		errs = append(errs,
 			checkEnum("tone", "LogoToneKind", v.Tone, AllowedLogoToneKind(), true),
 		)
+	case *Button:
+		errs = append(errs,
+			checkEnum("tone", "ButtonTone", v.Tone, AllowedButtonTone(), true),
+			checkEnum("size", "ButtonSize", v.Size, AllowedButtonSize(), true),
+			checkEnum("align", "HAlign", v.Align, AllowedHAlign(), true),
+		)
+	case *ChipRow:
+		errs = append(errs,
+			checkEnum("align", "HAlign", v.Align, AllowedHAlign(), true),
+		)
+		for i, c := range v.Chips {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("chips[%d].tone", i), "ChipTone", c.Tone, AllowedChipTone(), true),
+				checkEnum(fmt.Sprintf("chips[%d].color", i), "ColorRole", c.Color, AllowedColorRole(), true),
+			)
+		}
 	}
 	return errors.Join(errs...)
 }

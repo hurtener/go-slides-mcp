@@ -334,6 +334,35 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 			Caption: "Trusted by",
 		}, true
 
+	case KindButton:
+		// Button (R12.1, D-094): every field set — Label/Tone/Size/
+		// LeadingIcon/TrailingIcon/Align — so the round-trip covers each.
+		// Icon names are from the curated set (assets/icons).
+		return &Button{
+			Label:        "Talk to the team",
+			Tone:         ButtonPrimary,
+			Size:         ButtonSizeLG,
+			LeadingIcon:  "check",
+			TrailingIcon: "arrow-right",
+			Align:        HAlignCenter,
+		}, true
+
+	case KindChipRow:
+		// ChipRow (R12.5, D-096): a leading Label, three chips across
+		// every ChipTone (tint/solid/outline), two with curated leading
+		// icons, Wrap on, and a centered Align — covering every field on
+		// round-trip.
+		return &ChipRow{
+			Label: "CAPABILITIES",
+			Chips: []ChipSpec{
+				{Label: "Operate", Tone: ChipTint, Color: ColorAccent},
+				{Label: "Execute", Tone: ChipSolid, Color: ColorAccent, Icon: "check"},
+				{Label: "Build", Tone: ChipOutline, Color: ColorAccentAlt, Icon: "star"},
+			},
+			Wrap:  true,
+			Align: HAlignCenter,
+		}, true
+
 	default:
 		return nil, false
 	}

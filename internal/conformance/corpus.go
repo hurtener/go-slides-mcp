@@ -65,6 +65,8 @@ var Archetypes = []Fixture{
 	{"cycle", cycleDoc},
 	{"footnotes-sources", footnotesSourcesDoc},
 	{"agenda", agendaDoc},
+	{"button-cta", buttonCTADoc},
+	{"chip-row", chipRowDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -717,6 +719,55 @@ func agendaDoc() contracts.SlideDoc {
 						&contracts.Prose{Paragraphs: []contracts.RichText{rt("What we need from you")}},
 					}},
 				},
+			},
+		},
+	})
+}
+
+// buttonCTADoc exercises the Button CTA primitive (R12.1, D-094) as a
+// standalone affordance on a content slide: a large primary Button with a
+// trailing arrow-right glyph below a short heading. Kept to two modest nodes
+// so it stays clear of the safe area (INV-2 zero-overflow, strict);
+// asset-free like every other archetype fixture in this file.
+func buttonCTADoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Button CTA", contracts.Slide{
+		ID:        "button-cta",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Ready to ship?")},
+			&contracts.Button{
+				Label:        "Talk to the team",
+				Tone:         contracts.ButtonPrimary,
+				Size:         contracts.ButtonSizeLG,
+				TrailingIcon: "arrow-right",
+				Align:        contracts.HAlignLeft,
+			},
+		},
+	})
+}
+
+// chipRowDoc exercises the ChipRow wrap-to-next-line chip group (R12.5,
+// D-096): a labeled capability strip of 4 chips across all three ChipTone
+// variants, two with curated leading icons, Wrap on. Asset-free + modest so
+// it stays clear of the safe area (INV-2 zero-overflow, strict).
+func chipRowDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Chip Row", contracts.Slide{
+		ID:        "chip-row",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Common Builds")},
+			&contracts.ChipRow{
+				Label: "CATEGORIES",
+				Chips: []contracts.ChipSpec{
+					{Label: "Finance", Tone: contracts.ChipTint, Color: contracts.ColorAccent},
+					{Label: "HR", Tone: contracts.ChipSolid, Color: contracts.ColorAccent, Icon: "check"},
+					{Label: "Sales", Tone: contracts.ChipOutline, Color: contracts.ColorAccentAlt, Icon: "star"},
+					{Label: "Operations", Tone: contracts.ChipTint, Color: contracts.ColorSurfaceAlt},
+				},
+				Wrap:  true,
+				Align: contracts.HAlignLeft,
 			},
 		},
 	})
