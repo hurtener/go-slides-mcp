@@ -139,6 +139,10 @@ func ValidateNode(n contracts.SlideNode) error {
 		}
 	case *contracts.LogoWall:
 		errs = append(errs, validateLogoWall(v))
+	case *contracts.Button:
+		errs = append(errs, validateButton(v)...)
+	case *contracts.ChipRow:
+		errs = append(errs, validateChipRow(v)...)
 	}
 	// Enum validation applies to every node type; optional empty fields pass.
 	errs = append(errs, contracts.ValidateNodeEnums(n))
@@ -363,6 +367,26 @@ func validateLogoWall(l *contracts.LogoWall) error {
 		}
 	}
 	return errors.Join(errs...)
+}
+
+// validateButton enforces Button's structural rule (R12.1, D-094): a button
+// needs a non-empty Label (it is shape-only — no label means no affordance).
+// Tone/Size/Align enum checks run separately via ValidateNodeEnums.
+func validateButton(b *contracts.Button) []error {
+	if b.Label == "" {
+		return []error{errors.New("button: empty label")}
+	}
+	return nil
+}
+
+// validateChipRow enforces ChipRow's structural rule (R12.5, D-096): at least
+// one chip (an empty strip renders nothing and is not a real "tag strip").
+// Per-chip Tone/Color enum checks run separately via ValidateNodeEnums.
+func validateChipRow(c *contracts.ChipRow) []error {
+	if len(c.Chips) == 0 {
+		return []error{errors.New("chip_row: needs at least one chip")}
+	}
+	return nil
 }
 
 func cropErrs(c contracts.Crop) []error {

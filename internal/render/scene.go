@@ -168,6 +168,22 @@ func mapNode(node contracts.SlideNode) scene.SlideNode {
 			Tone:    mapLogoToneKind(n.Tone),
 			Caption: n.Caption,
 		}
+	case *contracts.Button:
+		return scene.Button{
+			Label:        n.Label,
+			Tone:         mapButtonTone(n.Tone),
+			Size:         mapButtonSize(n.Size),
+			LeadingIcon:  n.LeadingIcon,
+			TrailingIcon: n.TrailingIcon,
+			Align:        mapHAlign(n.Align),
+		}
+	case *contracts.ChipRow:
+		return scene.ChipRow{
+			Label: n.Label,
+			Chips: mapChipSpecs(n.Chips),
+			Wrap:  n.Wrap,
+			Align: mapHAlign(n.Align),
+		}
 	default:
 		return nil
 	}
@@ -181,6 +197,25 @@ func mapLogoEntries(logos []contracts.LogoEntry) []scene.LogoEntry {
 	mapped := make([]scene.LogoEntry, len(logos))
 	for i, l := range logos {
 		mapped[i] = scene.LogoEntry{AssetID: scene.AssetID(l.AssetID), Alt: l.Alt}
+	}
+	return mapped
+}
+
+// mapChipSpecs maps a ChipRow's chip pills 1:1 (R12.5, D-096) — Label, Tone,
+// Color, and an optional leading Icon. nil ⇒ nil so a ChipRow with no chips
+// maps to the engine's zero slice (byte-identical absent path).
+func mapChipSpecs(chips []contracts.ChipSpec) []scene.ChipSpec {
+	if chips == nil {
+		return nil
+	}
+	mapped := make([]scene.ChipSpec, len(chips))
+	for i, c := range chips {
+		mapped[i] = scene.ChipSpec{
+			Label: c.Label,
+			Tone:  mapChipTone(c.Tone),
+			Color: mapColorRole(c.Color),
+			Icon:  c.Icon,
+		}
 	}
 	return mapped
 }

@@ -1618,6 +1618,16 @@ export type Kind = typeof KindFunnel | typeof KindCycle;
  */
 export const KindLogoWall: Kind = "logo_wall";
 /**
+ * Node kind added in R12.1 — the Button CTA / action affordance (D-094),
+ * mirroring pptx-go's scene.Button.
+ */
+export const KindButton: Kind = "button";
+/**
+ * Node kind added in R12.5 — the ChipRow wrapping chip-group strip (D-096),
+ * mirroring pptx-go's scene.ChipRow.
+ */
+export const KindChipRow: Kind = "chip_row";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -1701,6 +1711,93 @@ export interface Bento {
    * Rows is the ordered sequence of bento rows.
    */
   rows?: BentoRow[];
+}
+/**
+ * ButtonTone selects a Button's fill treatment (mirrors pptx-go's
+ * scene.ButtonTone, an int enum — the product mirror is a string enum; see
+ * R12.1, D-094). Each tone maps to theme color tokens (P2), so a theme swap
+ * re-skins every button. The zero value ButtonPrimary is a solid accent pill
+ * — the default "do this next" affordance. The empty string is accepted
+ * (acceptEmpty=true) and maps to ButtonPrimary at render time.
+ */
+export type ButtonTone = string;
+/**
+ * ButtonPrimary is a solid ColorAccent fill, inverse label (zero value).
+ */
+export const ButtonPrimary: ButtonTone = "primary";
+/**
+ * ButtonAccentAlt is a solid ColorAccentAlt fill, inverse label.
+ */
+export const ButtonAccentAlt: ButtonTone = "accent_alt";
+/**
+ * ButtonGhost is no fill + an accent hairline outline, accent label.
+ */
+export const ButtonGhost: ButtonTone = "ghost";
+/**
+ * ButtonNeutral is a solid ColorSurfaceAlt fill, default label.
+ */
+export const ButtonNeutral: ButtonTone = "neutral";
+/**
+ * ButtonSize scales a Button's height, interior padding, and icon size
+ * (mirrors pptx-go's scene.ButtonSize; see R12.1, D-094). The zero value
+ * ButtonSizeMD is the default; SM/LG step it down/up. A pinned layout metric,
+ * not a theme token (it sizes geometry, not a visual property). The empty
+ * string is accepted (acceptEmpty=true) and maps to ButtonSizeMD at render.
+ */
+/**
+ * ButtonSizeMD is the default size.
+ */
+export const ButtonSizeMD = "md";
+/**
+ * ButtonSizeSM steps the geometry down.
+ */
+export const ButtonSizeSM = "sm";
+/**
+ * ButtonSizeLG steps the geometry up.
+ */
+export const ButtonSizeLG = "lg";
+/**
+ * Button sizes (wire values per compose-a-scene).
+ */
+export type ButtonSize = typeof ButtonSizeMD | typeof ButtonSizeSM | typeof ButtonSizeLG;
+/**
+ * Button is a presentational CTA / action affordance (R12.1, D-094): a
+ * content-fit RadiusFull pill with a label and optional leading/trailing
+ * icons, droppable standalone (a closing slide), inside a card body (a
+ * pricing card), or inside a banner. It is a shape only — no hyperlink/action
+ * wiring (the deck is static). Mirror of pptx-go's scene.Button.
+ * Width is content-fit (label + icons + padding) clamped to its box; Align
+ * offsets the pill within the box (zero = inherit the slide's
+ * Content.Horizontal). Tone selects the token fill (ghost = outline); Size
+ * scales the geometry. LeadingIcon / TrailingIcon are closed-name curated or
+ * extension icons (Stage-1 validated); their zero value ("") renders no
+ * glyph. Additive: absent ⇒ byte-identical.
+ */
+export interface Button {
+  /**
+   * Label is the button text.
+   */
+  label?: string;
+  /**
+   * Tone selects the token fill treatment; empty = ButtonPrimary (solid accent).
+   */
+  tone?: ButtonTone;
+  /**
+   * Size scales the geometry; empty = ButtonSizeMD (default).
+   */
+  size?: ButtonSize;
+  /**
+   * LeadingIcon is a closed-name curated/extension icon; "" = none.
+   */
+  leadingIcon?: string;
+  /**
+   * TrailingIcon is a closed-name curated/extension icon; "" = none.
+   */
+  trailingIcon?: string;
+  /**
+   * Align is a per-node horizontal alignment override; 0 = inherit slide.
+   */
+  align?: HAlign;
 }
 /**
  * CalloutKind selects a callout variant (mirrors pptx-go's scene.CalloutKind).
@@ -1894,6 +1991,62 @@ export interface CardSection {
    * Body is the section body children (must be non-empty).
    */
   body?: SlideNode[];
+}
+/**
+ * ChipSpec is one chip in a ChipRow (R12.5, D-096): a label, a tone, the
+ * tone's color role, and an optional leading icon (a closed-name curated or
+ * extension icon, Stage-1 validated). It mirrors the single Chip node's
+ * vocabulary (ChipTone / ColorRole). For ChipTint the Color is ignored (the
+ * chip uses ColorSurfaceAlt); ChipSolid / ChipOutline use Color.
+ */
+export interface ChipSpec {
+  /**
+   * Label is the chip text.
+   */
+  label?: string;
+  /**
+   * Tone selects the chip fill treatment; empty = ChipTint (tinted pill).
+   */
+  tone?: ChipTone;
+  /**
+   * Color is the chip color role; ignored for ChipTint (uses ColorSurfaceAlt).
+   */
+  color?: ColorRole;
+  /**
+   * Icon is an optional leading glyph (curated/extension icon name); "" = none.
+   */
+  icon?: string;
+}
+/**
+ * ChipRow is a horizontal, wrap-to-next-line row of content-fit chip pills
+ * with an optional leading label (R12.5, D-096): a tag / category / capability
+ * strip. Each chip sizes to its label (plus an optional leading icon); chips
+ * lay left-to-right and, when Wrap is set, reflow onto new lines when the row
+ * width is exceeded. Mirror of pptx-go's scene.ChipRow.
+ * Wrap is the engine mechanism: the zero value lays all chips on a single
+ * line (the minimal behavior); a product that wants a reflowing strip sets
+ * Wrap true (D-026). A non-empty Label renders as a leading TypeCaption label
+ * before the first chip. Align offsets each line's chips (zero = inherit the
+ * slide's Content.Horizontal). Additive: a deck with no ChipRow is
+ * byte-identical.
+ */
+export interface ChipRow {
+  /**
+   * Label is an optional leading TypeCaption label before the first chip; "" = none.
+   */
+  label?: string;
+  /**
+   * Chips is the sequence of chip pills; at least one is required.
+   */
+  chips?: ChipSpec[];
+  /**
+   * Wrap reflows chips onto new lines when the row width is exceeded; false = single line.
+   */
+  wrap?: boolean;
+  /**
+   * Align is a per-node horizontal alignment override; 0 = inherit slide.
+   */
+  align?: HAlign;
 }
 /**
  * Cycle is a closed-loop process diagram (R14.11, D-128): N stages placed

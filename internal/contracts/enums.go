@@ -299,6 +299,31 @@ func AllowedDataMarkKind() []DataMarkKind {
 // strings — for inclusion in an error message.
 func (DataMarkKind) allowedStrings() []string { return stringsFrom(AllowedDataMarkKind()) }
 
+// AllowedButtonTone returns the closed set of ButtonTone wire values
+// (R12.1, D-094). ENUM DRIFT GUARD: every ButtonTone const above must be
+// listed here — a missing value silently rejects a valid wire value. The
+// empty string is also legal (ButtonPrimary, the zero value) and is accepted
+// by the validator (acceptEmpty=true), mirroring the existing ChipTone
+// pattern.
+func AllowedButtonTone() []ButtonTone {
+	return []ButtonTone{ButtonPrimary, ButtonAccentAlt, ButtonGhost, ButtonNeutral}
+}
+
+// allowedStrings returns the closed set of ButtonTone wire values as plain
+// strings — for inclusion in an error message.
+func (ButtonTone) allowedStrings() []string { return stringsFrom(AllowedButtonTone()) }
+
+// AllowedButtonSize returns the closed set of ButtonSize wire values
+// (R12.1, D-094). The empty string is also legal (ButtonSizeMD, the zero
+// value) and is accepted by the validator (acceptEmpty=true).
+func AllowedButtonSize() []ButtonSize {
+	return []ButtonSize{ButtonSizeMD, ButtonSizeSM, ButtonSizeLG}
+}
+
+// allowedStrings returns the closed set of ButtonSize wire values as plain
+// strings — for inclusion in an error message.
+func (ButtonSize) allowedStrings() []string { return stringsFrom(AllowedButtonSize()) }
+
 // AllowedLogoToneKind returns the closed set of LogoToneKind wire values
 // (R14.7, D-125). The empty string (LogoToneNone) is excluded from this list
 // but is accepted by the validator (acceptEmpty=true), mirroring the

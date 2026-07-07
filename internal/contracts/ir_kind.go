@@ -82,6 +82,18 @@ const (
 	KindLogoWall Kind = "logo_wall"
 )
 
+// Node kind added in R12.1 — the Button CTA / action affordance (D-094),
+// mirroring pptx-go's scene.Button.
+const (
+	KindButton Kind = "button"
+)
+
+// Node kind added in R12.5 — the ChipRow wrapping chip-group strip (D-096),
+// mirroring pptx-go's scene.ChipRow.
+const (
+	KindChipRow Kind = "chip_row"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

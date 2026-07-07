@@ -147,6 +147,40 @@ func mapCardLayout(layout contracts.CardLayout) scene.CardLayout {
 	return scene.CardLayoutDefault
 }
 
+// mapButtonTone maps the product ButtonTone string enum to the engine's int
+// ButtonTone enum (R12.1, D-094). The empty string ("" — unset) maps to the
+// zero value ButtonPrimary, mirroring the engine default (a solid accent pill).
+func mapButtonTone(t contracts.ButtonTone) scene.ButtonTone {
+	switch t {
+	case contracts.ButtonAccentAlt:
+		return scene.ButtonAccentAlt
+	case contracts.ButtonGhost:
+		return scene.ButtonGhost
+	case contracts.ButtonNeutral:
+		return scene.ButtonNeutral
+	case contracts.ButtonPrimary:
+		fallthrough
+	default:
+		return scene.ButtonPrimary
+	}
+}
+
+// mapButtonSize maps the product ButtonSize string enum to the engine's int
+// ButtonSize enum (R12.1, D-094). The empty string ("" — unset) maps to the
+// zero value ButtonMD (the default geometry).
+func mapButtonSize(s contracts.ButtonSize) scene.ButtonSize {
+	switch s {
+	case contracts.ButtonSizeSM:
+		return scene.ButtonSM
+	case contracts.ButtonSizeLG:
+		return scene.ButtonLG
+	case contracts.ButtonSizeMD:
+		fallthrough
+	default:
+		return scene.ButtonMD
+	}
+}
+
 func mapColorRole(role contracts.ColorRole) pptx.ColorRole {
 	switch role {
 	case contracts.ColorCanvas:
