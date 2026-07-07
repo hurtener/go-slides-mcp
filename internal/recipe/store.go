@@ -200,45 +200,53 @@ func agendaRecipe() Recipe {
 	}
 }
 
-// pricingTiersRecipe (R14.20 offer-card family, pricing variant) composes 3
-// Cards — Eyebrow the plan name, a Stat with Number+Format USD (R14.13) for
-// the price, and a feature List. The middle card carries a HeaderFill +
-// StatusDot accent to signal "recommended".
+// pricingTiersRecipe (R12.10 + R14.20 offer-card family, pricing variant)
+// composes 4 Cards — plan chrome + big price + unit caption + cap line +
+// filled Checklist + footer CTA Button — with one ribboned, header-filled
+// highlighted tier. This is the reliable composite the agent can apply for a
+// tiered-pricing slide instead of manually stacking fragile atoms.
 func pricingTiersRecipe() Recipe {
-	tier := func(eyebrow string, price float64, accent bool, features ...string) *contracts.Card {
-		items := make([]contracts.ListItem, 0, len(features))
+	checklistItems := func(features ...string) []contracts.ChecklistItem {
+		items := make([]contracts.ChecklistItem, 0, len(features))
 		for _, f := range features {
-			items = append(items, contracts.ListItem{Text: contracts.RichText{{Text: f}}})
+			items = append(items, contracts.ChecklistItem{Text: contracts.RichText{{Text: f}}, State: contracts.CheckDone, Icon: "check"})
 		}
+		return items
+	}
+	tier := func(plan string, price float64, capLine string, highlight bool, ctaLabel string, features ...string) *contracts.Card {
 		card := &contracts.Card{
-			Eyebrow: eyebrow,
+			Eyebrow: "PLAN",
+			Header:  plan,
 			Body: []contracts.SlideNode{
 				&contracts.Stat{
 					Label:  "per seat / month",
 					Number: numberPtr(price),
 					Format: &contracts.NumberFormat{CurrencySymbol: "$"},
 				},
-				&contracts.List{Kind: contracts.ListBullet, Items: items},
+				&contracts.Prose{Paragraphs: []contracts.RichText{{{Text: capLine}}}},
+				&contracts.Checklist{Items: checklistItems(features...), Fill: true},
+				&contracts.Button{Label: ctaLabel, Tone: contracts.ButtonPrimary, TrailingIcon: "arrow-right"},
 			},
 		}
-		if accent {
+		if highlight {
 			card.HeaderFill = contracts.ColorAccent
-			card.StatusDot = contracts.ColorAccent
+			card.Ribbon = &contracts.Ribbon{Text: "MOST POPULAR", Position: contracts.RibbonTopBar, Color: contracts.ColorAccent, TextColor: contracts.TextInverse}
 		}
 		return card
 	}
 	return Recipe{
 		ID:          "rcp_pricing_tiers",
 		Name:        "Pricing Tiers",
-		Description: "Three pricing tiers with the middle plan highlighted as recommended.",
+		Description: "Four pricing tiers with one ribboned, highlighted plan; each card includes price, cap line, filled checklist, and footer CTA.",
 		Source:      "builtin",
 		Tags:        []string{"pricing", "offer", "comparison"},
 		Slide: contracts.Slide{Layout: contracts.LayoutCardGrid, Nodes: []contracts.SlideNode{
 			&contracts.Heading{Level: 2, Text: contracts.RichText{{Text: "Pricing"}}},
-			&contracts.Grid{Columns: 3, Gap: contracts.SpaceMD, Cells: []contracts.SlideNode{
-				tier("STARTER", 29, false, "5 seats", "Community support", "Core features"),
-				tier("GROWTH", 79, true, "25 seats", "Priority support", "Advanced analytics"),
-				tier("SCALE", 199, false, "Unlimited seats", "Dedicated support", "Custom SLAs"),
+			&contracts.Grid{Columns: 2, Gap: contracts.SpaceMD, Cells: []contracts.SlideNode{
+				tier("Starter", 0, "up to 5 agents", false, "Start free", "Core features", "Community support"),
+				tier("Growth", 79, "up to 25 agents", true, "Start free", "Priority support", "Advanced analytics"),
+				tier("Scale", 199, "up to 100 agents", false, "Contact sales", "Dedicated support", "Custom SLAs"),
+				tier("Enterprise+", 4000, "unlimited agents", false, "Contact sales", "Private deployment", "Custom governance"),
 			}},
 		}},
 	}
