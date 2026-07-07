@@ -114,6 +114,7 @@ func ValidateNode(n contracts.SlideNode) error {
 		errs = append(errs, validateGrid(v))
 	case *contracts.Card:
 		errs = append(errs, childErr("card.body", v.Body))
+		errs = append(errs, validateCard(v)...)
 	case *contracts.CardSection:
 		if len(v.Body) == 0 {
 			errs = append(errs, errors.New("card_section: body must be non-empty"))
@@ -241,10 +242,36 @@ func validateGrid(g *contracts.Grid) error {
 	} else if g.Columns >= 2 && g.Columns <= 4 && len(g.Cells)%g.Columns != 0 {
 		errs = append(errs, fmt.Errorf("grid: cell count %d not a multiple of columns %d", len(g.Cells), g.Columns))
 	}
+	for i, c := range g.Connectors {
+		if c.Between[0] < 0 || c.Between[1] < 0 {
+			errs = append(errs, fmt.Errorf("grid: connectors[%d] between indices must be >= 0", i))
+			continue
+		}
+		if c.Between[1] != c.Between[0]+1 {
+			errs = append(errs, fmt.Errorf("grid: connectors[%d] between %v must name adjacent columns {c,c+1}", i, c.Between))
+		}
+		if g.Columns > 0 && c.Between[1] >= g.Columns {
+			errs = append(errs, fmt.Errorf("grid: connectors[%d] between %v out of range for columns %d", i, c.Between, g.Columns))
+		}
+	}
 	if err := childErr("grid.cells", g.Cells); err != nil {
 		errs = append(errs, err)
 	}
 	return errors.Join(errs...)
+}
+
+// validateCard adds Stage-1 structural checks for the additive Ribbon field
+// (R12.3, D-098). A corner-star ribbon ignores Text; every other RibbonPos
+// requires non-empty Text so a highlighted card surfaces a real label rather
+// than an invisible badge.
+func validateCard(c *contracts.Card) []error {
+	if c.Ribbon == nil {
+		return nil
+	}
+	if c.Ribbon.Position != contracts.RibbonCornerStar && c.Ribbon.Text == "" {
+		return []error{errors.New("card: ribbon text must be non-empty unless position == corner_star")}
+	}
+	return nil
 }
 
 // validateDecoration checks structural constraints for Decoration nodes.

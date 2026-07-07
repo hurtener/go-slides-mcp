@@ -332,10 +332,46 @@ func mapConnectorKind(kind contracts.ConnectorKind) scene.ConnectorKind {
 		return scene.ConnectorCycle
 	case contracts.ConnectorPlus:
 		return scene.ConnectorPlus
+	case contracts.ConnectorBiArrow:
+		return scene.ConnectorBiArrow
 	case contracts.ConnectorArrow:
 		fallthrough
 	default:
 		return scene.ConnectorArrow
+	}
+}
+
+// mapRibbonPos maps the product RibbonPos string enum to the engine's int
+// RibbonPos enum (R12.3, D-098). The empty string maps to RibbonTopBar, the
+// engine zero value.
+func mapRibbonPos(p contracts.RibbonPos) scene.RibbonPos {
+	switch p {
+	case contracts.RibbonCornerTL:
+		return scene.RibbonCornerTL
+	case contracts.RibbonCornerTR:
+		return scene.RibbonCornerTR
+	case contracts.RibbonCornerStar:
+		return scene.RibbonCornerStar
+	case contracts.RibbonTopBar:
+		fallthrough
+	default:
+		return scene.RibbonTopBar
+	}
+}
+
+// mapJoinPosition maps the product JoinPosition string enum to the engine's
+// int JoinPosition enum (R12.8, D-101). The empty string maps to JoinSeam,
+// the engine zero value.
+func mapJoinPosition(p contracts.JoinPosition) scene.JoinPosition {
+	switch p {
+	case contracts.JoinTopBridge:
+		return scene.JoinTopBridge
+	case contracts.JoinBottomBridge:
+		return scene.JoinBottomBridge
+	case contracts.JoinSeam:
+		fallthrough
+	default:
+		return scene.JoinSeam
 	}
 }
 

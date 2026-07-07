@@ -29,6 +29,7 @@ const (
 	ConnectorArrowDashed ConnectorKind = "arrow_dashed"
 	ConnectorCycle       ConnectorKind = "cycle"
 	ConnectorPlus        ConnectorKind = "plus"
+	ConnectorBiArrow     ConnectorKind = "bi_arrow"
 )
 
 // IsValid reports whether v is one of the closed ConnectorKind values

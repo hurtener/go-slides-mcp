@@ -265,13 +265,35 @@ func (FlowOrientation) allowedStrings() []string {
 // AllowedConnectorKind returns the closed set of ConnectorKind values.
 func AllowedConnectorKind() []ConnectorKind {
 	return []ConnectorKind{
-		ConnectorArrow, ConnectorArrowDashed, ConnectorCycle, ConnectorPlus,
+		ConnectorArrow, ConnectorArrowDashed, ConnectorCycle, ConnectorPlus, ConnectorBiArrow,
 	}
 }
 
 // allowedStrings returns the closed set of ConnectorKind wire values as
 // plain strings — for inclusion in an error message.
 func (ConnectorKind) allowedStrings() []string { return stringsFrom(AllowedConnectorKind()) }
+
+// AllowedRibbonPos returns the closed set of RibbonPos wire values (R12.3,
+// D-098). The empty string is also legal (RibbonTopBar, the zero value) and
+// is accepted by the validator (acceptEmpty=true).
+func AllowedRibbonPos() []RibbonPos {
+	return []RibbonPos{RibbonTopBar, RibbonCornerTL, RibbonCornerTR, RibbonCornerStar}
+}
+
+// allowedStrings returns the closed set of RibbonPos wire values as plain
+// strings — for inclusion in an error message.
+func (RibbonPos) allowedStrings() []string { return stringsFrom(AllowedRibbonPos()) }
+
+// AllowedJoinPosition returns the closed set of JoinPosition wire values
+// (R12.8, D-101). The empty string is also legal (JoinSeam, the zero value)
+// and is accepted by the validator (acceptEmpty=true).
+func AllowedJoinPosition() []JoinPosition {
+	return []JoinPosition{JoinSeam, JoinTopBridge, JoinBottomBridge}
+}
+
+// allowedStrings returns the closed set of JoinPosition wire values as plain
+// strings — for inclusion in an error message.
+func (JoinPosition) allowedStrings() []string { return stringsFrom(AllowedJoinPosition()) }
 
 // AllowedDecorationKind returns the closed set of DecorationKind values.
 func AllowedDecorationKind() []DecorationKind {

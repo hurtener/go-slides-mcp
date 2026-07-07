@@ -60,17 +60,19 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 		// draws a circular badge centered on the column seam. Omit both fields for
 		// a plain two-column with no seam element (byte-identical to pre-R5 output).
 		return &TwoColumn{
-			Ratio:     Ratio11,
-			Join:      JoinBadge,
-			JoinLabel: "VS",
-			Left:      []SlideNode{&Heading{Text: RichText{{Text: "Option A"}}, Level: 2}},
-			Right:     []SlideNode{&Heading{Text: RichText{{Text: "Option B"}}, Level: 2}},
+			Ratio:        Ratio11,
+			Join:         JoinBadge,
+			JoinLabel:    "VS",
+			JoinPosition: JoinTopBridge,
+			Left:         []SlideNode{&Heading{Text: RichText{{Text: "Option A"}}, Level: 2}},
+			Right:        []SlideNode{&Heading{Text: RichText{{Text: "Option B"}}, Level: 2}},
 		}, true
 
 	case KindGrid:
 		return &Grid{
-			Columns: 2,
-			Gap:     SpaceMD,
+			Columns:    2,
+			Gap:        SpaceMD,
+			Connectors: []GridConnector{{Between: [2]int{0, 1}, Kind: ConnectorBiArrow, Label: "sync"}},
 			Cells: []SlideNode{
 				&Card{Header: "Card A", Body: []SlideNode{
 					&Prose{Paragraphs: []RichText{{{Text: "First cell"}}}},
@@ -84,6 +86,7 @@ func ExampleNodeForKind(kind Kind) (SlideNode, bool) {
 	case KindCard:
 		return &Card{
 			Header: "Feature Highlight",
+			Ribbon: &Ribbon{Text: "MOST POPULAR", Position: RibbonTopBar, Color: ColorAccent, TextColor: TextInverse},
 			Body: []SlideNode{
 				&Prose{Paragraphs: []RichText{
 					{{Text: "Cards hold child slide nodes in the body field."}},

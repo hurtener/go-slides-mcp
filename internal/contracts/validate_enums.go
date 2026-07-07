@@ -70,10 +70,16 @@ func ValidateNodeEnums(n SlideNode) error {
 		errs = append(errs,
 			checkEnum("gap", "SpaceRole", v.Gap, AllowedSpaceRole(), true),
 		)
+		for i, c := range v.Connectors {
+			errs = append(errs,
+				checkEnum(fmt.Sprintf("connectors[%d].kind", i), "ConnectorKind", c.Kind, AllowedConnectorKind(), true),
+			)
+		}
 	case *TwoColumn:
 		errs = append(errs,
 			checkEnum("ratio", "ColumnRatio", v.Ratio, AllowedColumnRatio(), true),
 			checkEnum("join", "ColumnJoin", v.Join, AllowedColumnJoin(), true),
+			checkEnum("joinPosition", "JoinPosition", v.JoinPosition, AllowedJoinPosition(), true),
 		)
 	case *Flow:
 		errs = append(errs,
@@ -95,6 +101,13 @@ func ValidateNodeEnums(n SlideNode) error {
 			checkEnum("layout", "CardLayout", v.Layout, AllowedCardLayout(), true),
 			checkEnum("elevation", "ElevationRole", v.Elevation, AllowedElevationRole(), true),
 		)
+		if v.Ribbon != nil {
+			errs = append(errs,
+				checkEnum("ribbon.position", "RibbonPos", v.Ribbon.Position, AllowedRibbonPos(), true),
+				checkEnum("ribbon.color", "ColorRole", v.Ribbon.Color, AllowedColorRole(), true),
+				checkEnum("ribbon.textColor", "TextColorRole", v.Ribbon.TextColor, AllowedTextColorRole(), true),
+			)
+		}
 	case *Decoration:
 		// DecorationKind is NOT optional: acceptEmpty=false.
 		errs = append(errs,
