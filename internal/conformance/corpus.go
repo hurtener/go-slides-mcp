@@ -75,6 +75,9 @@ var Archetypes = []Fixture{
 	{"bridge-two-column", bridgeTwoColumnDoc},
 	{"ribbon-card", ribbonCardDoc},
 	{"pricing-offer-card", pricingOfferCardDoc},
+	{"adversarial-card-grid", adversarialCardGridDoc},
+	{"adversarial-two-column", adversarialTwoColumnDoc},
+	{"adversarial-bento", adversarialBentoDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -997,6 +1000,102 @@ func pricingOfferCardDoc() contracts.SlideDoc {
 				tier("Growth", 79, "up to 25 agents", true, "Start free", "Priority", "Analytics"),
 				tier("Scale", 199, "up to 100 agents", false, "Contact sales", "Dedicated", "SLA"),
 			}},
+		},
+	})
+}
+
+// adversarialCardGridDoc is R11.12's product-side hostile-content proof for
+// Card chrome (R11.1/2/5/6/8/10/11): long wrapped headers, a long pill
+// label, status-dot + pill coexistence, watermark, dark variant + dark-ish
+// fills, and a wide Stat value — all still on-bar through the product IR
+// with ZERO warnings (INV-2 strict). The engine owns the box-overlap and
+// fit-to-line invariants; this corpus fixture proves the product consumes
+// those engine fixes under real hostile content.
+func adversarialCardGridDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Adversarial Card Grid", contracts.Slide{
+		ID:        "adversarial-card-grid",
+		Archetype: contracts.ArchetypeDark,
+		Variant:   contracts.VariantDark,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Hostile Card Content")},
+			&contracts.Grid{Columns: 2, Gap: contracts.SpaceMD, Cells: []contracts.SlideNode{
+				&contracts.Card{
+					Eyebrow:    "VISION",
+					Header:     "Platform — White Label & Professional Services",
+					HeaderPill: "FULLY CUSTOMIZABLE",
+					HeaderFill: contracts.ColorAccent,
+					StatusDot:  contracts.ColorAccent,
+					Watermark:  "01",
+					Body: []contracts.SlideNode{
+						&contracts.List{Kind: contracts.ListBullet, Items: []contracts.ListItem{
+							{Text: rt("Chat & Q&A")},
+							{Text: rt("Automated workflows")},
+							{Text: rt("Microsoft 365 · Workspace")},
+						}},
+					},
+				},
+				&contracts.Card{
+					Header:    "Replies. Then waits. Understands. Decides. Acts.",
+					Watermark: "Q4",
+					Body: []contracts.SlideNode{
+						&contracts.Stat{Value: "$4,000+", Label: "per month"},
+						&contracts.Prose{Paragraphs: []contracts.RichText{rt("up to 100 agents")}},
+					},
+				},
+			}},
+		},
+	})
+}
+
+// adversarialTwoColumnDoc is R11.12's hostile-content proof for the
+// TwoColumn join badge fit (R11.7): a multi-word JoinLabel on the seam
+// badge that used to break mid-word in a fixed circle. Through the product
+// IR it must render on-bar with ZERO warnings.
+func adversarialTwoColumnDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Adversarial Two Column", contracts.Slide{
+		ID:        "adversarial-two-column",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutTwoColumn,
+		Nodes: []contracts.SlideNode{
+			&contracts.TwoColumn{
+				Ratio:     contracts.Ratio11,
+				Join:      contracts.JoinBadge,
+				JoinLabel: "One agent, purpose-built",
+				Left: []contracts.SlideNode{
+					&contracts.Prose{Paragraphs: []contracts.RichText{rt("Build internally with your own models and data sources.")}},
+				},
+				Right: []contracts.SlideNode{
+					&contracts.Prose{Paragraphs: []contracts.RichText{rt("Sell externally as a packaged workflow to customers.")}},
+				},
+			},
+		},
+	})
+}
+
+// adversarialBentoDoc is R11.12's hostile-content proof for bento safe-area
+// clamping, row-label gutter fit, and list spacing (R11.3/9/10): long row
+// labels + modest multi-cell bodies that previously overlapped the footer.
+func adversarialBentoDoc() contracts.SlideDoc {
+	return oneSlide("Conformance — Adversarial Bento", contracts.Slide{
+		ID:        "adversarial-bento",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Hostile Bento Content")},
+			&contracts.Bento{
+				Columns: 2,
+				Rows: []contracts.BentoRow{
+					{Label: "Control plane", Cells: []contracts.BentoCell{
+						{Span: 1, Node: &contracts.Card{Header: "Automation", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Scheduled builds and one-click rollback.")}}}}},
+						{Span: 1, Node: &contracts.Card{Header: "Collaboration", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Shared workspaces and inline comments.")}}}}},
+					}},
+					{Label: "Memory-native & model orchestration", Cells: []contracts.BentoCell{
+						{Span: 1, Node: &contracts.Card{Header: "Sources", Body: []contracts.SlideNode{&contracts.List{Kind: contracts.ListBullet, Items: []contracts.ListItem{{Text: rt("Confluence")}, {Text: rt("Slack")}, {Text: rt("Workspace")}}}}}},
+						{Span: 1, Node: &contracts.Card{Header: "Policy", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Ground every answer in team-approved guidance.")}}}}},
+					}},
+				},
+			},
 		},
 	})
 }
