@@ -197,11 +197,12 @@ func TestBuiltinRecipesValidateAndRender(t *testing.T) {
 	}
 }
 
-// TestOfferCardFamilyBothRenderFromCardListShape is the R14.20 family
-// assertion: rcp_pricing_tiers and rcp_feature_card are both Card+List
-// compositions (a Grid of Cards each carrying a body List) and both render —
-// proving one composition shape covers the price and non-price variants.
-func TestOfferCardFamilyBothRenderFromCardListShape(t *testing.T) {
+// TestOfferCardFamilyBothRenderFromCardCompositeShape is the R12.10/R14.20
+// family assertion: rcp_pricing_tiers and rcp_feature_card are both Grid-of-
+// Cards compositions and both render; the pricing variant must now carry the
+// richer R12.10 composite (Checklist + Button + optional Ribbon highlight)
+// while the non-price variant stays the simpler Card+List offer card.
+func TestOfferCardFamilyBothRenderFromCardCompositeShape(t *testing.T) {
 	h := testHandlers()
 	deckardWhite := soul.DeckardWhite()
 
@@ -223,13 +224,39 @@ func TestOfferCardFamilyBothRenderFromCardListShape(t *testing.T) {
 				t.Fatalf("recipe %q: cell[%d] is %T, want *contracts.Card", id, i, cell)
 			}
 			hasList := false
+			hasChecklist := false
+			hasButton := false
 			for _, b := range card.Body {
-				if _, ok := b.(*contracts.List); ok {
+				switch b.(type) {
+				case *contracts.List:
 					hasList = true
+				case *contracts.Checklist:
+					hasChecklist = true
+				case *contracts.Button:
+					hasButton = true
 				}
 			}
-			if !hasList {
-				t.Fatalf("recipe %q: card[%d] body has no *contracts.List", id, i)
+			switch id {
+			case "rcp_pricing_tiers":
+				if !hasChecklist || !hasButton {
+					t.Fatalf("recipe %q: card[%d] body needs Checklist + Button (got list=%v checklist=%v button=%v)", id, i, hasList, hasChecklist, hasButton)
+				}
+			case "rcp_feature_card":
+				if !hasList && !hasChecklist {
+					t.Fatalf("recipe %q: card[%d] body has neither *contracts.List nor *contracts.Checklist", id, i)
+				}
+			}
+		}
+		if id == "rcp_pricing_tiers" {
+			ribboned := 0
+			for _, cell := range grid.Cells {
+				card := cell.(*contracts.Card)
+				if card.Ribbon != nil {
+					ribboned++
+				}
+			}
+			if ribboned != 1 {
+				t.Fatalf("recipe %q: ribboned card count = %d, want 1", id, ribboned)
 			}
 		}
 		doc := contracts.SlideDoc{Slides: []contracts.Slide{r.Slide}}

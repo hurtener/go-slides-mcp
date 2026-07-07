@@ -74,6 +74,7 @@ var Archetypes = []Fixture{
 	{"connector-grid", connectorGridDoc},
 	{"bridge-two-column", bridgeTwoColumnDoc},
 	{"ribbon-card", ribbonCardDoc},
+	{"pricing-offer-card", pricingOfferCardDoc},
 }
 
 // oneSlide wraps a single slide into a titled SlideDoc — the shared shape
@@ -949,6 +950,52 @@ func ribbonCardDoc() contracts.SlideDoc {
 				&contracts.Card{Header: "Starter", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("For small teams")}}}},
 				&contracts.Card{Header: "Business", Ribbon: &contracts.Ribbon{Text: "MOST POPULAR", Position: contracts.RibbonTopBar, Color: contracts.ColorAccent, TextColor: contracts.TextInverse}, Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Our recommended plan")}}}},
 				&contracts.Card{Header: "Enterprise", Body: []contracts.SlideNode{&contracts.Prose{Paragraphs: []contracts.RichText{rt("Custom scale")}}}},
+			}},
+		},
+	})
+}
+
+// pricingOfferCardDoc exercises the enriched pricing/offer-card recipe
+// shape (R12.10): one highlighted tier + one plain tier, each card =
+// Stat(price) + cap line + filled Checklist + footer CTA Button. The
+// full built-in recipe carries 4 tiers (apply_recipe/large.json points to
+// it); the corpus fixture stays to 2 cells so INV-2 strict zero-overflow
+// holds while still proving the composite on-bar.
+func pricingOfferCardDoc() contracts.SlideDoc {
+	numPtr := func(v float64) *float64 { return &v }
+	featureItems := func(items ...string) []contracts.ChecklistItem {
+		out := make([]contracts.ChecklistItem, 0, len(items))
+		for _, item := range items {
+			out = append(out, contracts.ChecklistItem{Text: rt(item), State: contracts.CheckDone, Icon: "check"})
+		}
+		return out
+	}
+	tier := func(plan string, price float64, capLine string, highlight bool, cta string, features ...string) *contracts.Card {
+		card := &contracts.Card{
+			Eyebrow: "PLAN",
+			Header:  plan,
+			Body: []contracts.SlideNode{
+				&contracts.Stat{Label: "per seat / month", Number: numPtr(price), Format: &contracts.NumberFormat{CurrencySymbol: "$"}},
+				&contracts.Prose{Paragraphs: []contracts.RichText{rt(capLine)}},
+				&contracts.Checklist{Items: featureItems(features...), Fill: true},
+				&contracts.Button{Label: cta, Tone: contracts.ButtonPrimary, TrailingIcon: "arrow-right"},
+			},
+		}
+		if highlight {
+			card.HeaderFill = contracts.ColorAccent
+			card.Ribbon = &contracts.Ribbon{Text: "MOST POPULAR", Position: contracts.RibbonTopBar, Color: contracts.ColorAccent, TextColor: contracts.TextInverse}
+		}
+		return card
+	}
+	return oneSlide("Conformance — Pricing Offer Card", contracts.Slide{
+		ID:        "pricing-offer-card",
+		Archetype: contracts.ArchetypeContent,
+		Layout:    contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Pricing")},
+			&contracts.Grid{Columns: 2, Gap: contracts.SpaceMD, Cells: []contracts.SlideNode{
+				tier("Growth", 79, "up to 25 agents", true, "Start free", "Priority", "Analytics"),
+				tier("Scale", 199, "up to 100 agents", false, "Contact sales", "Dedicated", "SLA"),
 			}},
 		},
 	})
