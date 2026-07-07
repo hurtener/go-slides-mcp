@@ -94,6 +94,25 @@ const (
 	KindChipRow Kind = "chip_row"
 )
 
+// Node kind added in R12.2 — the Checklist filled feature-list primitive
+// (D-095), mirroring pptx-go's scene.Checklist.
+const (
+	KindChecklist Kind = "checklist"
+)
+
+// Node kind added in R12.6 — the Banner full-width filled strip with
+// optional right-aligned trailing children (D-097), mirroring pptx-go's
+// scene.Banner.
+const (
+	KindBanner Kind = "banner"
+)
+
+// Node kind added in R12.7 — the IconRows vertical icon-label row-list
+// (D-100), mirroring pptx-go's scene.IconRows.
+const (
+	KindIconRows Kind = "icon_rows"
+)
+
 // LayoutKind is a slide's structural intent, mapping to a master layout
 // (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
 type LayoutKind string

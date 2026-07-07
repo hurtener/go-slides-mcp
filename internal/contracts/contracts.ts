@@ -1628,6 +1628,22 @@ export const KindButton: Kind = "button";
  */
 export const KindChipRow: Kind = "chip_row";
 /**
+ * Node kind added in R12.2 — the Checklist filled feature-list primitive
+ * (D-095), mirroring pptx-go's scene.Checklist.
+ */
+export const KindChecklist: Kind = "checklist";
+/**
+ * Node kind added in R12.6 — the Banner full-width filled strip with
+ * optional right-aligned trailing children (D-097), mirroring pptx-go's
+ * scene.Banner.
+ */
+export const KindBanner: Kind = "banner";
+/**
+ * Node kind added in R12.7 — the IconRows vertical icon-label row-list
+ * (D-100), mirroring pptx-go's scene.IconRows.
+ */
+export const KindIconRows: Kind = "icon_rows";
+/**
  * LayoutKind is a slide's structural intent, mapping to a master layout
  * (mirrors pptx-go's scene.LayoutKind; CONVENTIONS §2).
  */
@@ -1663,6 +1679,48 @@ export const LayoutBlank: LayoutKind = "blank";
  * CONVENTIONS §3.
  */
 export type SlideNode = any;
+/**
+ * Banner is a full-width filled "big takeaway / promo / CTA" strip
+ * (R12.6, D-097): a leading icon + a bold lead phrase + a supporting body
+ * on the left, with optional right-aligned Trailing children (a Stat
+ * and/or a Button). Distinct from the side-bar Callout — the banner is a
+ * wide, full-fill band. Mirror of pptx-go's scene.Banner.
+ * Fill is the strip color; an empty string leaves the engine's zero
+ * (ColorCanvas) in effect, which the engine renderer promotes to
+ * ColorAccent (a banner is always a filled strip — a canvas-colored one
+ * would be invisible). TextColor colors the lead/body; an empty string
+ * leaves the engine's zero (TextPrimary) in effect, which the renderer
+ * auto-contrasts against Fill (light on a dark fill), and any explicit
+ * non-default value is honored. Trailing children render in a right
+ * region per their own policy. Additive: a deck with no Banner is
+ * byte-identical.
+ */
+export interface Banner {
+  /**
+   * Lead is the bold headline phrase shown left-of-center.
+   */
+  lead?: RichText;
+  /**
+   * Body is the supporting copy shown below Lead (also left-aligned).
+   */
+  body?: RichText;
+  /**
+   * Icon is a leading curated/extension icon name; "" = none.
+   */
+  icon?: string;
+  /**
+   * Fill is the strip fill color role; "" = engine zero (Canvas → promoted to Accent).
+   */
+  fill?: ColorRole;
+  /**
+   * TextColor colors the lead/body; "" = engine zero (Primary, auto-contrasted on Fill).
+   */
+  textColor?: TextColorRole;
+  /**
+   * Trailing children render right-aligned in their own region (Stat/Button/Lockup); nil = none.
+   */
+  trailing?: SlideNode[];
+}
 /**
  * BentoCell is one cell of a BentoRow: the child node and how many of the
  * bento's shared column units this cell spans (>= 1; defaults to 1 when zero).
@@ -1991,6 +2049,79 @@ export interface CardSection {
    * Body is the section body children (must be non-empty).
    */
   body?: SlideNode[];
+}
+/**
+ * CheckState selects a Checklist item's status glyph (mirrors pptx-go's
+ * scene.CheckState, an int enum — the product mirror is a string enum).
+ * The zero value CheckDone is a filled affirmative check (the common "you
+ * get this" row), so a checklist with no per-item State field defaults to
+ * the engine's accent-tinted check (R12.2, D-095).
+ */
+export type CheckState = string;
+/**
+ * CheckDone is a filled check glyph (default), accent-tinted.
+ */
+export const CheckDone: CheckState = "done";
+/**
+ * CheckNo is a filled cross glyph, muted.
+ */
+export const CheckNo: CheckState = "no";
+/**
+ * CheckNeutral is a filled dot glyph, muted.
+ */
+export const CheckNeutral: CheckState = "neutral";
+/**
+ * ChecklistItem is one row of a Checklist (R12.2, D-095): rich text, a
+ * status, and an optional icon name that overrides the state's default
+ * glyph (a closed-name curated/extension icon). The zero value of State
+ * (CheckDone) renders a filled check glyph before the text.
+ */
+export interface ChecklistItem {
+  /**
+   * Text is the row's rich text.
+   */
+  text?: RichText;
+  /**
+   * State selects the row's status glyph; empty = CheckDone.
+   */
+  state?: CheckState;
+  /**
+   * Icon is an optional glyph override (curated/extension icon name); "" = state's default glyph.
+   */
+  icon?: string;
+}
+/**
+ * Checklist is a dense feature / "what you get" list (R12.2, D-095): rows
+ * of a filled status glyph (check / cross / dot) before rich text, reflowed
+ * row-major into 1-3 balanced columns, with the text hanging-indented from
+ * the glyph width. The glyph is a true filled custGeom (the curated
+ * check / x / dot icon), never an empty font checkbox. Mirror of
+ * pptx-go's scene.Checklist.
+ * GlyphTone overrides the per-state glyph color for every item; an empty
+ * string leaves the per-state default in effect (CheckDone → accent,
+ * others → muted), mirroring the D-054 pointer/sentinel pattern at the
+ * product layer (the engine uses *ColorRole; nil there = default; we map
+ * "" → nil via the existing mapColorRolePtr helper). Fill distributes
+ * inter-row slack so a short list spans the box height. Additive: a deck
+ * with no Checklist is byte-identical.
+ */
+export interface Checklist {
+  /**
+   * Items is the sequence of checklist rows; at least one is required.
+   */
+  items?: ChecklistItem[];
+  /**
+   * Columns selects 1..3 column reflow (row-major); 0 = 1 column (default).
+   */
+  columns?: number /* int */;
+  /**
+   * GlyphTone overrides the per-state glyph color role; "" = per-state default.
+   */
+  glyphTone?: ColorRole;
+  /**
+   * Fill distributes rows to fill the box height (like VAlignFill); false = top-aligned.
+   */
+  fill?: boolean;
 }
 /**
  * ChipSpec is one chip in a ChipRow (R12.5, D-096): a label, a tone, the
@@ -2391,6 +2522,70 @@ export interface Grid {
    * Cells is the grid children, a multiple of Columns.
    */
   cells?: SlideNode[];
+}
+/**
+ * RowTone selects an IconRow's framing (mirrors pptx-go's scene.RowTone, an
+ * int enum — the product mirror is a string enum). The zero value RowPlain
+ * draws no frame; RowPill wraps the row in a SurfaceAlt rounded-rect
+ * (R12.7, D-100).
+ */
+export type RowTone = string;
+/**
+ * RowPlain is the default — no frame.
+ */
+export const RowPlain: RowTone = "plain";
+/**
+ * RowPill wraps the row in a SurfaceAlt rounded-rect.
+ */
+export const RowPill: RowTone = "pill";
+/**
+ * IconRow is one row of an IconRows (R12.7, D-100): a leading icon, a
+ * rich label, and an optional right-aligned meta. Icon is a closed-name
+ * curated/extension icon name; an empty string renders no glyph (the
+ * label starts at the left).
+ */
+export interface IconRow {
+  /**
+   * Icon is the leading curated/extension glyph name; "" = no glyph at the left.
+   */
+  icon?: string;
+  /**
+   * Label is the row's rich text.
+   */
+  label?: RichText;
+  /**
+   * Meta is the optional right-aligned rich text; nil = none.
+   */
+  meta?: RichText;
+  /**
+   * Tone selects the row's framing; empty = RowPlain.
+   */
+  tone?: RowTone;
+}
+/**
+ * IconRows is a vertical stack of [icon | label | optional meta] rows
+ * (R12.7, D-100): the "integrations / capabilities / sources" list that
+ * reads as designed rows rather than bullets. Fill distributes inter-row
+ * spacing so the rows span the box height (like VAlignFill); GlyphColor
+ * tints every row's icon. Mirror of pptx-go's scene.IconRows.
+ * GlyphColor's empty string leaves the engine's zero (ColorCanvas) in
+ * effect, which the renderer promotes to ColorAccent (a canvas-colored
+ * glyph would be invisible). Additive: a deck with no IconRows is
+ * byte-identical.
+ */
+export interface IconRows {
+  /**
+   * Rows is the sequence of icon-rows; at least one is required.
+   */
+  rows?: IconRow[];
+  /**
+   * Fill distributes rows to fill the box height; false = top-anchored.
+   */
+  fill?: boolean;
+  /**
+   * GlyphColor tints every row's icon; "" = engine zero (Canvas → promoted to Accent).
+   */
+  glyphColor?: ColorRole;
 }
 /**
  * Hero is a cover/title slide node: an eyebrow, a title, and a subtitle.
