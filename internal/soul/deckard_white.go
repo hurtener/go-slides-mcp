@@ -66,6 +66,7 @@ func DeckardWhite() *Soul {
 	t.Radii[pptx.RadiusSM] = pptx.Pt(8)
 	t.Radii[pptx.RadiusMD] = pptx.Pt(12)
 	t.Radii[pptx.RadiusLG] = pptx.Pt(16)
+	applyTypographyDefaults(t)
 
 	return &Soul{
 		ID:          DeckardWhiteID,
@@ -106,5 +107,7 @@ func setType(t *pptx.Theme, role pptx.TypeRole, family string, size float64, wei
 	fs.Family = family
 	fs.Size = size
 	fs.Weight = weight
+	fs.AvgCharWidth = 0
+	fs.Fallback = nil
 	t.Typography[role] = fs
 }

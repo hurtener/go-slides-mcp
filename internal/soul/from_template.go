@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hurtener/go-slides-mcp/internal/soul/fonts"
 	"github.com/hurtener/pptx-go/pptx"
 )
 
@@ -31,6 +32,7 @@ func FromTemplate(name, description string, theme *pptx.Theme) (*Soul, error) {
 	canvas := t.ResolveColor(pptx.ColorCanvas)
 	t.Colors.Text[pptx.TextAccent] = legibleAccentText(t.ResolveColor(pptx.ColorAccent), canvas)
 	t.Colors.Text[pptx.TextAccentAlt] = legibleAccentText(t.ResolveColor(pptx.ColorAccentAlt), canvas)
+	applyTypographyDefaults(t)
 
 	extensions := map[string]string{
 		"border":       string(t.ResolveColor(pptx.ColorSurfaceAlt)),
@@ -39,11 +41,12 @@ func FromTemplate(name, description string, theme *pptx.Theme) (*Soul, error) {
 	}
 
 	s := &Soul{
-		ID:          id,
-		Name:        trimmedName,
-		Description: description,
-		Status:      "ready",
-		Theme:       t,
+		ID:           id,
+		Name:         trimmedName,
+		Description:  description,
+		Status:       "ready",
+		Theme:        t,
+		FontProvider: fonts.Provider(),
 		StyleGuide: StyleGuide{
 			NorthStar: "Render in the brand's own palette and type.",
 		},

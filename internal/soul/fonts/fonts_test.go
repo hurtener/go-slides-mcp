@@ -140,3 +140,33 @@ func TestEveryBundledFileValid(t *testing.T) {
 		}
 	}
 }
+
+func TestAvgCharWidthMeasuredPerBundledFamily(t *testing.T) {
+	tests := []struct {
+		family string
+		min    float64
+		max    float64
+	}{
+		{family: "Inter", min: 0.45, max: 0.65},
+		{family: "Lora", min: 0.45, max: 0.65},
+		{family: "Playfair Display", min: 0.45, max: 0.65},
+	}
+	for _, tc := range tests {
+		got, ok := AvgCharWidth(tc.family)
+		if !ok {
+			t.Fatalf("AvgCharWidth(%q) missing", tc.family)
+		}
+		if got < tc.min || got > tc.max {
+			t.Fatalf("AvgCharWidth(%q) = %.4f, want in [%.2f, %.2f]", tc.family, got, tc.min, tc.max)
+		}
+	}
+	inter, _ := AvgCharWidth("Inter")
+	lora, _ := AvgCharWidth("Lora")
+	playfair, _ := AvgCharWidth("Playfair Display")
+	if inter == lora || lora == playfair || inter == playfair {
+		t.Fatalf("expected family-specific measurements, got Inter=%.4f Lora=%.4f Playfair=%.4f", inter, lora, playfair)
+	}
+	if playfair == 0.5 && lora == 0.5 && inter == 0.5 {
+		t.Fatal("expected measured values, got the default factor 0.5 for every bundled family")
+	}
+}

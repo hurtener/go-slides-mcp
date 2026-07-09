@@ -26,6 +26,16 @@ func TestFromTemplateUsesExtractedAccent(t *testing.T) {
 	if s.Description != "From brand kit" {
 		t.Fatalf("description = %q, want %q", s.Description, "From brand kit")
 	}
+	if s.FontProvider == nil {
+		t.Fatal("FontProvider = nil, want bundled fallback provider")
+	}
+	body := s.Theme.ResolveType(pptx.TypeBody)
+	if body.AvgCharWidth <= 0 {
+		t.Fatalf("body AvgCharWidth = %.4f, want > 0", body.AvgCharWidth)
+	}
+	if len(body.Fallback) == 0 {
+		t.Fatal("body Fallback = nil, want a controlled fallback chain")
+	}
 }
 
 func TestFromTemplateRejectsNilTheme(t *testing.T) {

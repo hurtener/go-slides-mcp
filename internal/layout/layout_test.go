@@ -330,6 +330,7 @@ func TestR2FillOtherModesUnchanged(t *testing.T) {
 		contracts.VAlignCenter,
 		contracts.VAlignBottom,
 		contracts.VAlignJustify,
+		contracts.VAlignBalanced,
 	} {
 		ref := Compute(contracts.Slide{Nodes: nodes, Align: contracts.Alignment{Vertical: va}}, theme)
 		// Re-compute to confirm determinism (same result twice).
@@ -343,6 +344,41 @@ func TestR2FillOtherModesUnchanged(t *testing.T) {
 				t.Errorf("mode=%q placement[%d]: %+v vs %+v", va, i, a.Box, b.Box)
 			}
 		}
+	}
+}
+
+func TestComputeBalancedSlideY(t *testing.T) {
+	theme := pptx.DefaultTheme().Clone()
+	slide := contracts.Slide{
+		Align: contracts.Alignment{Vertical: contracts.VAlignBalanced},
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{Title: "Cover"},
+		},
+	}
+	lay := Compute(slide, theme)
+	if len(lay.Placements) != 1 {
+		t.Fatalf("got %d placements, want 1", len(lay.Placements))
+	}
+	bodyTop := int64(pptx.In(0.5))
+	if lay.Placements[0].Box.Y <= bodyTop {
+		t.Fatalf("balanced hero Y = %d, want strictly > body top %d", lay.Placements[0].Box.Y, bodyTop)
+	}
+}
+
+func TestComputeUsesRoleAvgCharWidth(t *testing.T) {
+	theme := pptx.DefaultTheme().Clone()
+	body := theme.Typography[pptx.TypeBody]
+	body.AvgCharWidth = 0.60
+	theme.Typography[pptx.TypeBody] = body
+	narrow := pptx.DefaultTheme().Clone()
+	nBody := narrow.Typography[pptx.TypeBody]
+	nBody.AvgCharWidth = 0.45
+	narrow.Typography[pptx.TypeBody] = nBody
+	text := rt("serif width should wrap earlier than sans width")
+	wideLines := wrappedLinesLayout(text, pptx.TypeBody, pptx.In(2.2), theme)
+	narrowLines := wrappedLinesLayout(text, pptx.TypeBody, pptx.In(2.2), narrow)
+	if wideLines <= narrowLines {
+		t.Fatalf("wrapped lines with wider avg char width = %d, want > narrow %d", wideLines, narrowLines)
 	}
 }
 

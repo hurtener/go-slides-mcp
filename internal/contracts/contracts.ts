@@ -42,9 +42,15 @@ export const VAlignJustify = "justify";
  */
 export const VAlignFill = "fill";
 /**
+ * VAlignBalanced distributes a sparse stack's slack across a top margin and
+ * widened inter-node gaps, with a slight upward optical bias so the content
+ * reads balanced rather than top-heavy. With no slack it behaves like "top".
+ */
+export const VAlignBalanced = "balanced";
+/**
  * Vertical alignment wire values. Empty string == "top" (the default).
  */
-export type VAlign = typeof VAlignTop | typeof VAlignCenter | typeof VAlignBottom | typeof VAlignJustify | typeof VAlignFill;
+export type VAlign = typeof VAlignTop | typeof VAlignCenter | typeof VAlignBottom | typeof VAlignJustify | typeof VAlignFill | typeof VAlignBalanced;
 /**
  * HAlign selects horizontal alignment of leaf nodes within the body region.
  * Wire value is a JSON string; the zero value (empty string) is treated as
@@ -80,7 +86,8 @@ export type HAlign = typeof HAlignLeft | typeof HAlignCenter | typeof HAlignRigh
 export interface Alignment {
   /**
    * Vertical sets the body stack's vertical position within the body region:
-   * "top" (default), "center", "bottom", "justify", or "fill". Empty = top.
+   * "top" (default), "center", "bottom", "justify", "fill", or "balanced".
+   * Empty = top.
    * Use "fill" to grow container nodes (grid, card, image, chart, etc.) to
    * consume the remaining body height — ideal for heading-plus-content slides.
    */

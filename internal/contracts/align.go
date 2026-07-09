@@ -28,6 +28,10 @@ const (
 	// exactly like "top". Beats "center"/"justify" for heading-plus-content
 	// slides where the content block should dominate the frame.
 	VAlignFill VAlign = "fill"
+	// VAlignBalanced distributes a sparse stack's slack across a top margin and
+	// widened inter-node gaps, with a slight upward optical bias so the content
+	// reads balanced rather than top-heavy. With no slack it behaves like "top".
+	VAlignBalanced VAlign = "balanced"
 )
 
 // HAlign selects horizontal alignment of leaf nodes within the body region.
@@ -56,7 +60,8 @@ const (
 // to top/left, reproducing the pre-alignment layout unchanged.
 type Alignment struct {
 	// Vertical sets the body stack's vertical position within the body region:
-	// "top" (default), "center", "bottom", "justify", or "fill". Empty = top.
+	// "top" (default), "center", "bottom", "justify", "fill", or "balanced".
+	// Empty = top.
 	// Use "fill" to grow container nodes (grid, card, image, chart, etc.) to
 	// consume the remaining body height — ideal for heading-plus-content slides.
 	Vertical VAlign `json:"vertical,omitempty"`

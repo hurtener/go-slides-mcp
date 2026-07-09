@@ -439,7 +439,7 @@ func (Anchor) allowedStrings() []string { return stringsFrom(AllowedAnchor()) }
 // validator accepts both; this list names only the named wire values.
 func AllowedVAlign() []VAlign {
 	return []VAlign{
-		VAlignTop, VAlignCenter, VAlignBottom, VAlignJustify, VAlignFill,
+		VAlignTop, VAlignCenter, VAlignBottom, VAlignJustify, VAlignFill, VAlignBalanced,
 	}
 }
 

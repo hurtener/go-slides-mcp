@@ -205,3 +205,78 @@ func TestApplyDecorPolicy_DeterministicAcrossRepeatedCalls(t *testing.T) {
 		t.Fatal("Render() with a decor policy is not byte-deterministic across repeated calls")
 	}
 }
+
+func TestComposeSlideDefaults_ExplicitAlignWins(t *testing.T) {
+	t.Parallel()
+
+	slide := contracts.Slide{
+		Layout: contracts.LayoutCover,
+		Align:  contracts.Alignment{Vertical: contracts.VAlignBottom},
+		Nodes:  []contracts.SlideNode{&contracts.Hero{Title: "Thanks"}},
+	}
+	got := ComposeSlideDefaults(slide, 0, 1)
+	if got.Align.Vertical != contracts.VAlignBottom {
+		t.Fatalf("ComposeSlideDefaults vertical = %q, want explicit bottom", got.Align.Vertical)
+	}
+}
+
+func TestComposeSlideDefaults_CoverCentersByDefault(t *testing.T) {
+	t.Parallel()
+
+	got := ComposeSlideDefaults(contracts.Slide{
+		Layout: contracts.LayoutCover,
+		Nodes:  []contracts.SlideNode{&contracts.Hero{Title: "Hello"}},
+	}, 0, 3)
+	if got.Align.Vertical != contracts.VAlignCenter {
+		t.Fatalf("cover vertical = %q, want center", got.Align.Vertical)
+	}
+}
+
+func TestComposeSlideDefaults_ClosingCentersByDefault(t *testing.T) {
+	t.Parallel()
+
+	got := ComposeSlideDefaults(contracts.Slide{
+		Archetype: contracts.ArchetypeClosing,
+		Layout:    contracts.LayoutCover,
+		Nodes: []contracts.SlideNode{
+			&contracts.Hero{Title: "Thank you", Subtitle: "See you soon"},
+			&contracts.Button{Label: "Contact us"},
+		},
+	}, 3, 4)
+	if got.Align.Vertical != contracts.VAlignCenter {
+		t.Fatalf("closing vertical = %q, want center", got.Align.Vertical)
+	}
+}
+
+func TestComposeSlideDefaults_DenseContainerFillsByDefault(t *testing.T) {
+	t.Parallel()
+
+	got := ComposeSlideDefaults(contracts.Slide{
+		Layout: contracts.LayoutCardGrid,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Pricing")},
+			&contracts.Grid{Columns: 2, Cells: []contracts.SlideNode{
+				&contracts.Card{Header: "A"},
+				&contracts.Card{Header: "B"},
+			}},
+		},
+	}, 1, 4)
+	if got.Align.Vertical != contracts.VAlignFill {
+		t.Fatalf("dense container vertical = %q, want fill", got.Align.Vertical)
+	}
+}
+
+func TestComposeSlideDefaults_SparseContentBalancesByDefault(t *testing.T) {
+	t.Parallel()
+
+	got := ComposeSlideDefaults(contracts.Slide{
+		Layout: contracts.LayoutTitleContent,
+		Nodes: []contracts.SlideNode{
+			&contracts.Heading{Level: 2, Text: rt("Summary")},
+			&contracts.Prose{Paragraphs: []contracts.RichText{rt("Short recap.")}},
+		},
+	}, 2, 5)
+	if got.Align.Vertical != contracts.VAlignBalanced {
+		t.Fatalf("sparse content vertical = %q, want balanced", got.Align.Vertical)
+	}
+}

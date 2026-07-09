@@ -26,6 +26,12 @@ func TestBootstrapInheritsDeckardWhiteWithNameOnly(t *testing.T) {
 	if s.Status != "ready" {
 		t.Fatalf("status = %q, want ready", s.Status)
 	}
+	if got := s.Theme.ResolveType(pptx.TypeBody).AvgCharWidth; got <= 0 {
+		t.Fatalf("body AvgCharWidth = %.4f, want > 0", got)
+	}
+	if got := s.Theme.ResolveType(pptx.TypeBody).Fallback; len(got) == 0 || got[0] != "Calibri" {
+		t.Fatalf("body fallback = %v, want [Calibri ...]", got)
+	}
 }
 
 func TestBootstrapAccentOverride(t *testing.T) {
@@ -84,6 +90,23 @@ func TestBootstrapNilPaletteMatchesDeckardWhite(t *testing.T) {
 				t.Fatalf("extension %q = %q, want %q", k, s.Extensions[k], v)
 			}
 		}
+	}
+}
+
+func TestBootstrapCustomSerifBodyPopulatesMetricsAndFallbacks(t *testing.T) {
+	s, err := Bootstrap(BootstrapParams{Name: "Editorial", BodyFont: "Lora"})
+	if err != nil {
+		fatalBootstrap(t, err)
+	}
+	body := s.Theme.ResolveType(pptx.TypeBody)
+	if body.Family != "Lora" {
+		t.Fatalf("body family = %q, want Lora", body.Family)
+	}
+	if body.AvgCharWidth <= 0.5 {
+		t.Fatalf("body AvgCharWidth = %.4f, want serif width > 0.5", body.AvgCharWidth)
+	}
+	if len(body.Fallback) == 0 || body.Fallback[0] != "Playfair Display" {
+		t.Fatalf("body fallback = %v, want first fallback Playfair Display", body.Fallback)
 	}
 }
 

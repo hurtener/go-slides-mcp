@@ -20,7 +20,9 @@ import (
 var (
 	bodyMargin    = pptx.In(0.5)
 	cardChromeEst = pptx.EMU(1097280) // ~1.2"
-	estGap        = pptx.EMU(137160)  // ~0.15"
+	// estGapFallback is the nil-theme fallback for estGapOf, mirrored from
+	// scene/render.go (D-142). With a real theme the estimators read SpaceMD.
+	estGapFallback = pptx.EMU(137160) // ~0.15"
 
 	// Content-aware increments and insets (Phase 22 / R1), mirrored verbatim
 	// from scene/render.go constants block — PINNED to the pptx-go version in
@@ -30,6 +32,19 @@ var (
 	calloutInsetEst  = pptx.EMU(182880) // ~0.20"; accent bar + text inset (renderCallout)
 	cardBodyInsetEst = pptx.EMU(182880) // ~0.20"; per-side card body padding estimate
 )
+
+const balancedOpticalBP = 8500 // mirrored from scene/render.go
+
+// estGapOf resolves the inter-node gap the height/width estimators insert
+// between stacked nodes. It mirrors scene/render.go estGapOf (D-142): the same
+// SpaceMD token the renderer uses, so preview geometry matches the composed
+// export. A nil theme falls back to the legacy literal.
+func estGapOf(theme *pptx.Theme) pptx.EMU {
+	if theme == nil {
+		return estGapFallback
+	}
+	return theme.ResolveSpace(pptx.SpaceMD)
+}
 
 // Compute returns the canvas geometry for a slide. theme supplies the SpaceMD
 // gap (resolved exactly as the renderer does); a nil theme falls back to the
@@ -140,6 +155,12 @@ func (c *computer) alignedStackIn(box pptx.Box, ns []contracts.SlideNode, align 
 		if candidate > box.Y {
 			startY = candidate
 		}
+	case contracts.VAlignBalanced:
+		slack := box.H - totalH
+		if slack > 0 {
+			unit := slack / pptx.EMU(n+1)
+			startY = box.Y + unit*balancedOpticalBP/10000
+		}
 		// VAlignTop and VAlignJustify both start at box.Y; Justify adjusts the gap.
 	}
 
@@ -149,6 +170,11 @@ func (c *computer) alignedStackIn(box pptx.Box, ns []contracts.SlideNode, align 
 		slack := box.H - bodyH
 		if slack > gap*pptx.EMU(n-1) {
 			effectiveGap = slack / pptx.EMU(n-1)
+		}
+	}
+	if align.Vertical == contracts.VAlignBalanced {
+		if slack := box.H - totalH; slack > 0 {
+			effectiveGap = gap + slack/pptx.EMU(n+1)
 		}
 	}
 
@@ -263,7 +289,7 @@ func naturalWidthRTAt(rt contracts.RichText, base pptx.TypeRole, theme *pptx.The
 			role = base
 		}
 		spec := theme.ResolveType(role)
-		avgW := pptx.EMU(spec.Size * avgCharWidthFactor * emuPerPointLayout)
+		avgW := pptx.EMU(spec.Size * roleAvgCharWidth(spec) * emuPerPointLayout)
 		total += avgW * pptx.EMU(len(run.Text))
 	}
 	return total
@@ -277,8 +303,15 @@ func naturalWidthPlain(text string, role pptx.TypeRole, theme *pptx.Theme) pptx.
 		return 0
 	}
 	spec := theme.ResolveType(role)
-	avgW := pptx.EMU(spec.Size * avgCharWidthFactor * emuPerPointLayout)
+	avgW := pptx.EMU(spec.Size * roleAvgCharWidth(spec) * emuPerPointLayout)
 	return avgW * pptx.EMU(len(text))
+}
+
+func roleAvgCharWidth(spec pptx.FontSpec) float64 {
+	if spec.AvgCharWidth > 0 {
+		return spec.AvgCharWidth
+	}
+	return avgCharWidthFactor
 }
 
 // wrappedLinesLayout estimates how many lines rt occupies when laid out in a
@@ -481,7 +514,7 @@ func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) p
 	case *contracts.Table:
 		return tableHeightLayout(v, avail, theme)
 	case *contracts.TwoColumn:
-		colW := (avail - estGap) / 2
+		colW := (avail - estGapOf(theme)) / 2
 		return maxEMU(nodesHeight(v.Left, colW, theme), nodesHeight(v.Right, colW, theme))
 	case *contracts.Grid:
 		cols := v.Columns
@@ -492,18 +525,19 @@ func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) p
 		if rows < 1 {
 			rows = 1
 		}
-		cellW := (avail - estGap*pptx.EMU(cols-1)) / pptx.EMU(cols)
+		gap := estGapOf(theme)
+		cellW := (avail - gap*pptx.EMU(cols-1)) / pptx.EMU(cols)
 		var maxCell pptx.EMU
 		for _, cell := range v.Cells {
 			if hh := preferredHeight(cell, cellW, theme); hh > maxCell {
 				maxCell = hh
 			}
 		}
-		return pptx.EMU(rows)*maxCell + estGap*pptx.EMU(rows-1)
+		return pptx.EMU(rows)*maxCell + gap*pptx.EMU(rows-1)
 	case *contracts.Card:
-		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGap
+		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGapOf(theme)
 	case *contracts.CardSection:
-		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGap
+		return cardChromeEst + nodesHeight(v.Body, avail-2*cardBodyInsetEst, theme) + estGapOf(theme)
 	case *contracts.Flow:
 		if v.Orientation == contracts.FlowVertical {
 			return pptx.In(0.9) * pptx.EMU(atLeast(len(v.Steps), 1))
@@ -515,7 +549,7 @@ func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) p
 		// height as a fixed 1.4" × row count plus gaps (PINNED to the pptx-go
 		// version in go.mod). The Bento is flexible so VAlignFill will grow it.
 		nRows := atLeast(len(v.Rows), 1)
-		return pptx.In(1.4)*pptx.EMU(nRows) + estGap*pptx.EMU(nRows-1)
+		return pptx.In(1.4)*pptx.EMU(nRows) + estGapOf(theme)*pptx.EMU(nRows-1)
 	default:
 		return pptx.In(1.0)
 	}
@@ -525,10 +559,11 @@ func preferredHeight(n contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) p
 // of width avail (mirrors scene/render.go nodesHeight — PINNED).
 func nodesHeight(nodes []contracts.SlideNode, avail pptx.EMU, theme *pptx.Theme) pptx.EMU {
 	var total pptx.EMU
+	gap := estGapOf(theme)
 	for i, n := range nodes {
 		total += preferredHeight(n, avail, theme)
 		if i > 0 {
-			total += estGap
+			total += gap
 		}
 	}
 	return total
