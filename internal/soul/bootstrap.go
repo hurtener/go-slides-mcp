@@ -174,6 +174,7 @@ func Bootstrap(p BootstrapParams) (*Soul, error) {
 	}
 
 	deriveAccentText(s, p)
+	applyTypographyDefaults(s.Theme)
 
 	// R13.1/R13.12: seed the paper tint, register the default cover/dark
 	// named gradients, and build the soul's default decor policy — all

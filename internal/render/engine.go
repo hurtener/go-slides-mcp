@@ -70,6 +70,7 @@ func renderWithWorkers(doc contracts.SlideDoc, s *soul.Soul, workers int, resolv
 	// autofit probes): composition is deterministic and idempotent for a
 	// given (doc, soul), so re-running it across probe renders stays
 	// consistent.
+	doc = applyAlignmentDefaults(doc)
 	doc = applyDecorPolicy(doc, s)
 
 	popts := []pptx.Option{pptx.WithTheme(s.Theme)}

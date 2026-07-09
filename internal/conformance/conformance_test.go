@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/render"
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 	"github.com/hurtener/go-slides-mcp/internal/validate"
@@ -157,5 +158,34 @@ func TestConformanceCorpus_IsExtensible(t *testing.T) {
 	}
 	if len(Archetypes) == 0 {
 		t.Fatal("Archetypes is empty")
+	}
+}
+
+func TestSerifSoulContentFitFixtures(t *testing.T) {
+	serif, err := soul.Bootstrap(soul.BootstrapParams{
+		Name:        "Conformance Serif",
+		HeadingFont: "Playfair Display",
+		BodyFont:    "Lora",
+	})
+	if err != nil {
+		t.Fatalf("Bootstrap serif soul error = %v", err)
+	}
+	for _, fx := range []struct {
+		name  string
+		build func() contracts.SlideDoc
+	}{
+		{name: "chip-row", build: chipRowDoc},
+		{name: "pricing-offer-card", build: pricingOfferCardDoc},
+	} {
+		t.Run(fx.name, func(t *testing.T) {
+			doc := fx.build()
+			_, stats, err := render.Render(doc, serif)
+			if err != nil {
+				t.Fatalf("Render() error = %v", err)
+			}
+			if len(stats.Warnings) != 0 || len(stats.LayoutWarnings) != 0 {
+				t.Fatalf("warnings = %v / %#v, want none", stats.Warnings, stats.LayoutWarnings)
+			}
+		})
 	}
 }

@@ -28,6 +28,10 @@ import (
 	"strings"
 	"sync"
 
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/sfnt"
+	"golang.org/x/image/math/fixed"
+
 	"github.com/hurtener/pptx-go/pptx"
 )
 
@@ -71,6 +75,9 @@ type provider struct {
 	// byKey groups faces by (lowercased family, italic) so Resolve can pick the
 	// nearest weight within a cut. Each slice is sorted ascending by weight.
 	byKey map[fontKey][]resolved
+	// avgByFamily is the measured average glyph advance over printable ASCII,
+	// as a fraction of em, keyed by lowercased family name.
+	avgByFamily map[string]float64
 }
 
 type fontKey struct {
@@ -96,7 +103,7 @@ var (
 // warn-don't-fail (the face simply is not embedded).
 func Provider() pptx.FontSource {
 	once.Do(func() {
-		p := &provider{byKey: make(map[fontKey][]resolved)}
+		p := &provider{byKey: make(map[fontKey][]resolved), avgByFamily: make(map[string]float64)}
 		for _, f := range bundled {
 			data, err := ttf.ReadFile(f.path)
 			if err != nil {
@@ -107,6 +114,14 @@ func Provider() pptx.FontSource {
 			}
 			k := fontKey{family: strings.ToLower(f.family), italic: f.italic}
 			p.byKey[k] = append(p.byKey[k], resolved{weight: f.weight, data: data})
+			if _, ok := p.avgByFamily[k.family]; !ok && !f.italic {
+				// Warn-don't-fail: an unmeasurable face leaves the family absent
+				// from avgByFamily, so callers fall back to the curated per-family
+				// factor rather than crashing the server on the MCP boundary.
+				if avg, err := measureAvgCharWidth(data); err == nil && avg > 0 {
+					p.avgByFamily[k.family] = avg
+				}
+			}
 		}
 		for k := range p.byKey {
 			slice := p.byKey[k]
@@ -115,6 +130,17 @@ func Provider() pptx.FontSource {
 		singleton = p
 	})
 	return singleton
+}
+
+// AvgCharWidth reports the measured average glyph advance of a bundled family,
+// as a fraction of em, over printable ASCII. Unknown families return false.
+func AvgCharWidth(family string) (float64, bool) {
+	p, _ := Provider().(*provider)
+	if p == nil {
+		return 0, false
+	}
+	avg, ok := p.avgByFamily[strings.ToLower(strings.TrimSpace(family))]
+	return avg, ok
 }
 
 // Resolve implements pptx.FontSource. It matches name against a bundled family
@@ -163,4 +189,43 @@ func absInt(x int) int {
 		return -x
 	}
 	return x
+}
+
+func measureAvgCharWidth(data []byte) (float64, error) {
+	f, err := sfnt.Parse(data)
+	if err != nil {
+		return 0, err
+	}
+	upem := f.UnitsPerEm()
+	if upem == 0 {
+		return 0, pptx.ErrFontNotFound
+	}
+	ppem := fixed.I(int(upem))
+	var (
+		buf   sfnt.Buffer
+		sum   float64
+		count int
+	)
+	for r := rune(32); r <= 126; r++ {
+		idx, err := f.GlyphIndex(&buf, r)
+		if err != nil {
+			return 0, err
+		}
+		if idx == 0 && r != ' ' {
+			continue
+		}
+		adv, err := f.GlyphAdvance(&buf, idx, ppem, font.HintingNone)
+		if err != nil {
+			return 0, err
+		}
+		if adv <= 0 {
+			continue
+		}
+		sum += float64(adv) / 64.0
+		count++
+	}
+	if count == 0 {
+		return 0, pptx.ErrFontNotFound
+	}
+	return sum / float64(count) / float64(upem), nil
 }

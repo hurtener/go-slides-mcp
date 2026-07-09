@@ -10,6 +10,7 @@ import (
 
 	"github.com/hurtener/go-slides-mcp/internal/contracts"
 	"github.com/hurtener/go-slides-mcp/internal/layout"
+	"github.com/hurtener/go-slides-mcp/internal/render"
 )
 
 func (h *handlers) getDeckOverview(_ context.Context, in contracts.GetDeckOverviewInput) (tool.Result[contracts.GetDeckOverviewOutput], error) {
@@ -45,6 +46,13 @@ func (h *handlers) openSlideEditor(_ context.Context, in contracts.OpenSlideEdit
 	if stored, err := h.deps.Store.GetDeck(in.DeckID); err == nil {
 		deckID = stored.ID
 		soulID = stored.SoulID
+		for i := range stored.Slides {
+			if stored.Slides[i].ID == slide.ID {
+				composed := render.ComposeSlideDefaults(*slide, i, len(stored.Slides))
+				slide = &composed
+				break
+			}
+		}
 	}
 	soulCtx := h.resolveSoul(soulID)
 	out := contracts.OpenSlideEditorOutput{

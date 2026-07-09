@@ -62,6 +62,18 @@ func TestDeckardWhiteGolden(t *testing.T) {
 		if fs.Family != c.fam || fs.Size != c.size || fs.Weight != c.weight {
 			t.Errorf("type role %d = %+v, want %s/%v/%d", c.role, fs, c.fam, c.size, c.weight)
 		}
+		if fs.AvgCharWidth <= 0 {
+			t.Errorf("type role %d AvgCharWidth = %.4f, want > 0", c.role, fs.AvgCharWidth)
+		}
+		if len(fs.Fallback) == 0 {
+			t.Errorf("type role %d Fallback = nil, want a controlled fallback chain", c.role)
+		}
+	}
+	if display := th.ResolveType(pptx.TypeDisplay); len(display.Fallback) == 0 || display.Fallback[0] != "Lora" {
+		t.Errorf("display fallback = %v, want first fallback Lora", display.Fallback)
+	}
+	if body := th.ResolveType(pptx.TypeBody); len(body.Fallback) == 0 || body.Fallback[0] != "Calibri" {
+		t.Errorf("body fallback = %v, want first fallback Calibri", body.Fallback)
 	}
 
 	// The 400/500-weights-only rule.

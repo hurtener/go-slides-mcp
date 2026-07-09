@@ -641,6 +641,8 @@ func mapVAlign(v contracts.VAlign) scene.VAlign {
 		return scene.VAlignJustify
 	case contracts.VAlignFill:
 		return scene.VAlignFill
+	case contracts.VAlignBalanced:
+		return scene.VAlignBalanced
 	default:
 		// VAlignTop ("top") and empty string both map to the zero value (top).
 		return scene.VAlignTop

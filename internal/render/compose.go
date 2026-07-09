@@ -5,6 +5,32 @@ import (
 	"github.com/hurtener/go-slides-mcp/internal/soul"
 )
 
+// ComposeSlideDefaults applies the product's implicit slide defaults that are
+// otherwise inferred at render time, so previews can mirror export layout.
+func ComposeSlideDefaults(slide contracts.Slide, idx, count int) contracts.Slide {
+	return applySlideAlignmentDefault(slide, idx, count)
+}
+
+func applyAlignmentDefaults(doc contracts.SlideDoc) contracts.SlideDoc {
+	if len(doc.Slides) == 0 {
+		return doc
+	}
+	slides := make([]contracts.Slide, len(doc.Slides))
+	changed := false
+	for i, slide := range doc.Slides {
+		next := applySlideAlignmentDefault(slide, i, len(doc.Slides))
+		slides[i] = next
+		if next.Align != slide.Align {
+			changed = true
+		}
+	}
+	if !changed {
+		return doc
+	}
+	doc.Slides = slides
+	return doc
+}
+
 // applyDecorPolicy fills in each slide's Background/decorations from the
 // soul's per-archetype DecorPolicy (R13.12), when the slide itself sets
 // neither. It is copy-on-write throughout: doc/slide/nodes are never mutated
@@ -98,4 +124,54 @@ func inferArchetype(s contracts.Slide, idx int, _ int) contracts.SlideArchetype 
 	default:
 		return contracts.ArchetypeContent
 	}
+}
+
+func applySlideAlignmentDefault(slide contracts.Slide, idx, count int) contracts.Slide {
+	if slide.Align.Vertical != "" {
+		return slide
+	}
+	if v := defaultVerticalAlign(slide, idx, count); v != "" {
+		slide.Align.Vertical = v
+	}
+	return slide
+}
+
+func defaultVerticalAlign(slide contracts.Slide, idx, count int) contracts.VAlign {
+	arch := slide.Archetype
+	if arch == "" {
+		arch = inferArchetype(slide, idx, count)
+	}
+	switch arch {
+	case contracts.ArchetypeCover, contracts.ArchetypeClosing:
+		return contracts.VAlignCenter
+	}
+	if hasFillableTopLevel(slide.Nodes) {
+		return contracts.VAlignFill
+	}
+	if isSparseBody(slide.Nodes) {
+		return contracts.VAlignBalanced
+	}
+	return ""
+}
+
+func hasFillableTopLevel(nodes []contracts.SlideNode) bool {
+	for _, n := range nodes {
+		switch contracts.KindOf(n) {
+		case contracts.KindGrid, contracts.KindTwoColumn, contracts.KindBento, contracts.KindTable, contracts.KindCardSection:
+			return true
+		}
+	}
+	return false
+}
+
+func isSparseBody(nodes []contracts.SlideNode) bool {
+	bodyCount := 0
+	for _, n := range nodes {
+		switch n.(type) {
+		case *contracts.Decoration, *contracts.SectionDivider:
+			continue
+		}
+		bodyCount++
+	}
+	return bodyCount > 0 && bodyCount <= 2
 }

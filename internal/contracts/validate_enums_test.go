@@ -329,18 +329,17 @@ func TestValidateNodeEnumsFullyValidNode(t *testing.T) {
 	}
 }
 
-// TestAllowedVAlignCoversFill guards enum-const/allowed-set drift: R2 added
-// VAlign "fill" without updating AllowedVAlign, so a valid value was rejected
-// by enum validation until a deck actually used it. Adding an enum value must
-// update its Allowed set.
-func TestAllowedVAlignCoversFill(t *testing.T) {
-	var found bool
+// TestAllowedVAlignCoversNewModes guards enum-const/allowed-set drift: adding a
+// VAlign wire value must update AllowedVAlign or valid slides will be rejected.
+func TestAllowedVAlignCoversNewModes(t *testing.T) {
+	found := map[contracts.VAlign]bool{}
 	for _, v := range contracts.AllowedVAlign() {
-		if v == contracts.VAlignFill {
-			found = true
-		}
+		found[v] = true
 	}
-	if !found {
+	if !found[contracts.VAlignFill] {
 		t.Fatal("AllowedVAlign() must include VAlignFill")
+	}
+	if !found[contracts.VAlignBalanced] {
+		t.Fatal("AllowedVAlign() must include VAlignBalanced")
 	}
 }
